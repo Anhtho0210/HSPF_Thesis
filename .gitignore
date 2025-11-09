@@ -11,3 +11,6 @@ PHD/
 TESTING/
 
 # Ignore the folder TESTING_MASTER_LIST
+
+#ignore the folder .env
+.env
