@@ -7,6 +7,7 @@ from langgraph.graph import StateGraph, END
 from typing import Any
 import time
 from dotenv import load_dotenv
+from models import AgentState, UserProfile
 
 # WORKFLOW
 # parsing →(check_for_completion) → "chat" (if mandatory missing)
@@ -20,61 +21,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import Runnable
 
-# --- 1. PYDANTIC SCHEMAS ---
-
-class Citizenship(BaseModel):
-    country_of_citizenship: Optional[str] = Field(description="The student's citizenship (e.g., 'Vietnam', 'India', 'Germany', or 'Non-EU').", default=None)
-
-class BachelorGPA(BaseModel):
-    score: Optional[float] = Field(description="The numeric GPA score on its original scale.", default=None)
-    max_scale: Optional[float] = Field(description="The maximum possible scale (e.g., 4.0 or 5.0).", default=None)
-    min_passing_grade: Optional[float] = Field(description="The minimum passing grade on the scale (e.g., 1.0).", default=None)
-    score_german: Optional[float] = Field(description="The GPA score converted to German grading system (1.0-4.0).", default=None)
-
-class AcademicBackground(BaseModel):
-    bachelor_field_of_study: Optional[str] = Field(description="Field of study for the bachelor's degree (e.g., 'Computer Science').", default=None)
-    bachelor_duration_years: Optional[int] = Field(description="Duration of the bachelor's degree in years (e.g., 4).", default=None)
-    bachelor_gpa: Optional[BachelorGPA] = Field(default=None)
-    total_credit_points: Optional[int] = Field(description="Total credit points earned in the bachelor's degree (e.g., 180).", default=None)
-    fields_of_interest: Optional[List[str]] = Field(description="4-5 specific technical fields the student targets (e.g., 'AI', 'Machine Learning', 'Data Science').", default=None)
-
-class LanguageProficiency(BaseModel):
-    language: str = Field(description="The language name (e.g., 'English', 'German').")
-    exam_type: Literal["TOEFL_iBT", "IELTS", "TestDaF", "CEFR", "Other"] = Field(description="Type of language exam.")
-    overall_score: Optional[float] = Field(description="Overall score for IELTS/TOEFL (e.g., 6.0).", default=None)
-    level: Optional[str] = Field(description="CEFR level for German (e.g., 'A2', 'B1', 'B2').", default=None)
-
-class StandardizedTest(BaseModel):
-    exam_type: str = Field(description="Type of standardized test (e.g., 'GRE', 'GMAT').")
-    total_score: Optional[float] = Field(description="Total score for the standardized test (e.g., 320).", default=None)
-
-class ProfessionalAndTests(BaseModel):
-    relevant_work_experience_months: Optional[int] = Field(description="Relevant work experience in months (e.g., 6).", default=None)
-    standardized_tests: Optional[List[StandardizedTest]] = Field(default=None)
-
-class Preferences(BaseModel):
-    preferred_cities: Optional[List[str]] = Field(description="List of preferred cities (e.g., ['Munich', 'Berlin', 'Aachen']).", default=None)
-    max_tuition_fee_eur: Optional[int] = Field(default=0, description="Maximum EUR fee per semester (0 for tuition-free).")
-    preferred_start_semester: Optional[str] = Field(description="Preferred start semester (e.g., 'Winter', 'Summer', 'Either').", default=None)
-    preferred_language_of_instruction: Optional[str] = Field(description="e.g., 'English' or 'German/English'.", default='English')
-
-class UserProfile(BaseModel):
-    """The structured data model for the student applicant profile."""
-    full_name: Optional[str] = Field(default=None)
-    citizenship: Optional[Citizenship] = Field(default=None)
-    academic_background: Optional[AcademicBackground] = Field(default=None)
-    language_proficiency: Optional[List[LanguageProficiency]] = Field(default=[])
-    professional_and_tests: Optional[ProfessionalAndTests] = Field(default=None)
-    preferences: Optional[Preferences] = Field(default=None)
-
-# --- 2. LANGGRAPH SHARED STATE (Memory) ---
-class AgentState(TypedDict):
-    user_intent: str      # ACCUMULATED raw text from the user (Full Profile)
-    latest_response: str  # The user's newest, single reply
-    ai_response: Optional[str] 
-    user_profile: Optional[UserProfile]
-    # ...
-    # Status flags could be added here later
 
 # --- 3. LLM SETUP ---
 # Load environment variables from .env file
@@ -108,11 +54,9 @@ def get_missing_fields(profile: Optional[UserProfile]) -> List[str]:
     if not profile.academic_background:
         academic_missing.append("academic background (bachelor field of study, GPA, credit points)")
     if not profile.full_name: 
-        missing.append("full name")
-    
+        missing.append("full name")    
     if not profile.citizenship or not profile.citizenship.country_of_citizenship: 
         missing.append("country of citizenship")
-
     else:
         if not profile.academic_background.bachelor_field_of_study: 
             academic_missing.append("bachelor field of study")
@@ -414,117 +358,115 @@ def check_for_completion(state: AgentState) -> Literal["chat", "wrap_up", "match
         print("[Decision] ✅ Profile COMPLETELY FILLED. Moving to Tool 3 (Matching).")
         return "matching"
 
-# --- 7. BUILD THE LANGGRAPH WORKFLOW (FIXED) ---
-
 # --- 7. BUILD THE LANGGRAPH WORKFLOW (FIXED and EXTENDED) ---
 
-def build_intake_workflow() -> Any:
-    workflow = StateGraph(AgentState)
-    workflow.add_node("parsing", parse_profile_node)
-    workflow.add_node("chat", conversational_chat_node)
-    workflow.add_node("wrap_up", wrap_up_chat_node) # NEW NODE
+# def build_intake_workflow() -> Any:
+#     workflow = StateGraph(AgentState)
+#     workflow.add_node("parsing", parse_profile_node)
+#     workflow.add_node("chat", conversational_chat_node)
+#     workflow.add_node("wrap_up", wrap_up_chat_node) # NEW NODE
 
-    workflow.set_entry_point("parsing")
+#     workflow.set_entry_point("parsing")
 
-    # The conditional edge now has three possible outputs
-    workflow.add_conditional_edges(
-        "parsing",
-        check_for_completion,
-        {
-            "chat": "chat",       # Mandatory data missing -> go to chat node
-            "wrap_up": "wrap_up", # Mandatory complete, desirable missing -> go to wrap-up node
-            "matching": END       # Everything complete -> finish
-        }
-    )
+#     # The conditional edge now has three possible outputs
+#     workflow.add_conditional_edges(
+#         "parsing",
+#         check_for_completion,
+#         {
+#             "chat": "chat",       # Mandatory data missing -> go to chat node
+#             "wrap_up": "wrap_up", # Mandatory complete, desirable missing -> go to wrap-up node
+#             "matching": END       # Everything complete -> finish
+#         }
+#     )
 
-    # After the mandatory chat question, we stop to wait for user input
-    workflow.add_edge("chat", END) 
+#     # After the mandatory chat question, we stop to wait for user input
+#     workflow.add_edge("chat", END) 
     
-    # After the wrap-up question, we stop to wait for user input
-    workflow.add_edge("wrap_up", END) # NEW EDGE
+#     # After the wrap-up question, we stop to wait for user input
+#     workflow.add_edge("wrap_up", END) # NEW EDGE
 
-    return workflow.compile()
+#     return workflow.compile()
 
-# --- 8. REVISED EXECUTION EXAMPLE FOR INTERACTIVE CHAT ---
+# # --- 8. REVISED EXECUTION EXAMPLE FOR INTERACTIVE CHAT ---
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     
-    # 1. Define Initial State
-    initial_raw_input = "I want to apply to Master's in Germany"
-    current_state: AgentState = {
-        "user_intent": initial_raw_input,
-        "latest_response": initial_raw_input,
-        "ai_response": None,
-        "user_profile": None,
-    }
+#     # 1. Define Initial State
+#     initial_raw_input = "I want to apply to Master's in Germany"
+#     current_state: AgentState = {
+#         "user_intent": initial_raw_input,
+#         "latest_response": initial_raw_input,
+#         "ai_response": None,
+#         "user_profile": None,
+#     }
     
-    # Compile the graph
-    app = build_intake_workflow()
+#     # Compile the graph
+#     app = build_intake_workflow()
 
-    print("\n--- 🚀 Starting Interactive Profile Intake ---")
+#     print("\n--- 🚀 Starting Interactive Profile Intake ---")
     
-    # --- Main Loop ---
-    while True:
+#     # --- Main Loop ---
+#     while True:
         
-        # 1. Check for Completion (will break if everything is filled OR user said no)
-        profile = current_state.get("user_profile")
-        user_intent = current_state.get("user_intent", "")
+#         # 1. Check for Completion (will break if everything is filled OR user said no)
+#         profile = current_state.get("user_profile")
+#         user_intent = current_state.get("user_intent", "")
         
-        # Check if user said "no" to stop asking questions (more specific check)
-        latest_response_lower = current_state.get("latest_response", "").lower()
-        # Only consider it a "no" if they're declining ALL remaining questions, not just one field
-        user_said_no = any(phrase in latest_response_lower for phrase in [
-            "no more", "that's all", "nothing else", "i'm done", "no preferences", 
-            "no other", "skip the rest", "no thanks", "that's it"
-        ])
+#         # Check if user said "no" to stop asking questions (more specific check)
+#         latest_response_lower = current_state.get("latest_response", "").lower()
+#         # Only consider it a "no" if they're declining ALL remaining questions, not just one field
+#         user_said_no = any(phrase in latest_response_lower for phrase in [
+#             "no more", "that's all", "nothing else", "i'm done", "no preferences", 
+#             "no other", "skip the rest", "no thanks", "that's it"
+#         ])
         
-        # Break if mandatory fields complete AND (desirable fields complete OR user declined all)
-        if profile and not get_missing_fields(profile):
-            missing_desirable = get_desirable_missing_fields(profile, user_intent)
-            if not missing_desirable or user_said_no:
-                break
+#         # Break if mandatory fields complete AND (desirable fields complete OR user declined all)
+#         if profile and not get_missing_fields(profile):
+#             missing_desirable = get_desirable_missing_fields(profile, user_intent)
+#             if not missing_desirable or user_said_no:
+#                 break
         
-        # 2. Run the graph from the current state (Parsing -> Check -> Chat/Wrap-up)
-        try:
-            next_state = app.invoke(current_state)
-            current_state.update(next_state)
-        except Exception as e:
-            print(f"\n[ERROR] Graph execution failed: {e}. Exiting loop.")
-            break
+#         # 2. Run the graph from the current state (Parsing -> Check -> Chat/Wrap-up)
+#         try:
+#             next_state = app.invoke(current_state)
+#             current_state.update(next_state)
+#         except Exception as e:
+#             print(f"\n[ERROR] Graph execution failed: {e}. Exiting loop.")
+#             break
 
-        # 3. Check for AI Question (Pause point)
-        ai_q = current_state.get("ai_response")
+#         # 3. Check for AI Question (Pause point)
+#         ai_q = current_state.get("ai_response")
 
-        if ai_q:
-            # A. Display Question
-            print("-" * 50)
-            print(f"AI Assistant: {ai_q}")
+#         if ai_q:
+#             # A. Display Question
+#             print("-" * 50)
+#             print(f"AI Assistant: {ai_q}")
             
-            # B. Get User Input <--- YOU CAN NOW INPUT HERE
-            user_response = input("You: ")
-            print("-" * 50)
+#             # B. Get User Input <--- YOU CAN NOW INPUT HERE
+#             user_response = input("You: ")
+#             print("-" * 50)
             
-            # C. CRITICAL UPDATE: Update the state with the NEW input
-            current_state["user_intent"] += " " + user_response
-            current_state["latest_response"] = user_response
-            current_state["ai_response"] = None # Reset AI response for the next iteration
+#             # C. CRITICAL UPDATE: Update the state with the NEW input
+#             current_state["user_intent"] += " " + user_response
+#             current_state["latest_response"] = user_response
+#             current_state["ai_response"] = None # Reset AI response for the next iteration
             
-        else:
-            # Should only happen on startup or if parser fails repeatedly
-            print("[System Notice] No new question generated. Retrying with current intent...")
-            time.sleep(1)
+#         else:
+#             # Should only happen on startup or if parser fails repeatedly
+#             print("[System Notice] No new question generated. Retrying with current intent...")
+#             time.sleep(1)
 
-    # --- Final Output (Section 2) ---
-    print("\n" + "=" * 50)
-    print("--- ✅ PROFILE INTAKE COMPLETE! ---")
-    print("=" * 50)
+#     # --- Final Output (Section 2) ---
+#     print("\n" + "=" * 50)
+#     print("--- ✅ PROFILE INTAKE COMPLETE! ---")
+#     print("=" * 50)
     
-    # Retrieve the final, complete profile from the state
-    final_profile = current_state.get("user_profile")
+#     # Retrieve the final, complete profile from the state
+#     final_profile = current_state.get("user_profile")
     
-    if final_profile:
-        print("\n--- Final Structured User Profile ---")
-        print(final_profile.model_dump_json(indent=2))
-        print("-------------------------------------")
-    else:
-        print("ERROR: Graph completed, but final profile object was not found in the state.")
+#     if final_profile:
+#         print("\n--- Final Structured User Profile ---")
+#         print(final_profile.model_dump_json(indent=2))
+#         print("-------------------------------------")
+#     else:
+#         print("ERROR: Graph completed, but final profile object was not found in the state.")
