@@ -9,16 +9,16 @@ from langchain_core.runnables import Runnable
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import os
+import time
 
 # --- Import from new models.py ---
-from models import AgentState, StructuredRequirements, UserProfile
+from models import AgentState, StructuredRequirements, UserProfile, ProgramRelevanceScore
 
 # --- LLM SETUP (can be shared or re-initialized) ---
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
     raise ValueError("GEMINI_API_KEY not found in environment.")
 LLM = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.0)
-
 
 # --- AGENT 3 TOOLS ---
 def get_requirement_extractor_chain() -> Runnable:
@@ -35,15 +35,44 @@ def get_requirement_extractor_chain() -> Runnable:
     return prompt | LLM | parser
 
 def get_field_reasoning_chain() -> Runnable:
+    """Creates a chain to reason about field of study relevance."""
     prompt = ChatPromptTemplate.from_messages(
         [
-            ("system", "Answer with only 'YES' or 'NO'."),
-            ("user", "Is a Bachelor's degree in '{user_field}' considered a relevant background for a Master's program that requires: '{required_fields_list}'?")
+            ("system", """You are an expert German university admissions officer. 
+Your job is to determine if a student's background is relevant.
+Answer with only 'YES' or 'NO'."""),
+            
+            ("user", """The student has a Bachelor's degree in:
+'{user_field}'
+
+The Master's program requires a Bachelor's degree in one of the following fields:
+'{required_fields_list}'
+
+Is the student's background in '{user_field}' *likely* relevant enough for them to apply (e.g., 'IT' is related to 'Computer Science','Mathematics','Artificial Intelligence'), or is it *completely unrelated* (e.g., 'IT' is not related to 'Architecture')?
+Answer with only 'YES' or 'NO'.""")
         ]
     )
     return prompt | LLM | (lambda x: "YES" in x.content.upper())
 
+def get_relevance_scoring_chain() -> Runnable:
+    """Creates a chain that scores program relevance."""
+    parser = JsonOutputParser(pydantic_object=ProgramRelevanceScore)   
+    prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", """You are an expert career advisor. Your job is to score how relevant a Master's program is for a student.
+    You must provide a score from 0.0 (not relevant at all) to 10.0 (a perfect match).
+    {format_instructions}"""), # <-- REMOVED f-string
+                
+                ("user", """Please score the program based on the student's interests.
+                
+    --- STUDENT'S INTERESTS ---
+    {user_interests}
 
+    --- PROGRAM DESCRIPTION ---
+    {program_description}""")
+            ]
+        )
+    return prompt | LLM | parser
 # --- AGENT 3 NODES ---
 
 def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
@@ -155,6 +184,8 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         except Exception as e:
             print(f"  [DEBUG] ❌ ERROR: Failed to process program {program['program_id']}. Error: {e}")
 
+        time.sleep(3)
+
     print("="*50)
     print(f"[Node: Agent 3 Filter] Complete. Found {len(eligible_programs)} eligible programs.")
     print("="*50 + "\n")
@@ -164,31 +195,109 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         "eligible_programs": eligible_programs
     }
 
-
 def agent_3_rank_node(state: AgentState) -> Dict[str, Any]:
     print("\n[Node: Agent 3 Rank] Ranking eligible programs...")
     eligible_programs = state["eligible_programs"]
-    user_interests = state["user_profile"].academic_background.fields_of_interest
+    
+    # Check if user_profile exists before accessing it
+    if not state.get("user_profile") or not state["user_profile"].academic_background:
+        print("  [DEBUG] ❌ ERROR: User profile or academic background is missing in state. Cannot rank.")
+        return {"ranked_programs": []}
+        
+    user_interests_list = state["user_profile"].academic_background.fields_of_interest
     
     if not eligible_programs:
+        print("[Node: Agent 3 Rank] No eligible programs to rank.")
         return {"ranked_programs": []}
 
-    # --- This is the RANK stage ---
+    # --- 1. Prepare User Query ---
+    user_query = " ".join(user_interests_list)
+
+    # --- 2. TF-IDF Keyword Score (Fast) ---
     descriptions = [p["description"] for p in eligible_programs]
-    user_query = " ".join(user_interests)
-    
     vectorizer = TfidfVectorizer(stop_words='english')
     program_vectors = vectorizer.fit_transform(descriptions)
     query_vector = vectorizer.transform([user_query])
     keyword_scores = cosine_similarity(query_vector, program_vectors)[0]
     
+    # --- 3. LLM Semantic Score (Slower) ---
+    print(f"  [DEBUG] Starting LLM semantic scoring for {len(eligible_programs)} programs...")
+    scoring_chain = get_relevance_scoring_chain()
+    
+    # Get instructions from the ProgramRelevanceScore parser
+    parser = JsonOutputParser(pydantic_object=ProgramRelevanceScore)
+    format_instructions = parser.get_format_instructions()
+
     ranked_list = []
+    
+    # Define weights for your final score
+    W_TFIDF = 0.3  # 30% weight for keyword match
+    W_LLM = 0.7    # 70% weight for semantic meaning
+
     for i, program in enumerate(eligible_programs):
-        # Here you would add your LLM-based score for a weighted average
-        program['relevance_score'] = keyword_scores[i]
+        
+        # Get Keyword Score
+        tfidf_score_normalized = keyword_scores[i] * 10  # Scale 0-1 to 0-10
+        
+        # Get LLM Score
+        llm_score = 0.0
+        llm_reasoning = ""
+        try:
+            llm_response_dict = scoring_chain.invoke({
+                "user_interests": user_query,
+                "program_description": program["description"],
+                "format_instructions": format_instructions # <-- PASS THE INSTRUCTIONS
+            })
+            
+            llm_score = llm_response_dict.get('score', 0.0)
+            llm_reasoning = llm_response_dict.get('reasoning', '')
+            
+            print(f"  [DEBUG] Scored '{program['name'][:20]}...': TF-IDF={tfidf_score_normalized:.1f}, LLM={llm_score:.1f}")
+
+        except Exception as e:
+            print(f"  [DEBUG] ❌ ERROR scoring program {program['program_id']}: {e}")
+        
+        # --- 4. Calculate Final Weighted Score ---
+        final_score = (W_TFIDF * tfidf_score_normalized) + (W_LLM * llm_score)
+        
+        program['relevance_score'] = final_score
+        program['llm_reasoning'] = llm_reasoning # Store for analysis
         ranked_list.append(program)
 
+        # --- !! CRITICAL RATE LIMIT FIX !! ---
+        # You MUST keep this to avoid crashing the API
+        time.sleep(3) # Add a 1-second delay between programs
+
+    # --- 5. Sort by the new final_score ---
     ranked_list = sorted(ranked_list, key=lambda p: p['relevance_score'], reverse=True)
     
     print(f"[Node: Agent 3 Rank] Ranking complete.")
     return {"ranked_programs": ranked_list}
+
+# def agent_3_rank_node(state: AgentState) -> Dict[str, Any]:
+#     print("\n[Node: Agent 3 Rank] Ranking eligible programs...")
+#     eligible_programs = state["eligible_programs"]
+#     user_interests = state["user_profile"].academic_background.fields_of_interest
+    
+#     if not eligible_programs:
+#         return {"ranked_programs": []}
+
+#     # --- This is the RANK stage ---
+#     descriptions = [p["description"] for p in eligible_programs]
+#     user_query = " ".join(user_interests)
+    
+#     vectorizer = TfidfVectorizer(stop_words='english')
+#     program_vectors = vectorizer.fit_transform(descriptions)
+#     query_vector = vectorizer.transform([user_query])
+#     keyword_scores = cosine_similarity(query_vector, program_vectors)[0]
+    
+#     ranked_list = []
+#     for i, program in enumerate(eligible_programs):
+#         # Here you would add your LLM-based score for a weighted average
+#         program['relevance_score'] = keyword_scores[i]
+#         ranked_list.append(program)
+
+#     ranked_list = sorted(ranked_list, key=lambda p: p['relevance_score'], reverse=True)
+    
+#     print(f"[Node: Agent 3 Rank] Ranking complete.")
+#     return {"ranked_programs": ranked_list}

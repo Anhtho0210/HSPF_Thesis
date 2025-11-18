@@ -58,6 +58,11 @@ class StructuredRequirements(BaseModel):
     min_toefl_ibt_score: Optional[int] = Field(description="Minimum TOEFL iBT score.")
     requires_gre: Optional[bool] = Field(description="True if GRE is mandatory.")
 
+class ProgramRelevanceScore(BaseModel):
+    """A model to hold the LLM's relevance score and reasoning."""
+    score: float = Field(description="A relevance score from 0.0 to 10.0.")
+    reasoning: str = Field(description="A brief, 1-sentence justification for the score.")
+
 # --- LANGGRAPH SHARED STATE ---
 class AgentState(TypedDict):
     user_intent: str
