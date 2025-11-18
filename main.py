@@ -66,10 +66,10 @@ if __name__ == "__main__":
 
     # --- Define Initial State ---
     initial_raw_input = (
-        "Hi, I'm Anny Tran from Vietnam. I have a 4-year IT degree with a 7.0/10.0 GPA (min pass 5.0), "
+        "Hi, I'm Anny Tran from Vietnam. I graduaded in Electronic Commerce. I have a 4-year IT degree with a 8.0/10.0 GPA (min pass 5.0), "
         "and 210 ECTS. I got a 7.0 on my IELTS. I have 3 years of work experience. "
         "I'm interested in Machine Learning, AI, and Information Systems. "
-        "I'd prefer Munich or Berlin and want tuition under 1000 EUR."
+        "I'd prefer Munich or Berlin and want tuition fee under 1000 EUR."
     )
     
     current_state: AgentState = {
@@ -126,6 +126,25 @@ if __name__ == "__main__":
     if final_ranked_list:
         print(f"\n--- Final Top 5 Ranked & Eligible Programs ---")
         for i, program in enumerate(final_ranked_list[:5]):
-            print(f"{i+1}. {program['name']} (Score: {program['relevance_score']:.2f})")
+            # Print the Name and Score
+            print(f"\n{i+1}. {program['name']}")
+            print(f"   Match Score: {program['relevance_score']:.1f} / 10.0")
+            
+            # --- THIS IS THE NEW PART ---
+            # Print the reasoning if it exists
+            reasoning = program.get('llm_reasoning', 'No reasoning provided.')
+            print(f"   💡 Why: {reasoning}")
+            # ----------------------------
+            
+            print("-" * 30)
     else:
         print("No eligible programs were found that match your profile.")
+        
+    # final_ranked_list = current_state.get("ranked_programs")
+    
+    # if final_ranked_list:
+    #     print(f"\n--- Final Top 5 Ranked & Eligible Programs ---")
+    #     for i, program in enumerate(final_ranked_list[:5]):
+    #         print(f"{i+1}. {program['name']} (Score: {program['relevance_score']:.2f})")
+    # else:
+    #     print("No eligible programs were found that match your profile.")
