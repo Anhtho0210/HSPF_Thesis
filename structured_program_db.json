@@ -1,0 +1,497 @@
+[
+  {
+    "program_id": "4722",
+    "university_name": "RPTU University of Kaiserslautern-Landau",
+    "program_name": "Actuarial and Financial Mathematics",
+    "degree_type": "Master",
+    "application_mode": "Direct",
+    "city": "Kaiserslautern",
+    "state": "Rhineland-Palatinate",
+    "tuition_fee_per_semester_eur": 0.0,
+    "semester_contribution_eur": 314.0,
+    "min_gpa_german_scale": null,
+    "required_degree_domains": [
+      "Mathematics",
+      "Economathematics"
+    ],
+    "specific_ects_requirements": [],
+    "min_work_experience_months": 0,
+    "requires_internship": false,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "None",
+    "deadlines": {
+      "winter_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "April 30"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "April 30"
+        }
+      },
+      "summer_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "October 31"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "October 31"
+        }
+      }
+    },
+    "course_content_summary": "Within the field of mathematics, the study programme focuses on financial mathematics, actuarial sciences, statistics, and computational methods. Lectures in the mentioned fields are accompanied by seminars, reading courses, and project seminars. In addition, the participants take modules like Insurance Economics, Economics of Banking, Dynamics of Financial Markets.",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4722/"
+  },
+  {
+    "program_id": "10396",
+    "university_name": "Paderborn University",
+    "program_name": "Additive Manufacturing",
+    "degree_type": "Master",
+    "application_mode": "Uni-Assist",
+    "city": "Paderborn",
+    "state": "North Rhine-Westphalia",
+    "tuition_fee_per_semester_eur": 0.0,
+    "semester_contribution_eur": 280.0,
+    "min_gpa_german_scale": 2.5,
+    "required_degree_domains": [],
+    "specific_ects_requirements": [],
+    "min_work_experience_months": 0,
+    "requires_internship": false,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "None",
+    "deadlines": {
+      "winter_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "September 21"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "May 31"
+        }
+      },
+      "summer_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "March 21"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "November 30"
+        }
+      }
+    },
+    "course_content_summary": "Main contents: Plastics Technologies in Additive Manufacturing, Materials Science of Metals, 3D Metal Printing, Introduction to Additive Manufacturing & Manufacturing Technology, Materials Science of Plastics, Powder Technology, Structure Optimisation, Design Rules for Additive Manufacturing, Product Creation, Standard Software Application Development",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/10396/"
+  },
+  {
+    "program_id": "4770",
+    "university_name": "Chemnitz University of Technology",
+    "program_name": "Advanced and Computational Mathematics – International Master's Programme",
+    "degree_type": "Master",
+    "application_mode": "Direct",
+    "city": "Chemnitz",
+    "state": "Saxony",
+    "tuition_fee_per_semester_eur": 0.0,
+    "semester_contribution_eur": 330.0,
+    "min_gpa_german_scale": null,
+    "required_degree_domains": [
+      "Mathematics"
+    ],
+    "specific_ects_requirements": [],
+    "min_work_experience_months": 0,
+    "requires_internship": false,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "A2",
+    "deadlines": {
+      "winter_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "July 15"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "July 15"
+        }
+      },
+      "summer_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "January 15"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "January 15"
+        }
+      }
+    },
+    "course_content_summary": "The Advanced and Computational Mathematics Master's programme focuses on solving real-world problems through mathematics. It provides a solid foundation in advanced mathematics, followed by specialization in one of three fields: Advanced Pure Mathematics, Computational Mathematics, or Data Sciences. Students also participate in a seminar, complete a Master's thesis, and have the opportunity to learn German. The program prepares students for careers in academia and practical working fields, with a potential pathway to a PhD.",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4770/"
+  },
+  {
+    "program_id": "7065",
+    "university_name": "Frankfurt University of Applied Sciences",
+    "program_name": "Advanced Architecture — From Urban Design to Building Construction",
+    "degree_type": "Master",
+    "application_mode": "Uni-Assist",
+    "city": "Frankfurt am Main",
+    "state": "Hesse",
+    "tuition_fee_per_semester_eur": 0.0,
+    "semester_contribution_eur": 360.0,
+    "min_gpa_german_scale": 2.3,
+    "required_degree_domains": [
+      "Architecture"
+    ],
+    "specific_ects_requirements": [],
+    "min_work_experience_months": 4,
+    "requires_internship": true,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "None",
+    "deadlines": {
+      "winter_semester": null,
+      "summer_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "March 1"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "October 15"
+        }
+      }
+    },
+    "course_content_summary": "The program focuses on advanced architecture, combining design and construction across all scales, from urban contexts to single details. Students gain broad knowledge through lectures and modules covering urban design, building design in existing contexts, and new building design. The curriculum emphasizes a global, diversity-oriented, and multicultural perspective, enabling students to translate abstract designs into concrete implementations, considering professional, practical, technical, economic, ecological, and social aspects, as well as varied cultural, historical, and climatic situations. Elective modules, including 30 ECTS from the German Master’s program “Design and Construction,” allow for individual specialization. Graduates are prepared for roles in architectural, engineering, and construction companies, property development, real estate, the public sector, and research, particularly at the interface between abstract designs and their execution planning.",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/7065/"
+  },
+  {
+    "program_id": "6318",
+    "university_name": "RWTH Aachen University",
+    "program_name": "Advanced Computational Methods in Civil Engineering",
+    "degree_type": "Master",
+    "application_mode": "Direct",
+    "city": "Aachen",
+    "state": "North Rhine-Westphalia",
+    "tuition_fee_per_semester_eur": 0.0,
+    "semester_contribution_eur": 317.0,
+    "min_gpa_german_scale": null,
+    "required_degree_domains": [
+      "Civil Engineering"
+    ],
+    "specific_ects_requirements": [
+      {
+        "domain_name": "Mathematical-physical basics",
+        "min_ects_total": 38.0,
+        "condition_comment": null,
+        "modules": [
+          {
+            "subject_area": "Mathematics",
+            "min_ects": 16.0,
+            "condition_comment": null
+          },
+          {
+            "subject_area": "Statistics",
+            "min_ects": 3.0,
+            "condition_comment": null
+          },
+          {
+            "subject_area": "Mechanics",
+            "min_ects": 16.0,
+            "condition_comment": null
+          },
+          {
+            "subject_area": "Hydromechanics",
+            "min_ects": 3.0,
+            "condition_comment": null
+          }
+        ]
+      },
+      {
+        "domain_name": "Civil engineering basics",
+        "min_ects_total": 80.0,
+        "condition_comment": "at least 20 CP each must be demonstrated from two of the areas listed below",
+        "modules": [
+          {
+            "subject_area": "Constructive engineering",
+            "min_ects": 20.0,
+            "condition_comment": null
+          },
+          {
+            "subject_area": "Water management",
+            "min_ects": 20.0,
+            "condition_comment": null
+          },
+          {
+            "subject_area": "Construction operations and geotechnics",
+            "min_ects": 20.0,
+            "condition_comment": null
+          },
+          {
+            "subject_area": "Transportation",
+            "min_ects": 20.0,
+            "condition_comment": null
+          }
+        ]
+      }
+    ],
+    "min_work_experience_months": 0,
+    "requires_internship": false,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "None",
+    "deadlines": {
+      "winter_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "July 15"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "March 1"
+        }
+      },
+      "summer_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "January 15"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "September 1"
+        }
+      }
+    },
+    "course_content_summary": "The Master's program 'Advanced Computational Methods in Civil Engineering' (AdCom) at RWTH Aachen University focuses on the application and development of numerical methods and simulations for innovative civil engineering structures. It is an interdisciplinary curriculum with courses from Civil Engineering, Mechanical Engineering, and Mathematics, providing a deep understanding of structural mechanics, fluid mechanics, and numerical mathematics. Students learn to address challenges related to new resource-conserving materials, advanced composite materials, and lightweight structures under dynamic loads. The program is highly scientific and research-oriented, preparing graduates for PhD programs and careers in research or industry, including classic civil engineering and mechanical engineering.",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/6318/"
+  },
+  {
+    "program_id": "4695",
+    "university_name": "Chemnitz University of Technology",
+    "program_name": "Advanced Functional Materials",
+    "degree_type": "Master",
+    "application_mode": "Uni-Assist",
+    "city": "Chemnitz",
+    "state": "Saxony",
+    "tuition_fee_per_semester_eur": 0.0,
+    "semester_contribution_eur": 330.0,
+    "min_gpa_german_scale": null,
+    "required_degree_domains": [
+      "Physics",
+      "Chemistry",
+      "Materials Science"
+    ],
+    "specific_ects_requirements": [],
+    "min_work_experience_months": 0,
+    "requires_internship": false,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "None",
+    "deadlines": {
+      "winter_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "July 15"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "July 15"
+        }
+      },
+      "summer_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "Jan 15"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "Jan 15"
+        }
+      }
+    },
+    "course_content_summary": "The Master's degree programme in Advanced Functional Materials focuses on the advanced chemical and physical aspects of modern materials, and the transfer of skills in synthesis, development, analysis, and manufacturing of functional materials. This interdisciplinary program, offered by the Faculty of Natural Sciences, is based on courses in materials chemistry and materials physics. It includes research-oriented extension of physical and chemical knowledge, advanced courses in modern research fields, lab-oriented modules, a research project, and the Master's thesis.",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4695/"
+  },
+  {
+    "program_id": "8579",
+    "university_name": "Rosenheim Technical University of Applied Sciences",
+    "program_name": "Advanced Industrial Engineering",
+    "degree_type": "Master",
+    "application_mode": "Uni-Assist",
+    "city": "Rosenheim",
+    "state": "Bavaria",
+    "tuition_fee_per_semester_eur": 500.0,
+    "semester_contribution_eur": 0.0,
+    "min_gpa_german_scale": 2.0,
+    "required_degree_domains": [
+      "Industrial Engineering"
+    ],
+    "specific_ects_requirements": [],
+    "min_work_experience_months": 0,
+    "requires_internship": false,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "None",
+    "deadlines": {
+      "winter_semester": {
+        "eu_applicants": {
+          "start_date": "April 15",
+          "end_date": "April 30"
+        },
+        "non_eu_applicants": {
+          "start_date": "April 15",
+          "end_date": "April 30"
+        }
+      },
+      "summer_semester": null
+    },
+    "course_content_summary": "The Master's degree in Advanced Industrial Engineering combines engineering and business administration with new approaches to sustainable concepts and digital technologies (AI, data science, collaborative robots, AR/VR/MR). The program emphasizes practical application through partnerships with leading companies, preparing students for international careers in fields like production engineering, technical sales, supply chain management, or management consulting.",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/8579/"
+  },
+  {
+    "program_id": "7612",
+    "university_name": "Chemnitz University of Technology",
+    "program_name": "Advanced Manufacturing – Mechanical Engineering and Production",
+    "degree_type": "Master",
+    "application_mode": "Direct",
+    "city": "Chemnitz",
+    "state": "Saxony",
+    "tuition_fee_per_semester_eur": 0.0,
+    "semester_contribution_eur": 330.0,
+    "min_gpa_german_scale": null,
+    "required_degree_domains": [
+      "engineering",
+      "natural science"
+    ],
+    "specific_ects_requirements": [
+      {
+        "domain_name": "Special mathematical methods of engineering",
+        "min_ects_total": 18.0,
+        "condition_comment": "including the topics of Fourier transforms, regression calculation, probability and mathematical statistics",
+        "modules": []
+      },
+      {
+        "domain_name": "Scientific and engineering data processing",
+        "min_ects_total": 12.0,
+        "condition_comment": "including the topics of CAD, CAS, numerical simulation and data acquisition as well as multiphysics simulation and practical experience",
+        "modules": []
+      },
+      {
+        "domain_name": "Metrology and control engineering",
+        "min_ects_total": 8.0,
+        "condition_comment": "including the topics of sensors, actuators and digital methods of manufacturing",
+        "modules": []
+      },
+      {
+        "domain_name": "New materials for engineering",
+        "min_ects_total": 8.0,
+        "condition_comment": "including the topics of polymers, metals, composites, matrix systems and functional properties",
+        "modules": []
+      },
+      {
+        "domain_name": "In-depth theoretical basics of engineering",
+        "min_ects_total": 12.0,
+        "condition_comment": "including the subjects of engineering mechanics, design, manufacturing and fluid dynamics",
+        "modules": []
+      },
+      {
+        "domain_name": "Resource-efficient manufacturing concepts",
+        "min_ects_total": 8.0,
+        "condition_comment": "including the topics of technical and natural cycles and networks, system optimisation and energy concepts",
+        "modules": []
+      }
+    ],
+    "min_work_experience_months": 0,
+    "requires_internship": false,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "A1",
+    "deadlines": {
+      "winter_semester": {
+        "eu_applicants": {
+          "start_date": null,
+          "end_date": "July 15"
+        },
+        "non_eu_applicants": {
+          "start_date": null,
+          "end_date": "July 15"
+        }
+      },
+      "summer_semester": null
+    },
+    "course_content_summary": "This English-taught, research-driven, and interdisciplinary Master’s programme focuses on equipping students with cutting-edge scientific methods, knowledge, and skills related to innovative technologies and advanced manufacturing processes. It embodies the core competencies of Chemnitz University of Technology, preparing graduates to shape the future of modern manufacturing. The program is oriented towards research key areas including \"Hybrid Technologies\", \"Printed Functionalities\", \"Work Design and Sustainability Management\" and \"Production Systems\".",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/7612/"
+  },
+  {
+    "program_id": "9989",
+    "university_name": "Justus Liebig University Giessen",
+    "program_name": "Advanced Materials",
+    "degree_type": "Master",
+    "application_mode": "Uni-Assist",
+    "city": "Gießen",
+    "state": "Hessen",
+    "tuition_fee_per_semester_eur": 0.0,
+    "semester_contribution_eur": 402.0,
+    "min_gpa_german_scale": null,
+    "required_degree_domains": [
+      "Advanced Materials",
+      "Materials Science",
+      "Materials Engineering",
+      "Biomaterials",
+      "Energy Materials"
+    ],
+    "specific_ects_requirements": [],
+    "min_work_experience_months": 0,
+    "requires_internship": false,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "None",
+    "deadlines": {
+      "winter_semester": {
+        "eu_applicants": {
+          "start_date": "June 1",
+          "end_date": "June 15"
+        },
+        "non_eu_applicants": {
+          "start_date": "May 1",
+          "end_date": "June 15"
+        }
+      },
+      "summer_semester": null
+    },
+    "course_content_summary": "The Master's degree program in Advanced Materials at Justus Liebig University Giessen focuses on modern functional materials modified at the molecular level for specific applications in high-tech areas like medicine, mobility, communication, energy supply, and aerospace. It uses interdisciplinary knowledge from chemistry and physics to understand and change material properties. The research-oriented program is integrated into current materials research in Giessen, with a focus on high-performance and energy materials, offering opportunities to work on current research projects and set a clear focus through specialisation. A double degree option with universities in Japan and Italy is available.",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/9989/"
+  },
+  {
+    "program_id": "5403",
+    "university_name": "TU Bergakademie Freiberg",
+    "program_name": "Advanced Materials Analysis",
+    "degree_type": "Master",
+    "application_mode": "Direct",
+    "city": "Freiberg",
+    "state": "Saxony",
+    "tuition_fee_per_semester_eur": 0.0,
+    "semester_contribution_eur": 107.0,
+    "min_gpa_german_scale": null,
+    "required_degree_domains": [
+      "Engineering Science (major in Materials Science)",
+      "Natural Science (major in Physics)",
+      "Natural Science (major in Chemistry)"
+    ],
+    "specific_ects_requirements": [],
+    "min_work_experience_months": 0,
+    "requires_internship": false,
+    "english_level_requirement": "B2",
+    "german_level_requirement": "None",
+    "deadlines": {
+      "winter_semester": null,
+      "summer_semester": {
+        "eu_applicants": {
+          "start_date": "Jan 1",
+          "end_date": "Apr 15"
+        },
+        "non_eu_applicants": {
+          "start_date": "Jan 1",
+          "end_date": "Apr 15"
+        }
+      }
+    },
+    "course_content_summary": "The Master's programme Advanced Materials Analysis (AMA) at TU Bergakademie Freiberg focuses on providing profound insight into important techniques for the analysis of solid materials (e.g., advanced steels, materials for electronics, shape memory alloys, energy materials) using microscopic, spectroscopic, and diffraction methods. The program emphasizes materials characterization to understand structure-property relations and tailor material properties. Graduates are prepared for careers in materials-related industrial fields, particularly in research and development, ranging from metallurgy to the semiconductor industry, as well as academic research.",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/5403/"
+  }
+]

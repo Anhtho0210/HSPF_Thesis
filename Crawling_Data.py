@@ -15,7 +15,7 @@ import random
 today = datetime.date.today().isoformat()
 
 # --- Configuration for Limiting Programs ---
-PROGRAM_LIMIT = 500
+PROGRAM_LIMIT = 10
 # --- End Configuration ---
 
 logging.basicConfig(filename='./logs/log_'+str(today) +
