@@ -74,6 +74,7 @@ if __name__ == "__main__":
     
     current_state: AgentState = {
         "user_intent": initial_raw_input,
+        "pdf_path": "Anny_Transcript.pdf",
         "latest_response": initial_raw_input,
         "ai_response": None,
         "user_profile": None,

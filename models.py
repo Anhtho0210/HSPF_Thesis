@@ -5,6 +5,23 @@ from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
 # --- PART 1: THE STUDENT 
+class StudentCourse(BaseModel):
+    """Represents a single course/module from the transcript."""
+    course_name: str = Field(description="Name of the subject (e.g. 'Calculus I').")
+    original_credits: float = Field(description="Credits as listed on the transcript.", default=0.0)
+    grade: Optional[str] = Field(default=None)
+
+    # New Field: Only populated if Agent asks or user provides
+    content_description: Optional[str] = Field(
+        description="Short summary of topics covered, provided by user on demand.", 
+        default=None
+    )
+    
+    # Calculated Field
+    converted_ects: float = Field(
+        description="The calculated value: original_credits * conversion_factor", 
+        default=0.0
+    )
 
 class Citizenship(BaseModel):
     country_of_citizenship: Optional[str] = Field(default=None)
@@ -16,10 +33,21 @@ class BachelorGPA(BaseModel):
     score_german: Optional[float] = Field(default=None)
 
 class AcademicBackground(BaseModel):
-    bachelor_field_of_study: Optional[str] = Field(default=None)
-    bachelor_gpa: Optional[BachelorGPA] = Field(default=None)
-    total_credit_points: Optional[int] = Field(default=None)
-    fields_of_interest: Optional[List[str]] = Field(default=None)
+    bachelor_field_of_study: str
+    
+    # Inputs for the Formula
+    total_credits_earned: Optional[float] = Field(description="Original total credits (e.g. 130).", default=None)
+    
+    program_duration_semesters: Optional[int] = Field(default=None)
+    ects_conversion_factor: float = Field(default=1.0)
+    
+    # Must match 'total_converted_ects' used in Agent1.py
+    total_converted_ects: float = Field(default=0.0)
+    
+    # The Course List
+    transcript_courses: List[StudentCourse] = Field(default_factory=list)
+    
+    bachelor_gpa: Optional[BachelorGPA] = None 
 
 class LanguageProficiency(BaseModel):
     language: str
@@ -148,6 +176,7 @@ class ProgramHardFilters(BaseModel):
 # --- PART 3: SHARED STATE ---
 class AgentState(TypedDict):
     user_intent: str
+    pdf_path: Optional[str]
     user_profile: Optional[UserProfile]
     program_catalog: List[dict]
     eligible_programs: List[dict]

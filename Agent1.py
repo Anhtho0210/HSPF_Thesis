@@ -8,6 +8,12 @@ from typing import Any
 import time
 from dotenv import load_dotenv
 from models import AgentState, UserProfile
+#handling PDF
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import FAISS 
+from langchain_openai import OpenAIEmbeddings
+from pypdf import PdfReader  
+import math
 
 # WORKFLOW
 # parsing →(check_for_completion) → "chat" (if mandatory missing)
@@ -38,6 +44,108 @@ LLM = ChatGoogleGenerativeAI(
     temperature=0.1 
 )
 
+#handling PDF
+def agent_1_ingest_syllabus(pdf_path):
+    # 1. Split PDF into chunks (e.g., 1 page per chunk)
+    loader = PyPDFLoader(pdf_path)
+    pages = loader.load_and_split()
+    
+    # 2. Create Vector Index (Temporary, just for this session)
+    vectorstore = FAISS.from_documents(pages, OpenAIEmbeddings())
+    retriever = vectorstore.as_retriever()
+    
+    return retriever
+
+def agent_3_check_syllabus(retriever, requirement_name):
+    # Instead of asking the user, ask the PDF!
+    
+    # Query: "Find courses about [Requirement Name]"
+    docs = retriever.get_relevant_documents(f"Course description regarding {requirement_name}")
+    
+    # Feed these specific snippets to LLM to judge
+    context_text = "\n".join([d.page_content for d in docs])
+    
+    prompt = f"""
+    Based on the syllabus excerpts below, does the student have courses that cover '{requirement_name}'?
+    Sum up the credits.
+    
+    Excerpts:
+    {context_text}
+    """
+
+def load_pdf_text(file_path: str) -> str:
+    """Reads text from a PDF file."""
+    try:
+        reader = PdfReader(file_path)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+        return text[:15000] # Limit to 15k chars to save tokens
+    except Exception as e:
+        print(f"Error reading PDF: {e}")
+        return ""
+
+#handling ECTs
+def apply_ects_conversion(profile: UserProfile) -> UserProfile:
+    """
+    Calculates ECTS Conversion Factor based on:
+    Factor = 30 / (Total_Credits / Semesters)
+    Then applies this factor to:
+    1. The Total Degree Credits
+    2. Every individual course in the transcript
+    """
+    acad = profile.academic_background
+    
+    # 1. Validate Inputs
+    # We check for 'total_credits_earned' because that is what your JSON output shows
+    if not acad or not acad.total_credits_earned or not acad.program_duration_semesters:
+        print("  [Logic] ⚠️ Cannot calculate ECTS Factor: Missing Total Credits or Duration.")
+        return profile
+
+    conversion_factor = 1.0
+
+    # 2. Calculate Factor
+    try:
+        credits_per_semester = acad.total_credits_earned / acad.program_duration_semesters
+        
+        if credits_per_semester > 0:
+            conversion_factor = 30.0 / credits_per_semester
+            
+            # Sanity Check: If factor is essentially 1.0, keep it 1.0
+            if 0.9 <= conversion_factor <= 1.1:
+                conversion_factor = 1.0
+            
+            acad.ects_conversion_factor = round(conversion_factor, 2)
+            print(f"  [Logic] 🧮 Calculated Factor: {acad.ects_conversion_factor}")
+            
+    except Exception as e:
+        print(f"  [Logic] ❌ Error calculating factor: {e}")
+        return profile # Stop if we can't get a factor
+
+    # 3. Apply to Total Degree (Safe Block)
+    try:
+        if acad.total_credits_earned:
+            acad.total_converted_ects = round(acad.total_credits_earned * conversion_factor, 1)
+            print(f"  [Logic] 🎓 Total Degree Converted: {acad.total_converted_ects} ECTS")
+    except Exception as e:
+        print(f"  [Logic] ⚠️ Could not convert total degree credits: {e}")
+
+    # 4. Apply to Individual Courses (Safe Block)
+    # This loop runs even if step 3 failed
+    try:
+        if acad.transcript_courses:
+            count = 0
+            for course in acad.transcript_courses:
+                if course.original_credits:
+                    # The Math: Original * Factor
+                    val = float(course.original_credits) * conversion_factor
+                    course.converted_ects = round(val, 1)
+                    count += 1
+            print(f"  [Logic] ✅ Converted {count} transcript courses.")
+    except Exception as e:
+        print(f"  [Logic] ❌ Error converting individual courses: {e}")
+
+    return profile
 # --- 4. HELPER FUNCTION: CHECK MISSING FIELDS ---
 
 def get_missing_fields(profile: Optional[UserProfile]) -> List[str]:
@@ -162,7 +270,24 @@ def get_desirable_missing_fields(profile: Optional[UserProfile], user_intent: st
 def parse_profile_node(state: AgentState) -> Dict[str, Any]:
     """Attempts to parse the accumulated user_intent into a structured UserProfile."""
     print("\n[Node: Parsing/Tool 1] Attempting structured extraction...")
+
+    # --- 1. PDF INGESTION (NEW) ---
+    pdf_text = ""
+    file_path = state.get("pdf_path") # <--- You need to add this key to AgentState in models.py
+    if file_path and os.path.exists(file_path):
+        print(f"  📄 Loading transcript from: {file_path}")
+        pdf_text = load_pdf_text(file_path)
     
+    # Combine User Chat + PDF Text
+    # We label them clearly so the LLM knows which is which
+    combined_input = f"""
+    USER CHAT HISTORY:
+    {state["user_intent"]}
+    
+    TRANSCRIPT DOCUMENT CONTENT:
+    {pdf_text}
+    """
+
     parser = JsonOutputParser(pydantic_object=UserProfile)
     format_instructions = parser.get_format_instructions()
     
@@ -190,6 +315,14 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
                - You should ask for 4-5 specific field of interests.
 
              - For 'academic_background.bachelor_gpa': Only extract if the user provides actual GPA numbers. Set score, max_scale, and min_passing_grade to null if not provided.
+             - For 'academic_background.transcript_courses': If the input contains a list of subjects/courses (e.g., from a PDF):
+               - Extract them into 'academic_background.transcript_courses'.
+               - **course_name**: The full subject title.
+               - **original_credits**: The RAW credit value listed (do NOT convert to ECTS yourself).
+             
+             - For 'academic_background.meta_data':
+               - Look for **'total_credits_earned'** (e.g., "Total Units: 140", "Credits: 128").
+               - Look for **'program_duration_semesters'** (e.g., "4 years" = 8, "3.5 years" = 7).
              
              - For 'language_proficiency': Use 'exam_type' instead of 'exam'. For IELTS/TOEFL, use 'overall_score'. For CEFR (German), use 'level'.
              - The 'professional_and_tests' and 'preferences' sections are optional.
@@ -209,14 +342,15 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
             ("user", "User's current accumulated profile text: \n---\n{input}\n---")
         ]
     )
-    
+
     parsing_chain: Runnable = prompt | LLM | parser
     
     try:
         # Pass variables using the required keys: 'input' and 'format_instructions'
                 # Pass variables using the required keys: 'input' and 'format_instructions'
+        # 1. Extract
         structured_output_dict = parsing_chain.invoke({
-            "input": state["user_intent"], 
+            "input": combined_input,  # <--- Pass combined text
             "format_instructions": format_instructions
         })
         
@@ -262,6 +396,12 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
         validated_profile = UserProfile(**structured_output_dict)
         print(f"[Node: Parsing/Tool 1] ✅ Profile parsed. Missing fields: {len(get_missing_fields(validated_profile))}")
         
+        # ECTS CALCULATION 
+        print("  [Logic] Running ECTS Conversion...")
+        validated_profile = apply_ects_conversion(validated_profile)
+        
+        print(f"[Node: Parsing/Tool 1] ✅ Profile parsed. Missing fields: {len(get_missing_fields(validated_profile))}")
+        print(validated_profile.model_dump_json(indent=2))
         # --- ADDED FOR TESTING/DEBUGGING ---
         print("\n--- Parsed Profile (Debug) ---")
         # Use .model_dump_json(indent=2) for clean, readable JSON output
