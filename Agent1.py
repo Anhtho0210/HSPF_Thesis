@@ -27,16 +27,12 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import Runnable
 
-
-# --- 3. LLM SETUP ---
-# Load environment variables from .env file
 load_dotenv()
-# --- LLM SETUP (from Agent1.py) ---
+# --- LLM SETUP 
 api_key = os.environ.get("GEMINI_API_KEY")
 if api_key:
     os.environ["GOOGLE_API_KEY"] = api_key
 else:
-    # Error will be caught during LLM initialization if not set
     print("[Warning] GEMINI_API_KEY not found in .env file or environment variables")
 
 LLM = ChatGoogleGenerativeAI(
@@ -99,7 +95,7 @@ def apply_ects_conversion(profile: UserProfile) -> UserProfile:
     # 1. Validate Inputs
     # We check for 'total_credits_earned' because that is what your JSON output shows
     if not acad or not acad.total_credits_earned or not acad.program_duration_semesters:
-        print("  [Logic] ⚠️ Cannot calculate ECTS Factor: Missing Total Credits or Duration.")
+        print("  [Logic] Cannot calculate ECTS Factor: Missing Total Credits or Duration.")
         return profile
 
     conversion_factor = 1.0
@@ -128,7 +124,7 @@ def apply_ects_conversion(profile: UserProfile) -> UserProfile:
             acad.total_converted_ects = round(acad.total_credits_earned * conversion_factor, 1)
             print(f"  [Logic] 🎓 Total Degree Converted: {acad.total_converted_ects} ECTS")
     except Exception as e:
-        print(f"  [Logic] ⚠️ Could not convert total degree credits: {e}")
+        print(f"  [Logic] Could not convert total degree credits: {e}")
 
     # 4. Apply to Individual Courses (Safe Block)
     # This loop runs even if step 3 failed
@@ -149,42 +145,54 @@ def apply_ects_conversion(profile: UserProfile) -> UserProfile:
 # --- 4. HELPER FUNCTION: CHECK MISSING FIELDS ---
 
 def get_missing_fields(profile: Optional[UserProfile]) -> List[str]:
-    """Analyzes the UserProfile for critical missing data points for matching.
-    Returns fields in priority order: academic fields first, then others."""
-    missing = []
-    
-    # If initial parsing failed completely or hasn't run
+    """
+    Analyzes the UserProfile for critical missing data points for matching.
+    Returns fields in priority order.
+    """
+
+    # 1. Safety Check: Is the profile object itself missing?
     if profile is None:
         return ["Initial full profile text (name, GPA, major, citizenship, interests)"]
+    
+    missing = []
 
-    # PRIORITY 1: Academic fields (ask these first)
-    academic_missing = []
-    if not profile.academic_background:
-        academic_missing.append("academic background (bachelor field of study, GPA, credit points)")
+    # 2. Basic Info Checks
     if not profile.full_name: 
         missing.append("full name")    
     if not profile.citizenship or not profile.citizenship.country_of_citizenship: 
         missing.append("country of citizenship")
+
+    # 3. Academic Background Checks (CRITICAL FIX HERE)
+    # We must check if the parent object exists before checking its children.
+    if not profile.academic_background:
+        # If the whole object is missing, request it entirely
+        missing.append("academic background (bachelor field, GPA, credits, duration)")
     else:
-        if not profile.academic_background.bachelor_field_of_study: 
-            academic_missing.append("bachelor field of study")
-        if not profile.academic_background.bachelor_duration_years:
-            academic_missing.append("bachelor duration years")
-        if not profile.academic_background.bachelor_gpa or not profile.academic_background.bachelor_gpa.score: 
-            academic_missing.append("bachelor GPA score")
-        if not profile.academic_background.bachelor_gpa or not profile.academic_background.bachelor_gpa.max_scale: 
-            academic_missing.append("bachelor GPA max scale")
-        if not profile.academic_background.bachelor_gpa or not profile.academic_background.bachelor_gpa.min_passing_grade: 
-            academic_missing.append("bachelor GPA min passing grade")
-        if not profile.academic_background.total_credit_points: 
-            academic_missing.append("total credit points")
-        if not profile.academic_background.fields_of_interest or (isinstance(profile.academic_background.fields_of_interest, list) and len(profile.academic_background.fields_of_interest) == 0): 
-            academic_missing.append("2-3 technical fields of interest")
-    
-    # Add academic fields first (priority order)
-    missing.extend(academic_missing)
-    
-    # PRIORITY 2: Language proof check is critical for filtering
+        # Safe to access properties now
+        acad = profile.academic_background
+
+        if not acad.bachelor_field_of_study: 
+            missing.append("bachelor field of study")
+         
+        # GPA Checks
+        gpa = acad.bachelor_gpa
+        if not gpa or not gpa.score or not gpa.max_scale or not gpa.min_passing_grade:
+            # If any piece is missing, ask for the COMPLETE set
+            missing.append("full bachelor GPA details (your score, maximum scale, and minimum passing grade)")
+             
+            
+        # ECTS Calculation Requirements
+        if not acad.total_credits_earned: 
+            missing.append("total credit points earned")
+        
+        if not acad.program_duration_semesters:
+            missing.append("duration of bachelor program semesters")
+
+        # Interests (Needed for Agent 3 Semantic Search)
+        if not acad.fields_of_interest: 
+            missing.append("2-3 technical fields of interest")
+
+    # 4. Language Checks
     if not profile.language_proficiency or len(profile.language_proficiency) == 0:
         missing.append("language proficiency (e.g., IELTS, TOEFL)")
     else:
@@ -194,7 +202,7 @@ def get_missing_fields(profile: Optional[UserProfile]) -> List[str]:
             for lang in profile.language_proficiency
         )
         if not has_valid_score:
-            missing.append("language proof score or level (e.g., IELTS score, CEFR level)")
+            missing.append("language proof score or level")
         
     return missing
 
@@ -203,64 +211,49 @@ def get_desirable_missing_fields(profile: Optional[UserProfile], user_intent: st
     """Analyzes the UserProfile for helpful, but non-critical, data points."""
     desirable_missing = []
     
-    # Only check if profile is not None and has been partially successful
+    # Safety Check 1: If profile is None, we can't check fields
     if profile is None:
         return []
 
     user_intent_lower = user_intent.lower()
     
-    # Check for "no" responses for cities - don't ask again if user explicitly declined
+    # Safety Check 2: Ensure preferences object exists
+    # This fixes your "AttributeError: 'UserProfile' object has no attribute 'preferences'"
+    if not hasattr(profile, "preferences") or profile.preferences is None:
+        # If missing, we suggest asking about them
+        desirable_missing.append("preferences (tuition fee, cities, language)")
+        return desirable_missing
+
+    # Check for "no" responses for cities
     cities_declined = any(phrase in user_intent_lower for phrase in [
         "no prefer", "no preference", "not important", "i don't care", "doesn't matter",
         "no cities", "no city preference", "any city", "no specific city"
     ])
     
-    # Check for non-critical, yet highly useful fields in preferences
-    if not profile.preferences:
-        # If preferences don't exist, we might want to ask about them (but skip cities if declined)
-        if not cities_declined:
-            desirable_missing.append("preferences (tuition fee, preferred cities, language of instruction)")
-        else:
-            desirable_missing.append("preferences (tuition fee, language of instruction)")
-    else:
-        # Only consider tuition fee missing if user hasn't explicitly mentioned it
-        tuition_mentioned = any(phrase in user_intent_lower for phrase in [
-            "tuition", "fee", "cost", "price", "free", "no tuition", "tuition-free"
-        ])
-        if not tuition_mentioned and (not profile.preferences.max_tuition_fee_eur or profile.preferences.max_tuition_fee_eur == 0): 
-            desirable_missing.append("maximum tuition fee (EUR per semester)")
-        
-        if not profile.preferences.preferred_language_of_instruction: 
-            desirable_missing.append("preferred language of instruction")
-        
-        # Only ask about cities if they haven't been explicitly declined
-        # Empty list [] means user was asked and said no, None means not asked yet
-        if not cities_declined:
-            if profile.preferences.preferred_cities is None: 
-                desirable_missing.append("preferred cities")
-            elif isinstance(profile.preferences.preferred_cities, list) and len(profile.preferences.preferred_cities) == 0:
-                # Empty list - this is actually fine, user said no preference, don't ask again
-                pass
+    # Check Tuition
+    tuition_mentioned = any(phrase in user_intent_lower for phrase in [
+        "tuition", "fee", "cost", "price", "free", "no tuition", "tuition-free"
+    ])
+    if not tuition_mentioned and (not profile.preferences.max_tuition_fee_eur or profile.preferences.max_tuition_fee_eur == 0): 
+        desirable_missing.append("maximum tuition fee (EUR per semester)")
     
-    # Check for professional_and_tests (optional but desirable)
-    if not profile.professional_and_tests:
-        # Check if user mentioned anything about work experience or standardized tests
-        work_mentioned = any(phrase in user_intent_lower for phrase in [
-            "work", "experience", "job", "employment", "internship", "intern"
-        ])
-        test_mentioned = any(phrase in user_intent_lower for phrase in [
-            "gre", "gmat", "standardized test", "test score"
-        ])
-        if not work_mentioned and not test_mentioned:
-            desirable_missing.append("professional information (work experience, standardized tests like GRE/GMAT)")
-    else:
-        # If professional_and_tests exists, check if it has meaningful data
-        if not profile.professional_and_tests.relevant_work_experience_months and (
-            not profile.professional_and_tests.standardized_tests or 
-            len(profile.professional_and_tests.standardized_tests) == 0
-        ):
-            # Professional_and_tests exists but is empty - might want to ask
-            pass
+    # Check Language Preference
+    if not profile.preferences.preferred_language_of_instruction: 
+        desirable_missing.append("preferred language of instruction")
+    
+    # Check Cities (if not declined)
+    if not cities_declined:
+        if not profile.preferences.preferred_cities: 
+            desirable_missing.append("preferred cities")
+    
+    # Check Professional Info
+    if not hasattr(profile, "professional_and_tests") or not profile.professional_and_tests:
+        work_mentioned = any(phrase in user_intent_lower for phrase in ["work", "experience", "job", "internship"])
+        if not work_mentioned:
+            desirable_missing.append("professional information (work experience)")
+
+    if not profile.preferences.preferred_start_semester:
+        desirable_missing.append("preferred start semester")    
             
     return desirable_missing
 
@@ -271,21 +264,25 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
     """Attempts to parse the accumulated user_intent into a structured UserProfile."""
     print("\n[Node: Parsing/Tool 1] Attempting structured extraction...")
 
-    # --- 1. PDF INGESTION (NEW) ---
+    # 1. CHECK: Have we already extracted the transcript?
+    existing_profile = state.get("user_profile")
+    has_transcript_data = existing_profile and existing_profile.academic_background and existing_profile.academic_background.transcript_courses
+    
     pdf_text = ""
-    file_path = state.get("pdf_path") # <--- You need to add this key to AgentState in models.py
-    if file_path and os.path.exists(file_path):
-        print(f"  📄 Loading transcript from: {file_path}")
-        pdf_text = load_pdf_text(file_path)
     
-    # Combine User Chat + PDF Text
-    # We label them clearly so the LLM knows which is which
+    # 2. LOAD: Only load PDF if we HAVEN'T extracted it yet
+    if state.get("pdf_path") and not has_transcript_data:
+        print("  📄 New PDF detected. Loading and Parsing...")
+        pdf_text = load_pdf_text(state["pdf_path"])
+    else:
+        print("  ⏩ Transcript already processed. Skipping PDF re-read.")
+        # We leave pdf_text empty so the LLM focuses only on the new chat text
+    
+    # 3. Combine Input
+    # If pdf_text is empty, the LLM only sees the chat history (Fast & Cheap!)
     combined_input = f"""
-    USER CHAT HISTORY:
-    {state["user_intent"]}
-    
-    TRANSCRIPT DOCUMENT CONTENT:
-    {pdf_text}
+    CHAT HISTORY: {state["user_intent"]}
+    NEW PDF CONTENT: {pdf_text}
     """
 
     parser = JsonOutputParser(pydantic_object=UserProfile)
@@ -295,8 +292,23 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", 
-             f"""You are a meticulous data extraction agent. 
+             f"""You are a data extraction agent. 
              STRICTLY extract ALL details from the user's FULL accumulated text and adhere to the JSON schema.
+
+             **For PDF extrac**
+             ### PRIORITY 1: TRANSCRIPT DATA (CRITICAL) ###
+             Scan the provided document text for a list of subjects/courses.
+             - Extract them into 'academic_background.transcript_courses'.
+             - **course_name**: The subject name (e.g. "Macroeconomics").
+             - **original_credits**: The credit value exactly as written (e.g. 3, 4.0, 5).
+             
+             ### PRIORITY 2: DEGREE META-DATA ###
+             - Look for 'total_credits_earned' (Sum of credits).
+             - Look for 'program_duration_semesters' (e.g. 4 years = 8).
+             
+             ### PRIORITY 3: OTHER PROFILE INFO (OPTIONAL) ###
+             - Try to find Name, Citizenship, GPA, and Degree Name.
+             - **If you cannot find these, just leave them null.** Do NOT invent data.
              
              CRITICAL RULES - ABSOLUTELY NO ASSUMPTIONS:
              - Do NOT invent or assume data that is not explicitly mentioned by the user.
@@ -325,7 +337,7 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
                - Look for **'program_duration_semesters'** (e.g., "4 years" = 8, "3.5 years" = 7).
              
              - For 'language_proficiency': Use 'exam_type' instead of 'exam'. For IELTS/TOEFL, use 'overall_score'. For CEFR (German), use 'level'.
-             - The 'professional_and_tests' and 'preferences' sections are optional.
+             - The 'preferences' sections are optional.
              
              Crucial Context: The user's latest response might be a short answer to a specific question. You must map that short answer to the CORRECT field based on what was asked.
              - If asked about bachelor's degree field and user answers with a discipline name (e.g., "Computer Science"), put it in 'bachelor_field_of_study'.
@@ -396,9 +408,12 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
         validated_profile = UserProfile(**structured_output_dict)
         print(f"[Node: Parsing/Tool 1] ✅ Profile parsed. Missing fields: {len(get_missing_fields(validated_profile))}")
         
-        # ECTS CALCULATION 
-        print("  [Logic] Running ECTS Conversion...")
-        validated_profile = apply_ects_conversion(validated_profile)
+        # --- FIX: Only run ECTS logic if academic background exists ---
+        if validated_profile.academic_background:
+            print("  [Logic] Running ECTS Conversion...")
+            validated_profile = apply_ects_conversion(validated_profile)
+        else:
+            print("  [Logic] Skipping ECTS: Academic background missing.")
         
         print(f"[Node: Parsing/Tool 1] ✅ Profile parsed. Missing fields: {len(get_missing_fields(validated_profile))}")
         print(validated_profile.model_dump_json(indent=2))
@@ -425,6 +440,15 @@ def conversational_chat_node(state: AgentState) -> Dict[str, Any]:
     profile = state.get("user_profile")
     current_intent = state["user_intent"]
     missing_data = get_missing_fields(profile)
+    if missing_data:
+        prompt_text = f"The user is missing CRITICAL info: {', '.join(missing_data)}. Ask ONE question to get this."
+    else:
+        # 2. If Mandatory is done, check Desirable
+        user_intent = state.get("user_intent", "")
+        missing_desirable = get_desirable_missing_fields(profile, user_intent)
+        
+        if not missing_desirable:
+            return {"ai_response": None} # Nothing left to ask!
     
     # 1. Define the Prompt Template
     prompt = ChatPromptTemplate.from_messages(

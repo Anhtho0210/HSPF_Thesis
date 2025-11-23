@@ -33,7 +33,7 @@ class BachelorGPA(BaseModel):
     score_german: Optional[float] = Field(default=None)
 
 class AcademicBackground(BaseModel):
-    bachelor_field_of_study: str
+    bachelor_field_of_study: Optional[str] = Field(default=None)
     
     # Inputs for the Formula
     total_credits_earned: Optional[float] = Field(description="Original total credits (e.g. 130).", default=None)
@@ -49,17 +49,34 @@ class AcademicBackground(BaseModel):
     
     bachelor_gpa: Optional[BachelorGPA] = None 
 
+    fields_of_interest: Optional[List[str]] = Field(
+        description="List of specific technical interests (e.g. 'AI', 'Supply Chain').", 
+        default_factory=list
+    )
+
 class LanguageProficiency(BaseModel):
     language: str
     exam_type: str
     overall_score: Optional[float] = None
     level: Optional[str] = None
 
-class UserProfile(BaseModel):
+class Preferences(BaseModel):
+    preferred_cities: Optional[List[str]] = Field(default_factory=list)
+    max_tuition_fee_eur: Optional[int] = Field(default=0)
+    preferred_start_semester: Optional[str] = Field(default=None)
+    preferred_language_of_instruction: Optional[str] = Field(default='English')
+
+class ProfessionalAndTests(BaseModel):
+    relevant_work_experience_months: Optional[int] = Field(default=None)
+    standardized_tests: Optional[List[dict]] = Field(default=None)
+     
+class UserProfile(BaseModel): 
     full_name: Optional[str] = None
     citizenship: Optional[Citizenship] = None
     academic_background: Optional[AcademicBackground] = None
     language_proficiency: Optional[List[LanguageProficiency]] = Field(default=[])
+    professional_and_tests: Optional[ProfessionalAndTests] = None
+    preferences: Preferences = Field(default_factory=Preferences)
 
 # --- PART 2: THE PROGRAM DATABASE 
 
@@ -177,6 +194,8 @@ class ProgramHardFilters(BaseModel):
 class AgentState(TypedDict):
     user_intent: str
     pdf_path: Optional[str]
+    latest_response: Optional[str]
+    ai_response: Optional[str]  
     user_profile: Optional[UserProfile]
     program_catalog: List[dict]
     eligible_programs: List[dict]

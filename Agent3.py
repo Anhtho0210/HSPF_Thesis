@@ -1,303 +1,207 @@
-# agent3.py
-
 import json
+import os
 from typing import Dict, Any, List
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.runnables import Runnable
+from dotenv import load_dotenv
+
+# For Semantic Matching
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import os
-import time
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-# --- Import from new models.py ---
-from models import AgentState, StructuredRequirements, UserProfile, ProgramRelevanceScore
+from models import AgentState, UserProfile
 
-# --- LLM SETUP (can be shared or re-initialized) ---
-api_key = os.environ.get("GEMINI_API_KEY")
-if not api_key:
-    raise ValueError("GEMINI_API_KEY not found in environment.")
-LLM = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.0)
+load_dotenv()
 
-# --- AGENT 3 TOOLS ---
-def get_requirement_extractor_chain() -> Runnable:
-    parser = JsonOutputParser(pydantic_object=StructuredRequirements)
+# --- HELPER: CEFR RANKING ---
+def get_cefr_rank(level: str) -> int:
+    """Converts CEFR levels to integers for comparison."""
+    if not level or level == "Unknown" or level == "None": return 0
+    # Clean string (e.g. "B2 (IELTS 6.0)" -> "B2")
+    norm_level = level.split(' ')[0].split('/')[0].strip().upper()
     
-    # Remove the f-string and add {format_instructions} as a variable
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", "Extract key admission requirements.\n{format_instructions}"),
-            ("user", "Program Text:\n{program_text}")
-        ]
-    )
+    ranks = {
+        "A1": 1, "A2": 2, 
+        "B1": 3, "B2": 4, 
+        "C1": 5, "C2": 6
+    }
+    return ranks.get(norm_level, 0)
 
-    return prompt | LLM | parser
+# --- 1. HARD FILTER LOGIC (The Core Engine) ---
+def check_hard_constraints(student: UserProfile, program: dict) -> dict:
+    """
+    Strictly rejects programs based on 'Must-Have' criteria.
+    Rule: If Program Data is MISSING/NULL, we ACCEPT (Benefit of Doubt).
+    """
+    
+    # --- 1. GPA Check ---
+    # Logic: German Scale -> Lower is better. (1.0 best, 4.0 worst)
+    if student.academic_background and student.academic_background.bachelor_gpa:
+        student_gpa = student.academic_background.bachelor_gpa.score_german
+        prog_min_gpa = program.get('min_gpa_german_scale')
+        
+        if student_gpa and prog_min_gpa:
+            if student_gpa > prog_min_gpa:
+                return {'eligible': False, 'reason': f"GPA {student_gpa} > Limit {prog_min_gpa}"}
 
-def get_field_reasoning_chain() -> Runnable:
-    """Creates a chain to reason about field of study relevance."""
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", """You are an expert German university admissions officer. 
-Your job is to determine if a student's background is relevant.
-Answer with only 'YES' or 'NO'."""),
+    # --- 2. Total ECTS Check (Degree Volume) ---
+    # Standard Master's requires 180 ECTS Bachelor. Some require 210.
+    if student.academic_background and student.academic_background.total_converted_ects:
+        student_ects = student.academic_background.total_converted_ects
+        # If program doesn't specify, assume standard 180
+        prog_min_ects = program.get('min_degree_ects', 180) 
+        
+        if student_ects < prog_min_ects:
+             return {'eligible': False, 'reason': f"Total ECTS {student_ects} < Required {prog_min_ects}"}
+
+    # --- 3. Language Proficiency Check ---
+    if student.language_proficiency:
+        # A. English
+        student_eng = "Unknown"
+        for lang in student.language_proficiency:
+            if "english" in lang.language.lower():
+                student_eng = lang.level if lang.level else "Unknown"
+                # Add logic to map scores to levels here if needed
+                break
+        
+        prog_eng = program.get('english_level_requirement', 'Unknown')
+        
+        # Only check if both sides are known
+        if student_eng != "Unknown" and prog_eng != "Unknown" and prog_eng != "None":
+            if get_cefr_rank(student_eng) < get_cefr_rank(prog_eng):
+                return {'eligible': False, 'reason': f"English {student_eng} < Req {prog_eng}"}
+
+    # --- 4. Tuition Fee Check ---
+    if student.preferences and student.preferences.max_tuition_fee_eur is not None:
+        max_fee = student.preferences.max_tuition_fee_eur
+        prog_fee = program.get('tuition_fee_per_semester_eur', 0.0)
+        
+        if prog_fee > max_fee:
+            return {'eligible': False, 'reason': f"Fee {prog_fee}€ > Budget {max_fee}€"}
+
+    # --- 5. Location Check (City & State) ---
+    if student.preferences and student.preferences.preferred_cities:
+        user_locs = [c.lower() for c in student.preferences.preferred_cities]
+        if user_locs: # Only check if user actually listed cities
+            prog_city = program.get('city', '').lower()
+            prog_state = program.get('state', '').lower()
             
-            ("user", """The student has a Bachelor's degree in:
-'{user_field}'
+            # Fail safe: If program has NO location data, we accept it
+            if prog_city or prog_state:
+                match = False
+                for loc in user_locs:
+                    if loc in prog_city or loc in prog_state:
+                        match = True
+                        break
+                if not match:
+                    return {'eligible': False, 'reason': f"Location mismatch ({prog_city})"}
 
-The Master's program requires a Bachelor's degree in one of the following fields:
-'{required_fields_list}'
+    # --- 6. Semester Check (Winter/Summer) ---
+    if student.preferences and student.preferences.preferred_start_semester:
+        user_sem = student.preferences.preferred_start_semester.lower() # "winter" or "summer"
+        deadlines = program.get('deadlines', {})
+        
+        # If deadlines object exists, check specific semester availability
+        if deadlines:
+            has_winter = deadlines.get('winter_semester') is not None
+            has_summer = deadlines.get('summer_semester') is not None
+            
+            if user_sem == "winter" and not has_winter:
+                 return {'eligible': False, 'reason': "No Winter Intake"}
+            if user_sem == "summer" and not has_summer:
+                 return {'eligible': False, 'reason': "No Summer Intake"}
 
-Is the student's background in '{user_field}' *likely* relevant enough for them to apply (e.g., 'IT' is related to 'Computer Science','Mathematics','Artificial Intelligence'), or is it *completely unrelated* (e.g., 'IT' is not related to 'Architecture')?
-Answer with only 'YES' or 'NO'.""")
-        ]
-    )
-    return prompt | LLM | (lambda x: "YES" in x.content.upper())
+    # --- 7. Teaching Language Preference ---
+    if student.preferences and student.preferences.preferred_language_of_instruction:
+        user_lang_pref = student.preferences.preferred_language_of_instruction.lower()
+        
+        # Infer teaching language from requirements
+        prog_eng_req = program.get('english_level_requirement', 'None')
+        prog_ger_req = program.get('german_level_requirement', 'None')
+        
+        # If user wants English, but Program requires NO English (implies German only)
+        if "english" in user_lang_pref:
+            if prog_eng_req == "None" and prog_ger_req != "None":
+                 return {'eligible': False, 'reason': "Program not taught in English"}
+                 
+        # If user wants German, but Program requires NO German (implies English only)
+        if "german" in user_lang_pref:
+             if prog_ger_req == "None" and prog_eng_req != "None":
+                  return {'eligible': False, 'reason': "Program not taught in German"}
 
-def get_relevance_scoring_chain() -> Runnable:
-    """Creates a chain that scores program relevance."""
-    parser = JsonOutputParser(pydantic_object=ProgramRelevanceScore)   
-    prompt = ChatPromptTemplate.from_messages(
-            [
-                ("system", """You are an expert career advisor. Your job is to score how relevant a Master's program is for a student.
-    You must provide a score from 0.0 (not relevant at all) to 10.0 (a perfect match).
-    {format_instructions}"""), # <-- REMOVED f-string
-                
-                ("user", """Please score the program based on the student's interests.
-                
-    --- STUDENT'S INTERESTS ---
-    {user_interests}
+    return {'eligible': True, 'reason': "Pass"}
 
-    --- PROGRAM DESCRIPTION ---
-    {program_description}""")
-            ]
-        )
-    return prompt | LLM | parser
-# --- AGENT 3 NODES ---
+# --- 2. SEMANTIC MATCHING LOGIC (Soft Scoring) ---
+def calculate_semantic_match(student: UserProfile, program: dict) -> float:
+    """
+    Calculates similarity between Student Interest/Transcript and Program Description.
+    """
+    # 1. Student Text
+    # Combine Interests + Course Names
+    transcript_text = " ".join([c.course_name for c in student.academic_background.transcript_courses])
+    interest_text = " ".join(student.academic_background.fields_of_interest or [])
+    student_doc = f"{transcript_text} {interest_text}"
 
+    # 2. Program Text
+    # Combine Content Summary + ECTS Subject Areas
+    prog_summary = program.get('course_content_summary', '')
+    prog_subjects = ""
+    if program.get('specific_ects_requirements'):
+        for domain in program['specific_ects_requirements']:
+            # Add domain name (e.g. "Mathematics")
+            prog_subjects += f" {domain.get('domain_name', '')}"
+            # Add modules (e.g. "Analysis", "Algebra")
+            for mod in domain.get('modules', []):
+                prog_subjects += f" {mod.get('subject_area', '')}"
+    
+    program_doc = f"{prog_summary} {prog_subjects}"
+
+    # 3. Match
+    if not student_doc.strip() or not program_doc.strip():
+        return 0.0
+        
+    try:
+        vectorizer = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = vectorizer.fit_transform([student_doc, program_doc])
+        score = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+        return round(float(score) * 10.0, 1) # 0 to 10 scale
+    except:
+        return 0.0
+
+# --- NODE: FILTER ---
 def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
-    """Filters the full program catalog down to only eligible programs."""
     print("\n" + "="*50)
-    print("--- [Node: Agent 3 Filter] ---")
-    print("Starting eligibility check...")
+    print("[Node: Agent 3] Filtering & Ranking...")
     
     user_profile = state["user_profile"]
     if not user_profile:
-        print("  [DEBUG] ❌ ERROR: User profile is None. Stopping filter.")
-        return {"eligible_programs": [], "program_catalog": []}
+        return {"eligible_programs": [], "ranked_programs": []}
 
+    # Load DB
     try:
-        with open("TESTING_MASTER_LIST_100.json", 'r') as f:
-            program_catalog = json.load(f)
-        print(f"  [DEBUG] Loaded {len(program_catalog)} programs from JSON.")
-    except Exception as e:
-        print(f"  [DEBUG] ❌ ERROR: Failed to load TESTING_MASTER_LIST_100.json: {e}")
-        return {"eligible_programs": [], "program_catalog": []}
+        with open("structured_program_db.json", 'r', encoding='utf-8') as f:
+            catalog = json.load(f)
+    except FileNotFoundError:
+        print("❌ DB Not Found")
+        return {"eligible_programs": []}
 
-    # --- 1. Print User Profile for Debugging ---
-    user_gpa = user_profile.academic_background.bachelor_gpa.score_german
-    user_field = user_profile.academic_background.bachelor_field_of_study
-    user_ielts = next((lang.overall_score for lang in user_profile.language_proficiency if lang.exam_type == 'IELTS'), None)
+    eligible = []
     
-    print("\n  --- [DEBUG] User Profile ---")
-    print(f"  User GPA (German): {user_gpa}")
-    print(f"  User Field:        {user_field}")
-    print(f"  User IELTS:        {user_ielts}")
-    print("  --------------------------\n")
+    for prog in catalog:
+        # 1. Hard Filter
+        check = check_hard_constraints(user_profile, prog)
+        if check['eligible']:
+            # 2. Soft Match (Only if eligible)
+            score = calculate_semantic_match(user_profile, prog)
+            prog['relevance_score'] = score
+            eligible.append(prog)
+        # else:
+        #     print(f"Skipped {prog['program_id']}: {check['reason']}")
 
-    # Get LLM tools
-    extractor_chain = get_requirement_extractor_chain()
-    reasoning_chain = get_field_reasoning_chain()
-
-    # Get the format instructions ONCE before the loop
-    parser = JsonOutputParser(pydantic_object=StructuredRequirements)
-    format_instructions = parser.get_format_instructions()
-
-    eligible_programs = []
-
-    # --- 2. Iterate and Filter (The Loop) ---
-    # Limiting to 10 for a test run. Remove "[:10]" for the full 100.
-    for program in program_catalog[:10]:
-        print(f"--- Checking Program: {program['program_id']} - {program['name']} ---")
-        combined_text = f"Admission: {program['admission_req']} \nLanguage: {program['language_req']}"
+    # 3. Rank
+    ranked = sorted(eligible, key=lambda x: x['relevance_score'], reverse=True)
+    
+    print(f"✅ Eligible Programs: {len(ranked)}")
+    if ranked:
+        print(f"🔝 Top Match: {ranked[0]['program_name']} (Score: {ranked[0]['relevance_score']})")
         
-        try:
-            # Pass BOTH variables to the invoke call
-            reqs_dict = extractor_chain.invoke({
-                "program_text": combined_text,
-                "format_instructions": format_instructions  # <-- Add this line
-            })
-            # --- 3. Debug the LLM Extractor ---
-            reqs = StructuredRequirements(**reqs_dict)
-            print(f"  [DEBUG] Extracted Reqs: {reqs.model_dump_json(indent=2)}")
-
-            is_eligible = True # Assume eligible until a check fails
-            
-            # --- 4. Debug the Filter Logic ---
-            # GPA Check
-            if reqs.min_gpa_german:
-                if user_gpa > reqs.min_gpa_german:
-                    print(f"  [DEBUG] ❌ REJECT (GPA): User {user_gpa} is worse than required {reqs.min_gpa_german}")
-                    is_eligible = False
-                else:
-                    print(f"  [DEBUG] ✅ PASS (GPA): User {user_gpa} <= Req {reqs.min_gpa_german}")
-            
-            # IELTS Check
-            if reqs.min_ielts_score and is_eligible:
-                if user_ielts is None or user_ielts < reqs.min_ielts_score:
-                    print(f"  [DEBUG] ❌ REJECT (IELTS): User {user_ielts} is less than required {reqs.min_ielts_score}")
-                    is_eligible = False
-                else:
-                    print(f"  [DEBUG] ✅ PASS (IELTS): User {user_ielts} >= Req {reqs.min_ielts_score}")
-
-            # Field of Study Check (LLM Reasoning)
-            if reqs.required_field_of_study and is_eligible:
-                print(f"  [DEBUG] Reasoning: Is '{user_field}' related to '{reqs.required_field_of_study}'?")
-                is_related = reasoning_chain.invoke({
-                    "user_field": user_field,
-                    "required_fields_list": ", ".join(reqs.required_field_of_study)
-                })
-                
-                if not is_related:
-                    print(f"  [DEBUG] ❌ REJECT (Field): LLM said '{user_field}' is NOT related.")
-                    is_eligible = False
-                else:
-                    print(f"  [DEBUG] ✅ PASS (Field): LLM said 'YES'.")
-            
-            # GRE Check
-            if reqs.requires_gre and is_eligible:
-                user_has_gre = user_profile.professional_and_tests and user_profile.professional_and_tests.standardized_tests
-                if not user_has_gre:
-                    print(f"  [DEBUG] ❌ REJECT (GRE): Program requires GRE, user has none.")
-                    is_eligible = False
-                else:
-                    print(f"  [DEBUG] ✅ PASS (GRE): User has GRE (assumed).")
-
-
-            # --- 5. Final Decision for this program ---
-            if is_eligible:
-                print("\n  [RESULT] 🎉🎉🎉 THIS PROGRAM IS ELIGIBLE 🎉🎉🎉\n")
-                eligible_programs.append(program)
-            else:
-                print("\n  [RESULT] 🛑 This program is NOT eligible.\n")
-
-        except Exception as e:
-            print(f"  [DEBUG] ❌ ERROR: Failed to process program {program['program_id']}. Error: {e}")
-
-        time.sleep(3)
-
-    print("="*50)
-    print(f"[Node: Agent 3 Filter] Complete. Found {len(eligible_programs)} eligible programs.")
-    print("="*50 + "\n")
-    
-    return {
-        "program_catalog": program_catalog,
-        "eligible_programs": eligible_programs
-    }
-
-def agent_3_rank_node(state: AgentState) -> Dict[str, Any]:
-    print("\n[Node: Agent 3 Rank] Ranking eligible programs...")
-    eligible_programs = state["eligible_programs"]
-    
-    # Check if user_profile exists before accessing it
-    if not state.get("user_profile") or not state["user_profile"].academic_background:
-        print("  [DEBUG] ❌ ERROR: User profile or academic background is missing in state. Cannot rank.")
-        return {"ranked_programs": []}
-        
-    user_interests_list = state["user_profile"].academic_background.fields_of_interest
-    
-    if not eligible_programs:
-        print("[Node: Agent 3 Rank] No eligible programs to rank.")
-        return {"ranked_programs": []}
-
-    # --- 1. Prepare User Query ---
-    user_query = " ".join(user_interests_list)
-
-    # --- 2. TF-IDF Keyword Score (Fast) ---
-    descriptions = [p["description"] for p in eligible_programs]
-    vectorizer = TfidfVectorizer(stop_words='english')
-    program_vectors = vectorizer.fit_transform(descriptions)
-    query_vector = vectorizer.transform([user_query])
-    keyword_scores = cosine_similarity(query_vector, program_vectors)[0]
-    
-    # --- 3. LLM Semantic Score (Slower) ---
-    print(f"  [DEBUG] Starting LLM semantic scoring for {len(eligible_programs)} programs...")
-    scoring_chain = get_relevance_scoring_chain()
-    
-    # Get instructions from the ProgramRelevanceScore parser
-    parser = JsonOutputParser(pydantic_object=ProgramRelevanceScore)
-    format_instructions = parser.get_format_instructions()
-
-    ranked_list = []
-    
-    # Define weights for your final score
-    W_TFIDF = 0.3  # 30% weight for keyword match
-    W_LLM = 0.7    # 70% weight for semantic meaning
-
-    for i, program in enumerate(eligible_programs):
-        
-        # Get Keyword Score
-        tfidf_score_normalized = keyword_scores[i] * 10  # Scale 0-1 to 0-10
-        
-        # Get LLM Score
-        llm_score = 0.0
-        llm_reasoning = ""
-        try:
-            llm_response_dict = scoring_chain.invoke({
-                "user_interests": user_query,
-                "program_description": program["description"],
-                "format_instructions": format_instructions # <-- PASS THE INSTRUCTIONS
-            })
-            
-            llm_score = llm_response_dict.get('score', 0.0)
-            llm_reasoning = llm_response_dict.get('reasoning', '')
-            
-            print(f"  [DEBUG] Scored '{program['name'][:20]}...': TF-IDF={tfidf_score_normalized:.1f}, LLM={llm_score:.1f}")
-
-        except Exception as e:
-            print(f"  [DEBUG] ❌ ERROR scoring program {program['program_id']}: {e}")
-        
-        # --- 4. Calculate Final Weighted Score ---
-        final_score = (W_TFIDF * tfidf_score_normalized) + (W_LLM * llm_score)
-        
-        program['relevance_score'] = final_score
-        program['llm_reasoning'] = llm_reasoning # Store for analysis
-        ranked_list.append(program)
-
-        # --- !! CRITICAL RATE LIMIT FIX !! ---
-        # You MUST keep this to avoid crashing the API
-        time.sleep(3) # Add a 1-second delay between programs
-
-    # --- 5. Sort by the new final_score ---
-    ranked_list = sorted(ranked_list, key=lambda p: p['relevance_score'], reverse=True)
-    
-    print(f"[Node: Agent 3 Rank] Ranking complete.")
-    return {"ranked_programs": ranked_list}
-
-# def agent_3_rank_node(state: AgentState) -> Dict[str, Any]:
-#     print("\n[Node: Agent 3 Rank] Ranking eligible programs...")
-#     eligible_programs = state["eligible_programs"]
-#     user_interests = state["user_profile"].academic_background.fields_of_interest
-    
-#     if not eligible_programs:
-#         return {"ranked_programs": []}
-
-#     # --- This is the RANK stage ---
-#     descriptions = [p["description"] for p in eligible_programs]
-#     user_query = " ".join(user_interests)
-    
-#     vectorizer = TfidfVectorizer(stop_words='english')
-#     program_vectors = vectorizer.fit_transform(descriptions)
-#     query_vector = vectorizer.transform([user_query])
-#     keyword_scores = cosine_similarity(query_vector, program_vectors)[0]
-    
-#     ranked_list = []
-#     for i, program in enumerate(eligible_programs):
-#         # Here you would add your LLM-based score for a weighted average
-#         program['relevance_score'] = keyword_scores[i]
-#         ranked_list.append(program)
-
-#     ranked_list = sorted(ranked_list, key=lambda p: p['relevance_score'], reverse=True)
-    
-#     print(f"[Node: Agent 3 Rank] Ranking complete.")
-#     return {"ranked_programs": ranked_list}
+    return {"eligible_programs": ranked, "ranked_programs": ranked[:10]}

@@ -1,5 +1,7 @@
 import time
+import os
 from langgraph.graph import StateGraph, END
+from reportlab.pdfgen import canvas
 
 # --- Import shared state ---
 from models import AgentState
@@ -9,15 +11,12 @@ from Agent1 import (
     parse_profile_node, 
     conversational_chat_node, 
     wrap_up_chat_node, 
-    check_for_completion
+    check_for_completion,
+    get_missing_fields,
+    get_desirable_missing_fields
 )
-
 # --- Import nodes from Agent 3 ---
-from Agent3 import (
-    agent_3_filter_node,
-    agent_3_rank_node
-)
-
+from Agent3 import agent_3_filter_node
 
 # --- 1. BUILD THE MASTER WORKFLOW ---
 def build_master_workflow():
@@ -29,8 +28,8 @@ def build_master_workflow():
     workflow.add_node("wrap_up", wrap_up_chat_node)
     
     # Add Agent 3 Nodes
+    # Note: We merged filtering & ranking into ONE node in Agent3.py
     workflow.add_node("agent_3_filter", agent_3_filter_node)
-    workflow.add_node("agent_3_rank", agent_3_rank_node)
 
     workflow.set_entry_point("parsing")
 
@@ -41,7 +40,7 @@ def build_master_workflow():
         {
             "chat": "chat",
             "wrap_up": "wrap_up",
-            "matching": "agent_3_filter"  # --- This connects Agent 1 to Agent 3 ---
+            "matching": "agent_3_filter"  # Connects to Agent 3
         }
     )
     
@@ -49,11 +48,8 @@ def build_master_workflow():
     workflow.add_edge("chat", END)
     workflow.add_edge("wrap_up", END)
     
-    # Connect Agent 3 (Filter -> Rank)
-    workflow.add_edge("agent_3_filter", "agent_3_rank")
-    
-    # Agent 3's final step is the end of the graph
-    workflow.add_edge("agent_3_rank", END)
+    # Connect Agent 3 to End
+    workflow.add_edge("agent_3_filter", END)
 
     return workflow.compile()
 
@@ -61,62 +57,85 @@ def build_master_workflow():
 # --- 2. EXECUTION ---
 if __name__ == "__main__":
     
-    # Compile the full graph
+    # 1. Prepare Data
+    pdf_filename = "Anny_Tran.pdf"
+    
     app = build_master_workflow()
 
     # --- Define Initial State ---
+    # Note: We intentionally leave some fields vague to test Agent 1's questions
     initial_raw_input = (
-        "Hi, I'm Anny Tran from Vietnam. I graduaded in Electronic Commerce. I have a 4-year IT degree with a 8.0/10.0 GPA (min pass 5.0), "
-        "and 210 ECTS. I got a 7.0 on my IELTS. I have 3 years of work experience. "
-        "I'm interested in Machine Learning, AI, and Information Systems. "
-        "I'd prefer Munich or Berlin and want tuition fee under 1000 EUR."
+        "Hi, I'm Anny from Vietnam. Here is my transcript. "
+        "I want to study Data Science."
+        # "I have IELTS 7.0" <-- Commented out to force Agent 1 to ask!
     )
     
-    current_state: AgentState = {
-        "user_intent": initial_raw_input,
-        "pdf_path": "Anny_Transcript.pdf",
-        "latest_response": initial_raw_input,
-        "ai_response": None,
+    current_state = {
+        "user_intent": "Hi, I'm Anny. I want to study data science.",
+        "pdf_path": "Anny_Tran.pdf", 
         "user_profile": None,
-        # Init Agent 3 keys
         "program_catalog": [], 
         "eligible_programs": [], 
-        "ranked_programs": []
+        "ranked_programs": [] # <--- This empty list causes the bug if checked too early!
     }
     
-    print("\n--- 🚀 Starting Full Agentic Workflow (Agent 1 + Agent 3) ---")
+    print("\n--- 🚀 Starting Full Agentic Workflow ---")
     
-    # --- Main Loop ---
     while True:
         try:
-            # Run the graph from the current state
-            next_state = app.invoke(current_state)
+            # Run the graph
+            print(f"\n[System] Invoking Graph...")
+            next_state = app.invoke(current_state, {"recursion_limit": 20})
             
-            # Update current state
+            # --- DEBUG: See what came back ---
+            print(f"[DEBUG] Next State Keys: {list(next_state.keys())}")
+            if "ai_response" in next_state:
+                print(f"[DEBUG] AI Response Content: {str(next_state['ai_response'])[:50]}...")
+            else:
+                print("[DEBUG] AI Response is MISSING in next_state")
+            # ---------------------------------
+
+            # Update current state with the new values
             current_state.update(next_state)
 
+            # --- CHECK 1: SUCCESS (Found Programs) ---
+            if current_state.get("eligible_programs"):
+                print("\n✅ Matching complete. Found eligible programs.")
+                break 
+
+            # --- CHECK 2: PAUSE FOR CHAT (Missing Info) ---
+            ai_q = current_state.get("ai_response")
+            
+            # Check if ai_q is valid text
+            if ai_q and isinstance(ai_q, str) and len(ai_q.strip()) > 0:
+                print("\n" + "-" * 50)
+                print(f"🤖 AI Assistant: {ai_q}")
+                print("-" * 50)
+                
+                user_response = input("👤 You: ")
+                
+                # Update State & Restart Loop
+                current_state["user_intent"] += f" \nUser: {user_response}"
+                current_state["ai_response"] = None # Clear flag so it runs again
+                continue 
+
+            # --- CHECK 3: FAILURE ---
+            profile = current_state.get("user_profile")
+            missing = get_missing_fields(profile) if profile else ["Profile Missing"]
+
+            if not missing:
+                print("\n❌ Agent 3 ran, but no programs matched your hard filters.")
+                break
+            else:
+                # If we are here, it means ai_q was None/Empty, but we are still missing info
+                print(f"\n[DEBUG] Stuck loop details:")
+                print(f"  - Missing Fields: {missing}")
+                print(f"  - AI Response in State: {current_state.get('ai_response')}")
+                break
+
         except Exception as e:
-            print(f"\n[ERROR] Graph execution failed: {e}. Exiting.")
+            print(f"\n[ERROR] Graph execution failed: {e}")
             break
-
-        # Check for AI Question (Pause point for Agent 1)
-        ai_q = current_state.get("ai_response")
-
-        if ai_q:
-            print("-" * 50)
-            print(f"AI Assistant: {ai_q}")
-            user_response = input("You: ")
-            print("-" * 50)
-            
-            # Update state with new input
-            current_state["user_intent"] += " " + user_response
-            current_state["latest_response"] = user_response
-            current_state["ai_response"] = None
-            
-        else:
-            # No AI question, means the graph finished (hit an END)
-            break
-
     # --- Final Output ---
     print("\n" + "=" * 50)
     print("--- ✅ WORKFLOW COMPLETE! ---")
@@ -125,27 +144,15 @@ if __name__ == "__main__":
     final_ranked_list = current_state.get("ranked_programs")
     
     if final_ranked_list:
-        print(f"\n--- Final Top 5 Ranked & Eligible Programs ---")
+        print(f"\n🎯 Found {len(final_ranked_list)} Matching Programs!\n")
+        
         for i, program in enumerate(final_ranked_list[:5]):
-            # Print the Name and Score
-            print(f"\n{i+1}. {program['name']}")
-            print(f"   Match Score: {program['relevance_score']:.1f} / 10.0")
+            print(f"{i+1}. {program.get('program_name', 'Unknown')} ({program.get('university_name')})")
+            print(f"   📊 Match Score: {program.get('relevance_score', 0):.1f} / 10.0")
             
-            # --- THIS IS THE NEW PART ---
-            # Print the reasoning if it exists
-            reasoning = program.get('llm_reasoning', 'No reasoning provided.')
-            print(f"   💡 Why: {reasoning}")
-            # ----------------------------
-            
+            # Show why (if Hard Filter logic added reasons, print them)
+            # Otherwise, show the summary that matched
+            print(f"   📝 Content: {program.get('course_content_summary')[:150]}...")
             print("-" * 30)
     else:
-        print("No eligible programs were found that match your profile.")
-        
-    # final_ranked_list = current_state.get("ranked_programs")
-    
-    # if final_ranked_list:
-    #     print(f"\n--- Final Top 5 Ranked & Eligible Programs ---")
-    #     for i, program in enumerate(final_ranked_list[:5]):
-    #         print(f"{i+1}. {program['name']} (Score: {program['relevance_score']:.2f})")
-    # else:
-    #     print("No eligible programs were found that match your profile.")
+        print("❌ No eligible programs found. (Check Hard Filters or Data)")
