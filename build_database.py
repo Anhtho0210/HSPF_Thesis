@@ -63,13 +63,24 @@ def get_extraction_chain():
             ]
         }}
            
-        2. **English Level**: STANDARDIZE to CEFR (B2, C1).
-           - IELTS 6.0 or 6.5 -> "B2"
-           - IELTS 7.0+ -> "C1"
-           - TOEFL 80-94 -> "B2"
-           - TOEFL 95+ -> "C1"
-           - If text says "fluent" or "good" without scores -> Output "B2"
-           - If text says "excellent" or "proficient" -> Output "C1"
+        2. RULES FOR LANGUAGE (Detailed) ###
+        Extract requirements for English and German separately.
+        
+        **For 'accepted_tests':**
+        - Scan text for specific test names (IELTS, TOEFL, Cambridge, TestDaF, DSH).
+        - Extract the score.
+        - Example Input: "TOEFL iBT 90 or IELTS 6.5"
+        - Example Output:
+          "accepted_tests": [
+             {{ "test_name": "TOEFL iBT", "min_score": "90" }},
+             {{ "test_name": "IELTS", "min_score": "6.5" }}
+          ]
+
+        **For 'notes':**
+        - Capture waivers like "Native speakers exempt" or "Degree in English accepted".
+        
+        **For 'min_cefr_level':**
+        - Standardize based on the tests found (IELTS 6.5 -> B2, 7.0 -> C1).
            
         3. **Application Mode**:
            - "VPD" or "Vorprüfungsdokumentation" -> "VPD"

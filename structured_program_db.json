@@ -15,10 +15,32 @@
       "Economathematics"
     ],
     "specific_ects_requirements": [],
+    "required_standardized_tests": [],
     "min_work_experience_months": 0,
     "requires_internship": false,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "None",
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "TOEFL paper-based",
+          "min_score": "550"
+        },
+        {
+          "test_name": "TOEFL computer-based",
+          "min_score": "213"
+        },
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "80"
+        }
+      ],
+      "notes": null
+    },
+    "german_requirements": {
+      "min_cefr_level": "Unknown",
+      "accepted_tests": [],
+      "notes": null
+    },
     "deadlines": {
       "winter_semester": {
         "eu_applicants": {
@@ -41,7 +63,7 @@
         }
       }
     },
-    "course_content_summary": "Within the field of mathematics, the study programme focuses on financial mathematics, actuarial sciences, statistics, and computational methods. Lectures in the mentioned fields are accompanied by seminars, reading courses, and project seminars. In addition, the participants take modules like Insurance Economics, Economics of Banking, Dynamics of Financial Markets.",
+    "course_content_summary": "Financial mathematics, actuarial sciences, statistics, computational methods, probability theory, stochastic, seminars, reading courses, project seminars, Insurance Economics, Economics of Banking, Dynamics of Financial Markets.",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4722/"
   },
   {
@@ -57,10 +79,38 @@
     "min_gpa_german_scale": 2.5,
     "required_degree_domains": [],
     "specific_ects_requirements": [],
+    "required_standardized_tests": [
+      {
+        "test_name": "GRE",
+        "target_group": "Non-EU",
+        "min_score": null
+      }
+    ],
     "min_work_experience_months": 0,
     "requires_internship": false,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "None",
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "87"
+        },
+        {
+          "test_name": "IELTS",
+          "min_score": "6.5"
+        },
+        {
+          "test_name": "CFE",
+          "min_score": "B"
+        }
+      ],
+      "notes": null
+    },
+    "german_requirements": {
+      "min_cefr_level": "Unknown",
+      "accepted_tests": [],
+      "notes": null
+    },
     "deadlines": {
       "winter_semester": {
         "eu_applicants": {
@@ -83,7 +133,7 @@
         }
       }
     },
-    "course_content_summary": "Main contents: Plastics Technologies in Additive Manufacturing, Materials Science of Metals, 3D Metal Printing, Introduction to Additive Manufacturing & Manufacturing Technology, Materials Science of Plastics, Powder Technology, Structure Optimisation, Design Rules for Additive Manufacturing, Product Creation, Standard Software Application Development",
+    "course_content_summary": "Plastics Technologies, Additive Manufacturing, Materials Science of Metals, 3D Metal Printing, Manufacturing Technology, Materials Science of Plastics, Powder Technology, Structure Optimisation, Design Rules, Product Creation, Standard Software Application Development",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/10396/"
   },
   {
@@ -101,10 +151,85 @@
       "Mathematics"
     ],
     "specific_ects_requirements": [],
+    "required_standardized_tests": [],
     "min_work_experience_months": 0,
     "requires_internship": false,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "A2",
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "IELTS",
+          "min_score": "5.5"
+        },
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "72"
+        },
+        {
+          "test_name": "TOEFL ITP Level 1",
+          "min_score": "543"
+        },
+        {
+          "test_name": "Cambridge Preliminary English Test + Result Distinction (PET)",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge First Certificate in English (FCE)",
+          "min_score": "Grade B or C"
+        },
+        {
+          "test_name": "Cambridge English: Business Vantage (BEC Vantage)",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge English: Legal (ILEC)",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge English: Financial (ICFE)",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge IGCSE",
+          "min_score": "B2"
+        },
+        {
+          "test_name": "Pearson PTE Academic",
+          "min_score": "59"
+        },
+        {
+          "test_name": "TOEIC Listening and Reading Test",
+          "min_score": "785"
+        },
+        {
+          "test_name": "TOEIC Speaking Test",
+          "min_score": "160"
+        },
+        {
+          "test_name": "TOEIC Writing Test",
+          "min_score": "150"
+        },
+        {
+          "test_name": "telc B2 certificate",
+          "min_score": null
+        },
+        {
+          "test_name": "UNIcert II",
+          "min_score": null
+        }
+      ],
+      "notes": "Completed degree in English Studies or American Studies; Completed degree with English as the language of instruction; Proof of professional qualification as a state-examined interpreter/translator; Applicants from countries with English as official/educational or native language are not required to submit proof of English language proficiency."
+    },
+    "german_requirements": {
+      "min_cefr_level": "A2",
+      "accepted_tests": [
+        {
+          "test_name": "A2 Certificate",
+          "min_score": null
+        }
+      ],
+      "notes": "Basic knowledge of German is recommended but not compulsory; Courses to obtain the required level of German language (A2) are included within the curriculum for non-native speakers."
+    },
     "deadlines": {
       "winter_semester": {
         "eu_applicants": {
@@ -119,15 +244,15 @@
       "summer_semester": {
         "eu_applicants": {
           "start_date": null,
-          "end_date": "January 15"
+          "end_date": "Jan 15"
         },
         "non_eu_applicants": {
           "start_date": null,
-          "end_date": "January 15"
+          "end_date": "Jan 15"
         }
       }
     },
-    "course_content_summary": "The Advanced and Computational Mathematics Master's programme focuses on solving real-world problems through mathematics. It provides a solid foundation in advanced mathematics, followed by specialization in one of three fields: Advanced Pure Mathematics, Computational Mathematics, or Data Sciences. Students also participate in a seminar, complete a Master's thesis, and have the opportunity to learn German. The program prepares students for careers in academia and practical working fields, with a potential pathway to a PhD.",
+    "course_content_summary": "Advanced and Computational Mathematics Master's programme focuses on solving real-world problems, advanced mathematics, computational mathematics, and data sciences. Students gain expertise in Advanced Pure Mathematics, Computational Mathematics, or Data Sciences. The curriculum includes a seminar, Master's thesis, and mandatory German language courses. The program prepares students for careers in scientific research, academia, and innovation in tech-driven fields. Outstanding achievers may qualify for a PhD.",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4770/"
   },
   {
@@ -137,18 +262,53 @@
     "degree_type": "Master",
     "application_mode": "Uni-Assist",
     "city": "Frankfurt am Main",
-    "state": "Hesse",
+    "state": "Hessen",
     "tuition_fee_per_semester_eur": 0.0,
     "semester_contribution_eur": 360.0,
     "min_gpa_german_scale": 2.3,
     "required_degree_domains": [
       "Architecture"
     ],
-    "specific_ects_requirements": [],
+    "specific_ects_requirements": [
+      {
+        "domain_name": "Elective Modules",
+        "min_ects_total": 30.0,
+        "condition_comment": "30 ECTS can be chosen from the German Master’s degree programme in “Design and Construction“ (“Entwurf und Konstruktion”)",
+        "modules": [
+          {
+            "subject_area": "Elective Modules",
+            "min_ects": 30.0,
+            "condition_comment": "Chosen from the German Master’s degree programme in “Design and Construction“ (“Entwurf und Konstruktion”)"
+          }
+        ]
+      }
+    ],
+    "required_standardized_tests": [],
     "min_work_experience_months": 4,
     "requires_internship": true,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "None",
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "79"
+        },
+        {
+          "test_name": "IELTS",
+          "min_score": "6"
+        },
+        {
+          "test_name": "Cambridge First Certificate",
+          "min_score": "A"
+        }
+      ],
+      "notes": "Native English speakers as well as graduates from English-language Bachelor's programmes are exempt."
+    },
+    "german_requirements": {
+      "min_cefr_level": "None",
+      "accepted_tests": [],
+      "notes": null
+    },
     "deadlines": {
       "winter_semester": null,
       "summer_semester": {
@@ -162,7 +322,7 @@
         }
       }
     },
-    "course_content_summary": "The program focuses on advanced architecture, combining design and construction across all scales, from urban contexts to single details. Students gain broad knowledge through lectures and modules covering urban design, building design in existing contexts, and new building design. The curriculum emphasizes a global, diversity-oriented, and multicultural perspective, enabling students to translate abstract designs into concrete implementations, considering professional, practical, technical, economic, ecological, and social aspects, as well as varied cultural, historical, and climatic situations. Elective modules, including 30 ECTS from the German Master’s program “Design and Construction,” allow for individual specialization. Graduates are prepared for roles in architectural, engineering, and construction companies, property development, real estate, the public sector, and research, particularly at the interface between abstract designs and their execution planning.",
+    "course_content_summary": "Advanced Architecture program focusing on design and construction across all scales, from urban contexts to single details. Key topics include urban design, design of buildings in existing contexts, built environments, and new building design. The curriculum integrates internationally-oriented projects, elective modules (including 30 ECTS from the German Master’s degree programme in “Design and Construction”), and Master’s theses. Students develop skills to translate abstract designs into concrete implementations, considering professional, practical, technical, economic, ecological, social, cultural, historical, and climatic aspects. The program emphasizes execution planning and scientific research in design and construction. Graduates are prepared for roles in architectural, engineering, and construction companies, the construction industry, property development, housing associations, real estate, public sector, and R&D in design and construction.",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/7065/"
   },
   {
@@ -176,9 +336,7 @@
     "tuition_fee_per_semester_eur": 0.0,
     "semester_contribution_eur": 317.0,
     "min_gpa_german_scale": null,
-    "required_degree_domains": [
-      "Civil Engineering"
-    ],
+    "required_degree_domains": [],
     "specific_ects_requirements": [
       {
         "domain_name": "Mathematical-physical basics",
@@ -235,10 +393,46 @@
         ]
       }
     ],
+    "required_standardized_tests": [
+      {
+        "test_name": "GRE",
+        "target_group": "Non-EU",
+        "min_score": null
+      }
+    ],
     "min_work_experience_months": 0,
     "requires_internship": false,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "None",
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "90"
+        },
+        {
+          "test_name": "IELTS",
+          "min_score": "5.5"
+        },
+        {
+          "test_name": "Cambridge CAE",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge FCE",
+          "min_score": "B"
+        },
+        {
+          "test_name": "RWTH Aachen Language Center Placement Test",
+          "min_score": "B2"
+        }
+      ],
+      "notes": "Placement test of the RWTH Aachen Language Center can only be obtained by individuals who are already enrolled as students at RWTH Aachen."
+    },
+    "german_requirements": {
+      "min_cefr_level": "None",
+      "accepted_tests": [],
+      "notes": null
+    },
     "deadlines": {
       "winter_semester": {
         "eu_applicants": {
@@ -261,7 +455,7 @@
         }
       }
     },
-    "course_content_summary": "The Master's program 'Advanced Computational Methods in Civil Engineering' (AdCom) at RWTH Aachen University focuses on the application and development of numerical methods and simulations for innovative civil engineering structures. It is an interdisciplinary curriculum with courses from Civil Engineering, Mechanical Engineering, and Mathematics, providing a deep understanding of structural mechanics, fluid mechanics, and numerical mathematics. Students learn to address challenges related to new resource-conserving materials, advanced composite materials, and lightweight structures under dynamic loads. The program is highly scientific and research-oriented, preparing graduates for PhD programs and careers in research or industry, including classic civil engineering and mechanical engineering.",
+    "course_content_summary": "Advanced Computational Methods in Civil Engineering (AdCom) focuses on applying and developing numerical methods and simulations for innovative civil engineering structures. The interdisciplinary curriculum includes courses from Civil Engineering, Mechanical Engineering, and Mathematics, covering structural mechanics, fluid mechanics, and numerical mathematics. Students learn to master challenges with new resource-conserving materials, advanced composite materials, and lightweight structures subject to dynamic loads. Expertise includes numerical methods, mechanical principles, software code development, and assessing numerical modelling limits. The program is highly scientific and research-oriented, preparing graduates for PhD programs and scientific careers in research or industry, with a strong focus on research and international reputation.",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/6318/"
   },
   {
@@ -281,10 +475,80 @@
       "Materials Science"
     ],
     "specific_ects_requirements": [],
+    "required_standardized_tests": [],
     "min_work_experience_months": 0,
     "requires_internship": false,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "None",
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "IELTS",
+          "min_score": "5.5"
+        },
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "72"
+        },
+        {
+          "test_name": "TOEFL ITP Level 1",
+          "min_score": "543"
+        },
+        {
+          "test_name": "Cambridge Preliminary English Test",
+          "min_score": "Distinction"
+        },
+        {
+          "test_name": "Cambridge First Certificate in English",
+          "min_score": "Grade B or C"
+        },
+        {
+          "test_name": "Cambridge English: Business Vantage",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge English: Legal",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge English: Financial",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge IGCSE",
+          "min_score": "B2"
+        },
+        {
+          "test_name": "Pearson PTE Academic",
+          "min_score": "59"
+        },
+        {
+          "test_name": "TOEIC Listening and Reading Test",
+          "min_score": "785"
+        },
+        {
+          "test_name": "TOEIC Speaking Test",
+          "min_score": "160"
+        },
+        {
+          "test_name": "TOEIC Writing Test",
+          "min_score": "150"
+        },
+        {
+          "test_name": "telc B2 certificate",
+          "min_score": null
+        },
+        {
+          "test_name": "UNIcert II",
+          "min_score": null
+        }
+      ],
+      "notes": "Completed degree in English Studies or American Studies; Completed degree with English as the language of instruction; Proof of professional qualification as a state-examined interpreter/translator; Applicants from countries with English as official/educational or native language are not required to submit proof of English language proficiency within their application."
+    },
+    "german_requirements": {
+      "min_cefr_level": "A2",
+      "accepted_tests": [],
+      "notes": "Courses to obtain the required level of German language (A2 by the end of the third semester) are included within the curriculum for non-native speakers. Students providing a certificate of A2 level (CEFR) may choose advanced language courses or subject studies."
+    },
     "deadlines": {
       "winter_semester": {
         "eu_applicants": {
@@ -307,7 +571,7 @@
         }
       }
     },
-    "course_content_summary": "The Master's degree programme in Advanced Functional Materials focuses on the advanced chemical and physical aspects of modern materials, and the transfer of skills in synthesis, development, analysis, and manufacturing of functional materials. This interdisciplinary program, offered by the Faculty of Natural Sciences, is based on courses in materials chemistry and materials physics. It includes research-oriented extension of physical and chemical knowledge, advanced courses in modern research fields, lab-oriented modules, a research project, and the Master's thesis.",
+    "course_content_summary": "Advanced chemical and physical aspects of modern materials, synthesis, development, analysis, manufacturing of functional materials. Interdisciplinary program based on materials chemistry and materials physics. Research-oriented extension and intensification of physical and chemical knowledge, advanced courses in modern research fields, lab-oriented modules, research project, Master's thesis.",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4695/"
   },
   {
@@ -325,10 +589,72 @@
       "Industrial Engineering"
     ],
     "specific_ects_requirements": [],
+    "required_standardized_tests": [],
     "min_work_experience_months": 0,
     "requires_internship": false,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "None",
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "72"
+        },
+        {
+          "test_name": "TOEIC",
+          "min_score": "785"
+        },
+        {
+          "test_name": "IELTS",
+          "min_score": "6.0"
+        },
+        {
+          "test_name": "IELTS Academic",
+          "min_score": "6.0"
+        },
+        {
+          "test_name": "Cambridge CEFR B2 First (FCE)",
+          "min_score": "Grade C (at least 160 points)"
+        },
+        {
+          "test_name": "Cambridge CEFR C1 Advanced (CAE)",
+          "min_score": "level B2 (at least 160 points)"
+        },
+        {
+          "test_name": "TELC Certificate English B2",
+          "min_score": null
+        },
+        {
+          "test_name": "TELC English University B2/C1",
+          "min_score": null
+        },
+        {
+          "test_name": "Pearson PTE Academic",
+          "min_score": "60"
+        },
+        {
+          "test_name": "Trinity ISE II",
+          "min_score": null
+        },
+        {
+          "test_name": "Trinity ISE Digital",
+          "min_score": "80"
+        },
+        {
+          "test_name": "KMK-Fremdsprachenzertifikat III",
+          "min_score": null
+        },
+        {
+          "test_name": "AKS UNIcert® II",
+          "min_score": null
+        }
+      ],
+      "notes": "Native English-speaking applicants are not required to submit proof. Accepted: At least six years of English tuition at school with a grade of at least “sufficient” in the final year proven by a German-language university entrance qualification or an equivalent, recognised university entrance qualification from a non-German school. Completed English-language Bachelor's or Master's degree. Completed English studies university degree in Germany or abroad. Passing \"Technical English\", \"Business English\" or a comparable English module with a grade of 3.0 or better worth at least 4 ECTS from a German university degree."
+    },
+    "german_requirements": {
+      "min_cefr_level": "None",
+      "accepted_tests": [],
+      "notes": null
+    },
     "deadlines": {
       "winter_semester": {
         "eu_applicants": {
@@ -342,7 +668,7 @@
       },
       "summer_semester": null
     },
-    "course_content_summary": "The Master's degree in Advanced Industrial Engineering combines engineering and business administration with new approaches to sustainable concepts and digital technologies (AI, data science, collaborative robots, AR/VR/MR). The program emphasizes practical application through partnerships with leading companies, preparing students for international careers in fields like production engineering, technical sales, supply chain management, or management consulting.",
+    "course_content_summary": "Advanced Industrial Engineering, business administration, sustainable concepts, digital technologies, artificial intelligence, data science, collaborative robots, augmented reality, virtual reality, mixed reality, engineering practice, production engineer, technical buyer, technical sales, supply chain management, management consultant, international requirements, technical English skills.",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/8579/"
   },
   {
@@ -357,51 +683,162 @@
     "semester_contribution_eur": 330.0,
     "min_gpa_german_scale": null,
     "required_degree_domains": [
-      "engineering",
-      "natural science"
+      "Engineering",
+      "Natural Sciences"
     ],
     "specific_ects_requirements": [
       {
         "domain_name": "Special mathematical methods of engineering",
         "min_ects_total": 18.0,
-        "condition_comment": "including the topics of Fourier transforms, regression calculation, probability and mathematical statistics",
-        "modules": []
+        "condition_comment": null,
+        "modules": [
+          {
+            "subject_area": "Mathematics",
+            "min_ects": 0.0,
+            "condition_comment": "Including Fourier transforms, regression calculation, probability and mathematical statistics"
+          }
+        ]
       },
       {
         "domain_name": "Scientific and engineering data processing",
         "min_ects_total": 12.0,
-        "condition_comment": "including the topics of CAD, CAS, numerical simulation and data acquisition as well as multiphysics simulation and practical experience",
-        "modules": []
+        "condition_comment": null,
+        "modules": [
+          {
+            "subject_area": "Data Processing",
+            "min_ects": 0.0,
+            "condition_comment": "Including CAD, CAS, numerical simulation, data acquisition, multiphysics simulation and practical experience"
+          }
+        ]
       },
       {
         "domain_name": "Metrology and control engineering",
         "min_ects_total": 8.0,
-        "condition_comment": "including the topics of sensors, actuators and digital methods of manufacturing",
-        "modules": []
+        "condition_comment": null,
+        "modules": [
+          {
+            "subject_area": "Metrology and Control Engineering",
+            "min_ects": 0.0,
+            "condition_comment": "Including sensors, actuators and digital methods of manufacturing"
+          }
+        ]
       },
       {
         "domain_name": "New materials for engineering",
         "min_ects_total": 8.0,
-        "condition_comment": "including the topics of polymers, metals, composites, matrix systems and functional properties",
-        "modules": []
+        "condition_comment": null,
+        "modules": [
+          {
+            "subject_area": "Materials Science",
+            "min_ects": 0.0,
+            "condition_comment": "Including polymers, metals, composites, matrix systems and functional properties"
+          }
+        ]
       },
       {
         "domain_name": "In-depth theoretical basics of engineering",
         "min_ects_total": 12.0,
-        "condition_comment": "including the subjects of engineering mechanics, design, manufacturing and fluid dynamics",
-        "modules": []
+        "condition_comment": null,
+        "modules": [
+          {
+            "subject_area": "Engineering Basics",
+            "min_ects": 0.0,
+            "condition_comment": "Including engineering mechanics, design, manufacturing and fluid dynamics"
+          }
+        ]
       },
       {
         "domain_name": "Resource-efficient manufacturing concepts",
         "min_ects_total": 8.0,
-        "condition_comment": "including the topics of technical and natural cycles and networks, system optimisation and energy concepts",
-        "modules": []
+        "condition_comment": null,
+        "modules": [
+          {
+            "subject_area": "Manufacturing Concepts",
+            "min_ects": 0.0,
+            "condition_comment": "Including technical and natural cycles and networks, system optimisation and energy concepts"
+          }
+        ]
       }
     ],
+    "required_standardized_tests": [],
     "min_work_experience_months": 0,
-    "requires_internship": false,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "A1",
+    "requires_internship": true,
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "IELTS",
+          "min_score": "5.5"
+        },
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "72"
+        },
+        {
+          "test_name": "TOEFL ITP Level 1",
+          "min_score": "543"
+        },
+        {
+          "test_name": "Cambridge PET",
+          "min_score": "Distinction"
+        },
+        {
+          "test_name": "Cambridge FCE",
+          "min_score": "B or C"
+        },
+        {
+          "test_name": "Cambridge BEC Vantage",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge ILEC",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge ICFE",
+          "min_score": null
+        },
+        {
+          "test_name": "Cambridge IGCSE",
+          "min_score": "B2"
+        },
+        {
+          "test_name": "Pearson PTE Academic",
+          "min_score": "59"
+        },
+        {
+          "test_name": "TOEIC",
+          "min_score": "L&R 785, S 160, W 150"
+        },
+        {
+          "test_name": "telc B2",
+          "min_score": null
+        },
+        {
+          "test_name": "UNIcert II",
+          "min_score": null
+        }
+      ],
+      "notes": "Completed degree in English Studies or American Studies; Completed degree with English as the language of instruction; Proof of professional qualification as a state-examined interpreter/translator; Applicants from countries with English as official/educational or native language are not required to submit proof of English language proficiency within their application."
+    },
+    "german_requirements": {
+      "min_cefr_level": "A1",
+      "accepted_tests": [
+        {
+          "test_name": "Goethe-Institut",
+          "min_score": null
+        },
+        {
+          "test_name": "telc examination centres",
+          "min_score": null
+        },
+        {
+          "test_name": "ÖSD",
+          "min_score": null
+        }
+      ],
+      "notes": "From winter semester 2024/25 German language proficiency A1 is compulsory! Applicants applying for a degree programme offered in English language need to show proof of German language proficiency at a minimum of an A1 level at the time of enrolment. Until the end of their third study semester at Chemnitz University of Technology, they have to submit a German language proof at level A2. German language courses at level A2 will be offered at our university. German language attendance certificates will not be accepted. It is also possible to take an online course before the semester starts (440 EUR fee, details in the admission letter)."
+    },
     "deadlines": {
       "winter_semester": {
         "eu_applicants": {
@@ -415,7 +852,7 @@
       },
       "summer_semester": null
     },
-    "course_content_summary": "This English-taught, research-driven, and interdisciplinary Master’s programme focuses on equipping students with cutting-edge scientific methods, knowledge, and skills related to innovative technologies and advanced manufacturing processes. It embodies the core competencies of Chemnitz University of Technology, preparing graduates to shape the future of modern manufacturing. The program is oriented towards research key areas including \"Hybrid Technologies\", \"Printed Functionalities\", \"Work Design and Sustainability Management\" and \"Production Systems\".",
+    "course_content_summary": "Advanced Manufacturing, Mechanical Engineering, Production, cutting-edge scientific methods, innovative technologies, advanced manufacturing processes, modern manufacturing, special mathematical methods of engineering, Fourier transforms, regression calculation, probability, mathematical statistics, scientific and engineering data processing, CAD, CAS, numerical simulation, data acquisition, multiphysics simulation, practical experience, metrology, control engineering, sensors, actuators, digital methods of manufacturing, new materials for engineering, polymers, metals, composites, matrix systems, functional properties, in-depth theoretical basics of engineering, engineering mechanics, design, manufacturing, fluid dynamics, resource-efficient manufacturing concepts, technical and natural cycles and networks, system optimisation, energy concepts, soft skills, responsible decisions, political developments, geographical constellations, regional economics, research, teaching, natural sciences, human factors, economics, integrated internships, industry, business, Hybrid Technologies, Printed Functionalities, Work Design, Sustainability Management, Production Systems, transdisciplinary, faculty-overarching, future-oriented, intercultural competencies.",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/7612/"
   },
   {
@@ -437,10 +874,32 @@
       "Energy Materials"
     ],
     "specific_ects_requirements": [],
+    "required_standardized_tests": [],
     "min_work_experience_months": 0,
     "requires_internship": false,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "None",
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "72"
+        },
+        {
+          "test_name": "IELTS",
+          "min_score": "5.5"
+        },
+        {
+          "test_name": "UNIcert II",
+          "min_score": null
+        }
+      ],
+      "notes": "Proof of obtaining a local higher education entrance qualification in one of the following countries: Australia, Ireland, Canada, New Zealand, USA, United Kingdom, South Africa or: Proof of a Bachelor’s degree in English in one of the following countries: Australia, Ireland, Canada, New Zealand, USA, United Kingdom, South Africa. Other language certificates may be accepted following a case-by-case assessment."
+    },
+    "german_requirements": {
+      "min_cefr_level": "None",
+      "accepted_tests": [],
+      "notes": null
+    },
     "deadlines": {
       "winter_semester": {
         "eu_applicants": {
@@ -454,7 +913,7 @@
       },
       "summer_semester": null
     },
-    "course_content_summary": "The Master's degree program in Advanced Materials at Justus Liebig University Giessen focuses on modern functional materials modified at the molecular level for specific applications in high-tech areas like medicine, mobility, communication, energy supply, and aerospace. It uses interdisciplinary knowledge from chemistry and physics to understand and change material properties. The research-oriented program is integrated into current materials research in Giessen, with a focus on high-performance and energy materials, offering opportunities to work on current research projects and set a clear focus through specialisation. A double degree option with universities in Japan and Italy is available.",
+    "course_content_summary": "The Master's degree program in Advanced Materials at Justus Liebig University Giessen (JLU) focuses on modern functional materials modified at the molecular level for specific applications. It addresses questions related to extending electric car battery life, increasing solar cell efficiency, and developing biocompatible implants. The program integrates interdisciplinary knowledge from chemistry and physics to understand and optimize material properties. It is research-oriented, providing theoretical and practical knowledge to tailor materials for future applications, with a strong integration into current materials research in Giessen, focusing on high-performance and energy materials. Students can work on current research projects and choose a specialization. The program offers excellent career opportunities and the unique opportunity to obtain a double degree with partner universities like Osaka University (Japan), Kansai University (Japan), and the University of Padua (Italy).",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/9989/"
   },
   {
@@ -469,15 +928,33 @@
     "semester_contribution_eur": 107.0,
     "min_gpa_german_scale": null,
     "required_degree_domains": [
-      "Engineering Science (major in Materials Science)",
-      "Natural Science (major in Physics)",
-      "Natural Science (major in Chemistry)"
+      "Engineering Science with a major in Materials Science",
+      "Natural Science with a major in Physics",
+      "Natural Science with a major in Chemistry"
     ],
     "specific_ects_requirements": [],
+    "required_standardized_tests": [],
     "min_work_experience_months": 0,
     "requires_internship": false,
-    "english_level_requirement": "B2",
-    "german_level_requirement": "None",
+    "english_requirements": {
+      "min_cefr_level": "B2",
+      "accepted_tests": [
+        {
+          "test_name": "TOEFL iBT",
+          "min_score": "90"
+        },
+        {
+          "test_name": "IELTS",
+          "min_score": "6.5"
+        }
+      ],
+      "notes": null
+    },
+    "german_requirements": {
+      "min_cefr_level": "None",
+      "accepted_tests": [],
+      "notes": null
+    },
     "deadlines": {
       "winter_semester": null,
       "summer_semester": {
@@ -491,7 +968,7 @@
         }
       }
     },
-    "course_content_summary": "The Master's programme Advanced Materials Analysis (AMA) at TU Bergakademie Freiberg focuses on providing profound insight into important techniques for the analysis of solid materials (e.g., advanced steels, materials for electronics, shape memory alloys, energy materials) using microscopic, spectroscopic, and diffraction methods. The program emphasizes materials characterization to understand structure-property relations and tailor material properties. Graduates are prepared for careers in materials-related industrial fields, particularly in research and development, ranging from metallurgy to the semiconductor industry, as well as academic research.",
+    "course_content_summary": "Advanced Materials Analysis (AMA) Master's program for materials science, engineering science, physics, or chemistry graduates. Focus on behavior and analysis of solid materials down to atomic level, combining natural scientist's and engineer's perspectives. Utilizes various instrumental analysis techniques for materials characterization, structure-property relations, and targeted tailoring. Covers analysis of advanced steels, electronics materials, shape memory alloys, and energy materials using microscopic, spectroscopic, and diffraction methods. Prepares graduates for careers in materials-related industrial fields, research and development, metallurgy, and semiconductor industry, as well as academic research.",
     "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/5403/"
   }
 ]

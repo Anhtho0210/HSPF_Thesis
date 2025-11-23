@@ -77,6 +77,28 @@ class StandardizedTest(BaseModel):
     )
     min_score: Optional[float] = Field(description="Minimum score if specified (e.g. 155).", default=None)
 
+class LanguageTest(BaseModel):
+    """A specific accepted test and score."""
+    test_name: str = Field(description="e.g. 'IELTS', 'TOEFL iBT', 'Cambridge FCE'.")
+    min_score: Optional[str] = Field(
+        description="The score required. e.g. '6.5', '90', 'B'. If no score applies (e.g. native speaker), leave null.", 
+        default=None
+    )
+
+class DetailedLanguageRequirement(BaseModel):
+    """Detailed breakdown for a specific language (English or German)."""
+    min_cefr_level: Literal["A1", "A2", "B1", "B2", "C1", "C2", "None", "Unknown"] = Field(
+        description="Standardized level for quick filtering.", default="Unknown"
+    )
+    accepted_tests: List[LanguageTest] = Field(
+        description="List of specific tests mentioned in the text.", 
+        default_factory=list
+    )
+    notes: Optional[str] = Field(
+        description="Waivers or conditions (e.g. 'Native speakers exempt', 'Medium of instruction accepted').", 
+        default=None
+    )
+
 class ProgramHardFilters(BaseModel):
     """Structured data for the University Program."""
     program_id: str = Field(default="Unknown")
@@ -104,13 +126,16 @@ class ProgramHardFilters(BaseModel):
 
     # --- NESTED ECTS LIST ---
     specific_ects_requirements: List[ECTSDomain] = Field(default_factory=list)
+
+    # --- TESTS (Added this back!) ---
+    required_standardized_tests: List[StandardizedTest] = Field(default_factory=list)
     # Work Experience
     min_work_experience_months: int = Field(description="Mandatory work exp in months.", default=0)
     requires_internship: bool = Field(default=False)
     
     # Language
-    english_level_requirement: Literal["A1", "A2", "B1", "B2", "C1", "C2", "None", "Unknown"] = Field(default="Unknown")
-    german_level_requirement: Literal["A1", "A2", "B1", "B2", "C1", "C2", "None", "Unknown"] = Field(default="None")
+    english_requirements: DetailedLanguageRequirement = Field(default_factory=DetailedLanguageRequirement)
+    german_requirements: DetailedLanguageRequirement = Field(default_factory=DetailedLanguageRequirement)
     
     # Granular Deadlines ---
     deadlines: ProgramDeadlines = Field(description="Structured application periods.", default_factory=ProgramDeadlines)
