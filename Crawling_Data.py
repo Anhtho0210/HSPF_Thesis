@@ -15,8 +15,21 @@ import random
 today = datetime.date.today().isoformat()
 
 # --- Configuration for Limiting Programs ---
-PROGRAM_LIMIT = 10
+PROGRAM_LIMIT = None  # Set to None for unlimited crawling, or a number (e.g., 10) to limit
 # --- End Configuration ---
+
+# --- Configuration for Baden-Württemberg Filter ---
+# Comprehensive list of cities and towns in Baden-Württemberg with universities/colleges
+BADEN_WUERTTEMBERG_CITIES = {
+    # Major cities
+    "Stuttgart", "Karlsruhe", "Mannheim", "Freiburg", "Heidelberg",
+    "Ulm", "Heilbronn", "Pforzheim", "Reutlingen", "Esslingen",
+    "Ludwigsburg", "Tübingen", "Konstanz", "Aalen", "Offenburg"
+}
+
+# Set to True to enable Baden-Württemberg filtering
+ENABLE_BW_FILTER = True
+# --- End Baden-Württemberg Configuration ---
 
 logging.basicConfig(filename='./logs/log_'+str(today) +
                     '.txt', level=logging.DEBUG)
@@ -49,7 +62,8 @@ def fetch_links():
     # 1. Ensure the driver is on the correct search results page
     # (Assuming apply_filters has been called and the page is loaded)
     
-    print(f"Starting link retrieval, aiming for {PROGRAM_LIMIT} programs...")
+    limit_text = "all available" if PROGRAM_LIMIT is None else str(PROGRAM_LIMIT)
+    print(f"Starting link retrieval, aiming for {limit_text} programs...")
     
     page_count = 1
 
@@ -71,13 +85,18 @@ def fetch_links():
             
             # --- 2. Append links and check limit ---
             
-            links_to_add = PROGRAM_LIMIT - len(all_urls)
-            if links_to_add > 0:
-                # Only add the necessary number of links to reach the limit
-                all_urls.extend(current_page_links[:links_to_add])
+            if PROGRAM_LIMIT is None:
+                # No limit - add all links from this page
+                all_urls.extend(current_page_links)
+            else:
+                # Limited crawling - only add what's needed to reach the limit
+                links_to_add = PROGRAM_LIMIT - len(all_urls)
+                if links_to_add > 0:
+                    # Only add the necessary number of links to reach the limit
+                    all_urls.extend(current_page_links[:links_to_add])
             
-            # Check if the limit has been reached after adding links
-            if len(all_urls) >= PROGRAM_LIMIT:
+            # Check if the limit has been reached after adding links (only if limit is set)
+            if PROGRAM_LIMIT is not None and len(all_urls) >= PROGRAM_LIMIT:
                 print(f"Reached the program limit of {PROGRAM_LIMIT}. Exiting loop.")
                 break 
             
@@ -264,6 +283,20 @@ def extractor(item_links):
                     print("Skipping link due to failed extraction.")
                     continue
 
+                # --- Baden-Württemberg Filter ---
+                if ENABLE_BW_FILTER:
+                    # Get the city from the extracted data (city is at index 3 in params list)
+                    city_index = params.index("city")
+                    extracted_city = dataFromURL[city_index]
+                    
+                    # Check if the city is in Baden-Württemberg
+                    if extracted_city not in BADEN_WUERTTEMBERG_CITIES:
+                        print(f"⚠️  Skipping program - City '{extracted_city}' is not in Baden-Württemberg")
+                        continue
+                    else:
+                        print(f"✅ City '{extracted_city}' is in Baden-Württemberg - Adding program")
+                # --- End Baden-Württemberg Filter ---
+
                 #print("result: ", [f"{p}: {d}" for p, d in zip(params, dataFromURL)])
 
                 final_data.append(dataFromURL)
@@ -279,7 +312,8 @@ def extractor(item_links):
 
 
 def exportJSON(): # <--- NEW FUNCTION
-    filename = f"TESTING_MASTER_LIST_{PROGRAM_LIMIT}"
+    limit_suffix = "ALL" if PROGRAM_LIMIT is None else str(PROGRAM_LIMIT)
+    filename = f"TESTING_MASTER_LIST_{limit_suffix}"
 
     if not final_data:
         print("No data to export.")
@@ -310,7 +344,8 @@ def exportJSON(): # <--- NEW FUNCTION
 def main():
     try:
         print("# Starting script ...")
-        print(f"# Limit set to: {PROGRAM_LIMIT} programs.")
+        limit_display = "unlimited (all available)" if PROGRAM_LIMIT is None else f"{PROGRAM_LIMIT} programs"
+        print(f"# Limit set to: {limit_display}")
         print("# Visiting parent url: ", parent_url)
         item_links = surf1()
         

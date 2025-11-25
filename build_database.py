@@ -156,7 +156,7 @@ def get_extraction_chain():
     
     return prompt | LLM | parser
 
-def process_catalog(input_file="TESTING_MASTER_LIST_10.json", output_file="structured_program_db.json"):
+def process_catalog(input_file="TESTING_MASTER_LIST_ALL.json", output_file="structured_program_db.json"):
     try:
         with open(input_file, 'r', encoding='utf-8') as f:
             raw_data = json.load(f)

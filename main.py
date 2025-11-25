@@ -58,7 +58,7 @@ def build_master_workflow():
 if __name__ == "__main__":
     
     # 1. Prepare Data
-    pdf_filename = "Transcrip_Of_Record.pdf"
+    pdf_filename = "ToR.pdf"
     app = build_master_workflow()
  
     # --- Define Initial State ---
