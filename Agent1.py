@@ -189,8 +189,13 @@ def get_missing_fields(profile: Optional[UserProfile]) -> List[str]:
             missing.append("duration of bachelor program semesters")
 
         # Interests (Needed for Agent 3 Semantic Search)
-        if not acad.fields_of_interest: 
-            missing.append("2-3 technical fields of interest")
+        # MOVED TO desired_program
+        # if not acad.fields_of_interest: 
+        #     missing.append("2-3 technical fields of interest")
+
+    # 3b. Desired Program Checks
+    if not profile.desired_program or not profile.desired_program.fields_of_interest:
+        missing.append("2-3 technical fields of interest (modules, course names)")
 
     # 4. Language Checks
     if not profile.language_proficiency or len(profile.language_proficiency) == 0:
@@ -321,13 +326,11 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
              - For 'academic_background.bachelor_field_of_study': 
                - This is where you put the BACHELOR DEGREE FIELD the user studied (e.g., "Computer Science", "Engineering", "Business", "Mathematics").
                - Do NOT assume from terms like "degree", "CompSci", "CS degree", "tech degree", or "I have a degree", "degree in tech" or "studied programming", you should ask for confirm.
-             
-             - For 'academic_background.fields_of_interest': 
-               - This is for RESEARCH/TECHNICAL INTERESTS/DESIRED MASTER PROGRAMS for Master's studies (e.g., "AI", "Machine Learning", "Data Science").
-               - ONLY extract specific technical/research fields that are EXPLICITLY mentioned (e.g., "AI", "Machine Learning", "Cybersecurity").
-               - If the user only says "interested in tech" or "technology" without specific field names, ask again for confirm.
-               - You should ask for 4-5 specific field of interests.
-
+             - For 'desired_program':
+                - **program_name**: A LIST of Master's program names the user wants to study (e.g., ["Data Science", "MBA"]).
+                - **fields_of_interest**: Specific technical/research fields, modules, or course names the user is interested in (e.g., "AI", "Machine Learning", "Cybersecurity").
+                - You should ask for 4-5 specific field of interests.
+              
              - For 'academic_background.bachelor_gpa': Only extract if the user provides actual GPA numbers. Set score, max_scale, and min_passing_grade to null if not provided.
              - For 'academic_background.transcript_courses': If the input contains a list of subjects/courses (e.g., from a PDF):
                - Extract them into 'academic_background.transcript_courses'.
@@ -343,7 +346,7 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
              
              Crucial Context: The user's latest response might be a short answer to a specific question. You must map that short answer to the CORRECT field based on what was asked.
              - If asked about bachelor's degree field and user answers with a discipline name (e.g., "Computer Science"), put it in 'bachelor_field_of_study'.
-             - If asked about interests and user answers with technical fields (e.g., "AI", "Machine Learning"), put them in 'fields_of_interest'.
+             - If asked about interests and user answers with technical fields (e.g., "AI", "Machine Learning"), put them in 'desired_program.fields_of_interest'.
              - If the user provides a city name (e.g., 'Munich'), populate 'preferences.preferred_cities' as a list.
              - If the user provides a number in EUR, it is likely 'preferences.max_tuition_fee_eur'.
              - IMPORTANT: If the user explicitly states they have no preference for cities, set 'preferences.preferred_cities' to an empty list [].

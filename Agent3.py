@@ -79,21 +79,31 @@ def check_hard_constraints(student: UserProfile, program: dict) -> dict:
             return {'eligible': False, 'reason': f"Fee {prog_fee}€ > Budget {max_fee}€"}
 
     # --- 5. Location Check (City & State) ---
-    if student.preferences and student.preferences.preferred_cities:
-        user_locs = [c.lower() for c in student.preferences.preferred_cities]
-        if user_locs: # Only check if user actually listed cities
-            prog_city = program.get('city', '').lower()
+    if student.preferences:
+        # Check cities
+        if student.preferences.preferred_cities:
+            user_locs = [c.lower() for c in student.preferences.preferred_cities]
+            if user_locs: # Only check if user actually listed cities
+                prog_city = program.get('city', '').lower()
+                prog_state = program.get('state', '').lower()
+                
+                # Fail safe: If program has NO location data, we accept it
+                if prog_city or prog_state:
+                    match = False
+                    for loc in user_locs:
+                        if loc in prog_city or loc in prog_state:
+                            match = True
+                            break
+                    if not match:
+                        return {'eligible': False, 'reason': f"Location mismatch ({prog_city})"}
+        
+        # Check state preference
+        if student.preferences.preferred_state:
+            user_state = student.preferences.preferred_state.lower()
             prog_state = program.get('state', '').lower()
             
-            # Fail safe: If program has NO location data, we accept it
-            if prog_city or prog_state:
-                match = False
-                for loc in user_locs:
-                    if loc in prog_city or loc in prog_state:
-                        match = True
-                        break
-                if not match:
-                    return {'eligible': False, 'reason': f"Location mismatch ({prog_city})"}
+            if prog_state and user_state not in prog_state:
+                return {'eligible': False, 'reason': f"State mismatch (Program in {prog_state}, prefer {user_state})"}
 
     # --- 6. Semester Check (Winter/Summer) ---
     if student.preferences and student.preferences.preferred_start_semester:
@@ -138,7 +148,15 @@ def calculate_semantic_match(student: UserProfile, program: dict) -> float:
     # 1. Student Text
     # Combine Interests + Course Names
     transcript_text = " ".join([c.course_name for c in student.academic_background.transcript_courses])
-    interest_text = " ".join(student.academic_background.fields_of_interest or [])
+    
+    # Use new desired_program fields if available, otherwise fallback (or empty)
+    interests = []
+    if student.desired_program and student.desired_program.fields_of_interest:
+        interests = student.desired_program.fields_of_interest
+    elif student.academic_background and student.academic_background.fields_of_interest:
+        interests = student.academic_background.fields_of_interest
+        
+    interest_text = " ".join(interests)
     student_doc = f"{transcript_text} {interest_text}"
 
     # 2. Program Text

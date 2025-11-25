@@ -62,6 +62,7 @@ class LanguageProficiency(BaseModel):
 
 class Preferences(BaseModel):
     preferred_cities: Optional[List[str]] = Field(default_factory=list)
+    preferred_state: Optional[str] = Field(description="Preferred German state (e.g., 'Bavaria', 'Baden-Württemberg').", default=None)
     max_tuition_fee_eur: Optional[int] = Field(default=0)
     preferred_start_semester: Optional[str] = Field(default=None)
     preferred_language_of_instruction: Optional[str] = Field(default='English')
@@ -70,10 +71,15 @@ class ProfessionalAndTests(BaseModel):
     relevant_work_experience_months: Optional[int] = Field(default=None)
     standardized_tests: Optional[List[dict]] = Field(default=None)
      
+class DesiredProgram(BaseModel):
+    program_name: List[str] = Field(description="List of target Master's program names (e.g. ['Data Science', 'MBA']).", default_factory=list)
+    fields_of_interest: List[str] = Field(description="Specific interests/modules (module, course name).", default_factory=list)
+
 class UserProfile(BaseModel): 
     full_name: Optional[str] = None
     citizenship: Optional[Citizenship] = None
     academic_background: Optional[AcademicBackground] = None
+    desired_program: Optional[DesiredProgram] = None
     language_proficiency: Optional[List[LanguageProficiency]] = Field(default=[])
     professional_and_tests: Optional[ProfessionalAndTests] = None
     preferences: Preferences = Field(default_factory=Preferences)
