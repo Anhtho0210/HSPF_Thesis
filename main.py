@@ -58,10 +58,10 @@ def build_master_workflow():
 if __name__ == "__main__":
     
     # 1. Prepare Data
-    pdf_filename = "Anny_Tran.pdf"
+    pdf_filename = "Transcrip_Of_Record.pdf"
     
     app = build_master_workflow()
-
+ 
     # --- Define Initial State ---
     # Note: We intentionally leave some fields vague to test Agent 1's questions
     initial_raw_input = (
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     
     current_state = {
         "user_intent": "Hi, I'm Anny. I want to study data science.",
-        "pdf_path": "Anny_Tran.pdf", 
+        "pdf_path": pdf_filename, 
         "user_profile": None,
         "program_catalog": [], 
         "eligible_programs": [], 

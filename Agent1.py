@@ -295,13 +295,15 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
              f"""You are a data extraction agent. 
              STRICTLY extract ALL details from the user's FULL accumulated text and adhere to the JSON schema.
 
-             **For PDF extrac**
+             **For PDF extraction**
              ### PRIORITY 1: TRANSCRIPT DATA (CRITICAL) ###
              Scan the provided document text for a list of subjects/courses.
-             - Extract them into 'academic_background.transcript_courses'.
-             - **course_name**: The subject name (e.g. "Macroeconomics").
-             - **original_credits**: The credit value exactly as written (e.g. 3, 4.0, 5).
-             
+             - Extract those into 'academic_background.transcript_courses'.
+             - **course_name**: The header could be 'course title', 'title', 'course name','Exam description'. The subject name (e.g. "Macroeconomics").
+             - **original_credits**: The header could be 'credits' The credit value exactly as written (e.g. 3, 4.0, 5).
+             - **grade**: The header could be 'grade', 'grade point', 'grade point average', 'gpa'. The grade value exactly as written (e.g. 4.0, 5.0).
+
+
              ### PRIORITY 2: DEGREE META-DATA ###
              - Look for 'total_credits_earned' (Sum of credits).
              - Look for 'program_duration_semesters' (e.g. 4 years = 8).
@@ -309,7 +311,7 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
              ### PRIORITY 3: OTHER PROFILE INFO (OPTIONAL) ###
              - Try to find Name, Citizenship, GPA, and Degree Name.
              - **If you cannot find these, just leave them null.** Do NOT invent data.
-             
+
              CRITICAL RULES - ABSOLUTELY NO ASSUMPTIONS:
              - Do NOT invent or assume data that is not explicitly mentioned by the user.
              - Do NOT infer or guess fields like 'bachelor_field_of_study' or 'fields_of_interest' from vague statements.
