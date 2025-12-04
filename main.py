@@ -65,7 +65,7 @@ if __name__ == "__main__":
     # Note: We intentionally leave some fields vague to test Agent 1's questions
     initial_raw_input = (
         "Hi, I'm Anny from Vietnam. Here is my transcript. "
-        "I want to study Data Science."
+        "I want to study Business Management"
         # "I have IELTS 7.0" <-- Commented out to force Agent 1 to ask!
     )
     
@@ -100,6 +100,55 @@ if __name__ == "__main__":
             # --- CHECK 1: SUCCESS (Found Programs) ---
             if current_state.get("eligible_programs"):
                 print("\n✅ Matching complete. Found eligible programs.")
+                
+                # Print full user profile for debugging
+                print("\n" + "=" * 50)
+                print("📋 FULL USER PROFILE (After Agent1)")
+                print("=" * 50)
+                profile = current_state.get("user_profile")
+                if profile:
+                    print(f"\n👤 Name: {profile.full_name}")
+                    print(f"🌍 Citizenship: {profile.citizenship.country_of_citizenship if profile.citizenship else 'N/A'}")
+                    
+                    if profile.academic_background:
+                        acad = profile.academic_background
+                        print(f"\n🎓 Academic Background:")
+                        print(f"   - Field of Study: {acad.bachelor_field_of_study}")
+                        print(f"   - Duration: {acad.program_duration_semesters} semesters")
+                        print(f"   - Total Credits: {acad.total_credits_earned}")
+                        print(f"   - ECTS Conversion Factor: {acad.ects_conversion_factor}")
+                        print(f"   - Total Converted ECTS: {acad.total_converted_ects}")
+                        
+                        if acad.bachelor_gpa:
+                            gpa = acad.bachelor_gpa
+                            print(f"   - GPA: {gpa.score}/{gpa.max_scale} (min: {gpa.min_passing_grade})")
+                            print(f"   - German GPA: {gpa.score_german}")
+                        
+                        print(f"   - Fields of Interest: {acad.fields_of_interest}")
+                        
+                        if acad.transcript_courses:
+                            print(f"\n   📄 Transcript Courses ({len(acad.transcript_courses)} courses):")
+                            for i, course in enumerate(acad.transcript_courses[:5]):  # Show first 5
+                                print(f"      {i+1}. {course.course_name} - {course.original_credits} credits (ECTS: {course.converted_ects})")
+                            if len(acad.transcript_courses) > 5:
+                                print(f"      ... and {len(acad.transcript_courses) - 5} more courses")
+                        else:
+                            print(f"\n   📄 Transcript Courses: ❌ None extracted from PDF")
+                    
+                    if profile.language_proficiency:
+                        lang = profile.language_proficiency
+                        print(f"\n🗣️ Language: {lang.exam_type} - Overall: {lang.overall_score}")
+                    
+                    if profile.preferences:
+                        pref = profile.preferences
+                        print(f"\n⚙️ Preferences:")
+                        print(f"   - Max Tuition: {pref.max_tuition_fee_eur} EUR/semester")
+                        print(f"   - Preferred Cities: {pref.preferred_cities if pref.preferred_cities else 'No preference'}")
+                        print(f"   - Start Semester: {pref.preferred_start_semester}")
+                else:
+                    print("❌ No profile found!")
+                print("=" * 50 + "\n")
+                
                 break 
 
             # --- CHECK 2: PAUSE FOR CHAT (Missing Info) ---
@@ -145,7 +194,7 @@ if __name__ == "__main__":
     if final_ranked_list:
         print(f"\n🎯 Found {len(final_ranked_list)} Matching Programs!\n Those program passes the Hard Filter, it gets a score based on 60% Qualifications (ECTS) and 40% Desire (Interests)")
         
-        for i, program in enumerate(final_ranked_list[:5]):
+        for i, program in enumerate(final_ranked_list):
             print(f"{i+1}. {program.get('program_name')} ({program.get('university_name')})")
             print(f"   📊 Final Score: {program.get('relevance_score', 0):.1f} / 10.0")
             

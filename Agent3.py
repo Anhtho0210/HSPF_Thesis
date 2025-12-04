@@ -65,10 +65,12 @@ def check_hard_constraints(student: UserProfile, program: dict) -> dict:
     # 3. Language Check
     if student.language_proficiency:
         student_eng = "Unknown"
+        # FIX: Loop through the list to find the English exam
         for lang in student.language_proficiency:
-            if "english" in lang.language.lower():
-                student_eng = lang.level if lang.level else "Unknown"
-                break
+            if lang.language and "english" in lang.language.lower():
+                 # Check if level exists, otherwise infer from score if needed
+                 student_eng = lang.level if lang.level else "Unknown"
+                 break
         
         prog_eng = program.get('english_level_requirement', 'Unknown')
         
@@ -108,7 +110,8 @@ def check_ects_match_with_embeddings(student_course_vectors: List[Any], student_
     """
     requirements = program.get('specific_ects_requirements', [])
     if not requirements:
-        return {'eligible': True, 'score': 1.0, 'details': "No ECTS Reqs"}
+        # Return 0.5 (Neutral) instead of 1.0 (Perfect)
+        return {'eligible': True, 'score': 0.5, 'details': "No ECTS Data listed"}
 
     total_domains = 0
     met_domains = 0
