@@ -1,225 +1,259 @@
 import json
 import os
+import time
 from typing import Dict, Any, List
+from collections import Counter
 from dotenv import load_dotenv
-
-# For Semantic Matching
-from sklearn.feature_extraction.text import TfidfVectorizer
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from sklearn.metrics.pairwise import cosine_similarity
-from langchain_google_genai import ChatGoogleGenerativeAI
-
 from models import AgentState, UserProfile
 
 load_dotenv()
 
-# --- HELPER: CEFR RANKING ---
-def get_cefr_rank(level: str) -> int:
-    """Converts CEFR levels to integers for comparison."""
-    if not level or level == "Unknown" or level == "None": return 0
-    # Clean string (e.g. "B2 (IELTS 6.0)" -> "B2")
-    norm_level = level.split(' ')[0].split('/')[0].strip().upper()
-    
-    ranks = {
-        "A1": 1, "A2": 2, 
-        "B1": 3, "B2": 4, 
-        "C1": 5, "C2": 6
-    }
-    return ranks.get(norm_level, 0)
+if not os.environ.get("GEMINI_API_KEY"):
+    print("❌ Error: GEMINI_API_KEY not found.")
 
-# --- 1. HARD FILTER LOGIC (The Core Engine) ---
+embeddings_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
+# --- HELPERS (Fast Mode) ---
+def safe_embed_query(text: str) -> List[float]:
+    """Single text embedding. Retries only on actual errors."""
+    for attempt in range(3):
+        try:
+            return embeddings_model.embed_query(text)
+        except Exception as e:
+            print(f"  ⚠️ Embed Retry {attempt+1}: {e}")
+            time.sleep(0.5) # Small safety pause only on ERROR
+    return []
+
+def safe_batch_embed(texts: List[str], batch_size: int = 50) -> List[List[float]]:
+    """
+    Batch embedding for Paid API.
+    Increased batch_size to 50 for speed. Removed artificial sleep.
+    """
+    all_embeddings = []
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i : i + batch_size]
+        try:
+            all_embeddings.extend(embeddings_model.embed_documents(batch))
+        except Exception as e:
+            print(f"  ❌ Batch Error: {e}")
+            # Fallback: Fill with zeros to keep index alignment
+            all_embeddings.extend([[0.0]*768 for _ in batch])
+            
+    return all_embeddings
+
+# --- LOGIC FUNCTIONS ---
 def check_hard_constraints(student: UserProfile, program: dict) -> dict:
-    """
-    Strictly rejects programs based on 'Must-Have' criteria.
-    Rule: If Program Data is MISSING/NULL, we ACCEPT (Benefit of Doubt).
-    """
+    """Strictly rejects programs based on 'Must-Have' criteria."""
     
-    # --- 1. GPA Check ---
-    # Logic: German Scale -> Lower is better. (1.0 best, 4.0 worst)
+    # 1. GPA Check
     if student.academic_background and student.academic_background.bachelor_gpa:
         student_gpa = student.academic_background.bachelor_gpa.score_german
         prog_min_gpa = program.get('min_gpa_german_scale')
-        
         if student_gpa and prog_min_gpa:
             if student_gpa > prog_min_gpa:
                 return {'eligible': False, 'reason': f"GPA {student_gpa} > Limit {prog_min_gpa}"}
 
-    # --- 2. Total ECTS Check (Degree Volume) ---
-    # Standard Master's requires 180 ECTS Bachelor. Some require 210.
+    # 2. Total ECTS Check
     if student.academic_background and student.academic_background.total_converted_ects:
         student_ects = student.academic_background.total_converted_ects
-        # If program doesn't specify, assume standard 180
         prog_min_ects = program.get('min_degree_ects', 180) 
-        
-        if student_ects < prog_min_ects:
+        if student_ects > 0 and student_ects < prog_min_ects:
              return {'eligible': False, 'reason': f"Total ECTS {student_ects} < Required {prog_min_ects}"}
 
-    # --- 3. Language Proficiency Check ---
+    # 3. Language Check
     if student.language_proficiency:
-        # A. English
         student_eng = "Unknown"
         for lang in student.language_proficiency:
             if "english" in lang.language.lower():
                 student_eng = lang.level if lang.level else "Unknown"
-                # Add logic to map scores to levels here if needed
                 break
         
         prog_eng = program.get('english_level_requirement', 'Unknown')
         
-        # Only check if both sides are known
-        if student_eng != "Unknown" and prog_eng != "Unknown" and prog_eng != "None":
+        # Helper inner function for ranking
+        def get_cefr_rank(level: str) -> int:
+            if not level or level in ["Unknown", "None"]: return 0
+            norm_level = level.split(' ')[0].split('/')[0].strip().upper()
+            ranks = {"A1": 1, "A2": 2, "B1": 3, "B2": 4, "C1": 5, "C2": 6}
+            return ranks.get(norm_level, 0)
+
+        if student_eng != "Unknown" and prog_eng not in ["Unknown", "None"]:
             if get_cefr_rank(student_eng) < get_cefr_rank(prog_eng):
                 return {'eligible': False, 'reason': f"English {student_eng} < Req {prog_eng}"}
 
-    # --- 4. Tuition Fee Check ---
+    # 4. Tuition Fee Check
     if student.preferences and student.preferences.max_tuition_fee_eur is not None:
         max_fee = student.preferences.max_tuition_fee_eur
         prog_fee = program.get('tuition_fee_per_semester_eur', 0.0)
-        
-        if prog_fee > max_fee:
-            return {'eligible': False, 'reason': f"Fee {prog_fee}€ > Budget {max_fee}€"}
-
-    # --- 5. Location Check (City & State) ---
-    if student.preferences:
-        # Check cities
-        if student.preferences.preferred_cities:
-            user_locs = [c.lower() for c in student.preferences.preferred_cities]
-            if user_locs: # Only check if user actually listed cities
-                prog_city = program.get('city', '').lower()
-                prog_state = program.get('state', '').lower()
-                
-                # Fail safe: If program has NO location data, we accept it
-                if prog_city or prog_state:
-                    match = False
-                    for loc in user_locs:
-                        if loc in prog_city or loc in prog_state:
-                            match = True
-                            break
-                    if not match:
-                        return {'eligible': False, 'reason': f"Location mismatch ({prog_city})"}
-        
-        # Check state preference
-        if student.preferences.preferred_state:
-            user_state = student.preferences.preferred_state.lower()
-            prog_state = program.get('state', '').lower()
-            
-            if prog_state and user_state not in prog_state:
-                return {'eligible': False, 'reason': f"State mismatch (Program in {prog_state}, prefer {user_state})"}
-
-    # --- 6. Semester Check (Winter/Summer) ---
-    if student.preferences and student.preferences.preferred_start_semester:
-        user_sem = student.preferences.preferred_start_semester.lower() # "winter" or "summer"
-        deadlines = program.get('deadlines', {})
-        
-        # If deadlines object exists, check specific semester availability
-        if deadlines:
-            has_winter = deadlines.get('winter_semester') is not None
-            has_summer = deadlines.get('summer_semester') is not None
-            
-            if user_sem == "winter" and not has_winter:
-                 return {'eligible': False, 'reason': "No Winter Intake"}
-            if user_sem == "summer" and not has_summer:
-                 return {'eligible': False, 'reason': "No Summer Intake"}
-
-    # --- 7. Teaching Language Preference ---
-    if student.preferences and student.preferences.preferred_language_of_instruction:
-        user_lang_pref = student.preferences.preferred_language_of_instruction.lower()
-        
-        # Infer teaching language from requirements
-        prog_eng_req = program.get('english_level_requirement', 'None')
-        prog_ger_req = program.get('german_level_requirement', 'None')
-        
-        # If user wants English, but Program requires NO English (implies German only)
-        if "english" in user_lang_pref:
-            if prog_eng_req == "None" and prog_ger_req != "None":
-                 return {'eligible': False, 'reason': "Program not taught in English"}
-                 
-        # If user wants German, but Program requires NO German (implies English only)
-        if "german" in user_lang_pref:
-             if prog_ger_req == "None" and prog_eng_req != "None":
-                  return {'eligible': False, 'reason': "Program not taught in German"}
+        if prog_fee > (max_fee + 100):
+            return {'eligible': False, 'reason': f"Fee {prog_fee} > {max_fee}"}
 
     return {'eligible': True, 'reason': "Pass"}
 
-# --- 2. SEMANTIC MATCHING LOGIC (Soft Scoring) ---
-def calculate_semantic_match(student: UserProfile, program: dict) -> float:
-    """
-    Calculates similarity between Student Interest/Transcript and Program Description.
-    """
-    # 1. Student Text
-    # Combine Interests + Course Names
-    transcript_text = " ".join([c.course_name for c in student.academic_background.transcript_courses])
-    
-    # Use new desired_program fields if available, otherwise fallback (or empty)
-    interests = []
-    if student.desired_program and student.desired_program.fields_of_interest:
-        interests = student.desired_program.fields_of_interest
-    elif student.academic_background and student.academic_background.fields_of_interest:
-        interests = student.academic_background.fields_of_interest
-        
-    interest_text = " ".join(interests)
-    student_doc = f"{transcript_text} {interest_text}"
-
-    # 2. Program Text
-    # Combine Content Summary + ECTS Subject Areas
-    prog_summary = program.get('course_content_summary', '')
-    prog_subjects = ""
-    if program.get('specific_ects_requirements'):
-        for domain in program['specific_ects_requirements']:
-            # Add domain name (e.g. "Mathematics")
-            prog_subjects += f" {domain.get('domain_name', '')}"
-            # Add modules (e.g. "Analysis", "Algebra")
-            for mod in domain.get('modules', []):
-                prog_subjects += f" {mod.get('subject_area', '')}"
-    
-    program_doc = f"{prog_summary} {prog_subjects}"
-
-    # 3. Match
-    if not student_doc.strip() or not program_doc.strip():
-        return 0.0
-        
+def calculate_interest_match(user_vector: List[float], program_vector: List[float]) -> float:
+    """Calculates cosine similarity between user interest and program."""
+    if not user_vector or not program_vector: 
+        return 0.5
     try:
-        vectorizer = TfidfVectorizer(stop_words='english')
-        tfidf_matrix = vectorizer.fit_transform([student_doc, program_doc])
-        score = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-        return round(float(score) * 10.0, 1) # 0 to 10 scale
+        sim = cosine_similarity([user_vector], [program_vector])[0][0]
+        return min(sim * 1.2, 1.0) # Boost score slightly
     except:
-        return 0.0
+        return 0.5
 
-# --- NODE: FILTER ---
+def check_ects_match_with_embeddings(student_course_vectors: List[Any], student_courses: List[Any], program: dict) -> dict:
+    """
+    The Expensive Check: Runs on survivors.
+    """
+    requirements = program.get('specific_ects_requirements', [])
+    if not requirements:
+        return {'eligible': True, 'score': 1.0, 'details': "No ECTS Reqs"}
+
+    total_domains = 0
+    met_domains = 0
+    details = []
+
+    for domain in requirements:
+        req_name = domain.get('domain_name', '')
+        req_credits = domain.get('min_ects_total', 0)
+        
+        if req_credits <= 0: continue
+        total_domains += 1
+        
+        # Single API Call per requirement
+        req_vector = safe_embed_query(req_name) 
+        time.sleep(0.2) # Sleep 200ms to smooth out the burst
+        if not req_vector: continue
+
+        similarities = cosine_similarity([req_vector], student_course_vectors)[0]
+        
+        found_credits = 0.0
+        # Threshold 0.55 finds matches like "Marketing" <-> "Business"
+        for i, score in enumerate(similarities):
+            if score > 0.55:
+                found_credits += student_courses[i].converted_ects
+
+        if found_credits >= (req_credits * 0.6): 
+            met_domains += 1
+        else:
+            details.append(f"{req_name}: {int(found_credits)}/{int(req_credits)}")
+                
+    if details:
+        if met_domains < (total_domains / 2):
+             return {'eligible': False, 'score': 0.0, 'details': f"Missing: {', '.join(details)}"}
+        else:
+             return {'eligible': True, 'score': 0.5, 'details': f"Partial: {', '.join(details)}"}
+            
+    return {'eligible': True, 'score': 1.0, 'details': "All Met"}
+
+
+# ==========================================
+# MAIN NODE (FAST MODE)
+# ==========================================
 def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     print("\n" + "="*50)
-    print("[Node: Agent 3] Filtering & Ranking...")
+    print("[Node: Agent 3] High-Speed Processing...")
     
-    user_profile = state["user_profile"]
-    if not user_profile:
-        return {"eligible_programs": [], "ranked_programs": []}
+    user_profile = state.get("user_profile")
+    if not user_profile: return {"eligible_programs": []}
 
-    # Load DB
     try:
         with open("structured_program_db.json", 'r', encoding='utf-8') as f:
             catalog = json.load(f)
     except FileNotFoundError:
-        print("❌ DB Not Found")
         return {"eligible_programs": []}
 
-    eligible = []
+    # --- 0. PREPARE USER DATA ---
+    print("  🧠 Embedding User Profile...")
+    interests = []
+    if user_profile.academic_background:
+         interests = user_profile.academic_background.fields_of_interest
+    user_text = " ".join(interests) if interests else "General"
+    user_interest_vector = safe_embed_query(user_text)
+
+    student_courses = []
+    student_course_vectors = []
+    if user_profile.academic_background and user_profile.academic_background.transcript_courses:
+        student_courses = user_profile.academic_background.transcript_courses
+        course_names = [c.course_name for c in student_courses]
+        if course_names:
+             # Batch embed transcript
+            student_course_vectors = safe_batch_embed(course_names, batch_size=50)
+
+    # --- STAGE 1: HARD FILTER & INTEREST MATCH (The Wide Funnel) ---
+    print(f"  🔍 Stage 1: Filtering {len(catalog)} programs...")
     
+    survivors = []
+    program_texts = []
+    
+    # A. Hard Filter Loop
     for prog in catalog:
-        # 1. Hard Filter
         check = check_hard_constraints(user_profile, prog)
         if check['eligible']:
-            # 2. Soft Match (Only if eligible)
-            score = calculate_semantic_match(user_profile, prog)
-            prog['relevance_score'] = score
-            eligible.append(prog)
-        # else:
-        #     print(f"Skipped {prog['program_id']}: {check['reason']}")
+            survivors.append(prog)
+            # Prepare text for batch embedding
+            p_name = prog.get('program_name', '')
+            p_sum = prog.get('course_content_summary', '')
+            program_texts.append(f"{p_name} {p_name} {p_sum}")
 
-    # 3. Rank
-    ranked = sorted(eligible, key=lambda x: x['relevance_score'], reverse=True)
+    print(f"     -> {len(survivors)} passed Hard Filters.")
     
-    print(f"✅ Eligible Programs: {len(ranked)}")
-    if ranked:
-        print(f"🔝 Top Match: {ranked[0]['program_name']} (Score: {ranked[0]['relevance_score']})")
+    # B. Batch Embed Interest (Fast Batching)
+    if survivors:
+        # Increased batch size to 50 for Paid API
+        program_vectors = safe_batch_embed(program_texts, batch_size=50)
+    else:
+        return {"eligible_programs": []}
+
+    # C. Calculate Interest Scores & Filter
+    interest_filtered_programs = []
+    
+    for i, prog in enumerate(survivors):
+        interest_score = 0.5
+        if user_interest_vector and i < len(program_vectors):
+             interest_score = calculate_interest_match(user_interest_vector, program_vectors[i])
         
+        prog['temp_interest_score'] = interest_score
+        
+        # THRESHOLD: Keep decent matches
+        if interest_score >= 0.4:
+            interest_filtered_programs.append(prog)
+        time.sleep(0.1)
+
+    print(f"     -> {len(interest_filtered_programs)} passed Interest Check.")
+
+    # --- STAGE 2: ECTS DEEP CHECK (The Narrow Funnel) ---
+    print("  🔬 Stage 2: Running Deep ECTS Check...")
+    
+    final_results = []
+    
+    for i, prog in enumerate(interest_filtered_programs):
+        
+        # --- FIX: HANDLE MISSING TRANSCRIPT ---
+        if student_course_vectors:
+            # We have data, calculate REAL score
+            ects_check = check_ects_match_with_embeddings(student_course_vectors, student_courses, prog)
+        else:
+            # No data: Pass them, but give a LOWER score (0.5) so they rank below verified matches
+            ects_check = {'eligible': True, 'score': 0.5, 'details': "⚠️ Transcript missing - Unverified"}
+        # --------------------------------------
+        
+        if not ects_check['eligible']:
+            continue
+
+        # Final Score Calculation
+        # ECTS (60%) + Interest (40%)
+        final_score = (ects_check['score'] * 0.6) + (prog['temp_interest_score'] * 0.4)
+        prog['relevance_score'] = round(final_score * 10, 1) # Scale to 10
+        prog['llm_reasoning'] = f"Interest: {int(prog['temp_interest_score']*100)}% | ECTS: {ects_check['details']}"
+        
+        # Filter out very low scores
+        if final_score > 0.2:  # Adjusted to ensure unverified users (min ~0.3-0.5) still appear
+            final_results.append(prog)
+
+    # --- SORT & RETURN ---
+    ranked = sorted(final_results, key=lambda x: x['relevance_score'], reverse=True)
+    print(f"✅ Final Eligible: {len(ranked)}")
+    
     return {"eligible_programs": ranked, "ranked_programs": ranked[:10]}

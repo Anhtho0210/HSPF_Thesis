@@ -143,15 +143,15 @@ if __name__ == "__main__":
     final_ranked_list = current_state.get("ranked_programs")
     
     if final_ranked_list:
-        print(f"\n🎯 Found {len(final_ranked_list)} Matching Programs!\n")
+        print(f"\n🎯 Found {len(final_ranked_list)} Matching Programs!\n Those program passes the Hard Filter, it gets a score based on 60% Qualifications (ECTS) and 40% Desire (Interests)")
         
         for i, program in enumerate(final_ranked_list[:5]):
-            print(f"{i+1}. {program.get('program_name', 'Unknown')} ({program.get('university_name')})")
-            print(f"   📊 Match Score: {program.get('relevance_score', 0):.1f} / 10.0")
+            print(f"{i+1}. {program.get('program_name')} ({program.get('university_name')})")
+            print(f"   📊 Final Score: {program.get('relevance_score', 0):.1f} / 10.0")
             
-            # Show why (if Hard Filter logic added reasons, print them)
-            # Otherwise, show the summary that matched
-            print(f"   📝 Content: {program.get('course_content_summary')[:150]}...")
-            print("-" * 30)
+            # --- PRINT THE REASONING ---
+            print(f"   💡 Analysis: {program.get('llm_reasoning', 'N/A')}")
+            # ---------------------------        
+            print("-" * 50)
     else:
         print("❌ No eligible programs found. (Check Hard Filters or Data)")
