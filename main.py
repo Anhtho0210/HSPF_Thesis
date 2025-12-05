@@ -62,23 +62,22 @@ if __name__ == "__main__":
     app = build_master_workflow()
  
     # --- Define Initial State ---
-    # Note: We intentionally leave some fields vague to test Agent 1's questions
     initial_raw_input = (
-        "Hi, I'm Anny from Vietnam. Here is my transcript. "
-        "I want to study Business Management"
-        # "I have IELTS 7.0" <-- Commented out to force Agent 1 to ask!
+        "Hi, I'm Anny from Vietnam. I have a Bachelor in Electronic Commerce. "
+        "I want to study Data Science. "
+        "My interests are Data Structure, Web Data Analytics, and Digital Marketing."
     )
     
     current_state = {
-        "user_intent": "Hi, I'm Anny. I want to study data science.",
+        "user_intent": initial_raw_input, # <--- Updated to match Anny's intent
         "pdf_path": pdf_filename, 
         "user_profile": None,
         "program_catalog": [], 
         "eligible_programs": [], 
-        "ranked_programs": [] # <--- This empty list causes the bug if checked too early!
+        "ranked_programs": [] 
     }
     
-    print("\n--- 🚀 Starting Full Agentic Workflow ---")
+    print("\n--- 🚀 Starting Anny's Matching Workflow (4-Layer Funnel) ---")
     
     while True:
         try:
@@ -86,121 +85,55 @@ if __name__ == "__main__":
             print(f"\n[System] Invoking Graph...")
             next_state = app.invoke(current_state, {"recursion_limit": 20})
             
-            # --- DEBUG: See what came back ---
-            print(f"[DEBUG] Next State Keys: {list(next_state.keys())}")
-            if "ai_response" in next_state:
-                print(f"[DEBUG] AI Response Content: {str(next_state['ai_response'])[:50]}...")
-            else:
-                print("[DEBUG] AI Response is MISSING in next_state")
-            # ---------------------------------
-
-            # Update current state with the new values
+            # Update current state
             current_state.update(next_state)
 
             # --- CHECK 1: SUCCESS (Found Programs) ---
+            # If Agent 3 returned programs, we are done!
             if current_state.get("eligible_programs"):
-                print("\n✅ Matching complete. Found eligible programs.")
+                print("\n" + "=" * 60)
+                print("✅ MATCHING COMPLETE: Top Candidates for Anny")
+                print("=" * 60)
                 
-                # Print full user profile for debugging
-                print("\n" + "=" * 50)
-                print("📋 FULL USER PROFILE (After Agent1)")
-                print("=" * 50)
-                profile = current_state.get("user_profile")
-                if profile:
-                    print(f"\n👤 Name: {profile.full_name}")
-                    print(f"🌍 Citizenship: {profile.citizenship.country_of_citizenship if profile.citizenship else 'N/A'}")
+                final_ranked_list = current_state.get("ranked_programs", [])
+                
+                if final_ranked_list:
+                    print(f"🎯 Found {len(final_ranked_list)} Top Matches (Filtered from DB)\n")
                     
-                    if profile.academic_background:
-                        acad = profile.academic_background
-                        print(f"\n🎓 Academic Background:")
-                        print(f"   - Field of Study: {acad.bachelor_field_of_study}")
-                        print(f"   - Duration: {acad.program_duration_semesters} semesters")
-                        print(f"   - Total Credits: {acad.total_credits_earned}")
-                        print(f"   - ECTS Conversion Factor: {acad.ects_conversion_factor}")
-                        print(f"   - Total Converted ECTS: {acad.total_converted_ects}")
+                    for i, program in enumerate(final_ranked_list[:5]): # Show top 5
+                        print(f"{i+1}. {program.get('program_name')} ({program.get('university_name')})")
+                        print(f"   📊 Final Score: {program.get('relevance_score', 0):.1f} / 10.0")
                         
-                        if acad.bachelor_gpa:
-                            gpa = acad.bachelor_gpa
-                            print(f"   - GPA: {gpa.score}/{gpa.max_scale} (min: {gpa.min_passing_grade})")
-                            print(f"   - German GPA: {gpa.score_german}")
-                        
-                        print(f"   - Fields of Interest: {acad.fields_of_interest}")
-                        
-                        if acad.transcript_courses:
-                            print(f"\n   📄 Transcript Courses ({len(acad.transcript_courses)} courses):")
-                            for i, course in enumerate(acad.transcript_courses[:5]):  # Show first 5
-                                print(f"      {i+1}. {course.course_name} - {course.original_credits} credits (ECTS: {course.converted_ects})")
-                            if len(acad.transcript_courses) > 5:
-                                print(f"      ... and {len(acad.transcript_courses) - 5} more courses")
-                        else:
-                            print(f"\n   📄 Transcript Courses: ❌ None extracted from PDF")
-                    
-                    if profile.language_proficiency:
-                        lang = profile.language_proficiency
-                        print(f"\n🗣️ Language: {lang.exam_type} - Overall: {lang.overall_score}")
-                    
-                    if profile.preferences:
-                        pref = profile.preferences
-                        print(f"\n⚙️ Preferences:")
-                        print(f"   - Max Tuition: {pref.max_tuition_fee_eur} EUR/semester")
-                        print(f"   - Preferred Cities: {pref.preferred_cities if pref.preferred_cities else 'No preference'}")
-                        print(f"   - Start Semester: {pref.preferred_start_semester}")
+                        # --- THIS IS THE NEW PART ---
+                        # Display the reasoning from the 4 Layers
+                        print(f"   💡 Logic Trace:")
+                        print(f"      {program.get('llm_reasoning', 'N/A')}")
+                        print("-" * 50)
                 else:
-                    print("❌ No profile found!")
-                print("=" * 50 + "\n")
+                    print("❌ Agent 3 found matches, but ranking failed.")
                 
                 break 
 
             # --- CHECK 2: PAUSE FOR CHAT (Missing Info) ---
             ai_q = current_state.get("ai_response")
-            
-            # Check if ai_q is valid text
-            if ai_q and isinstance(ai_q, str) and len(ai_q.strip()) > 0:
+            if ai_q:
                 print("\n" + "-" * 50)
                 print(f"🤖 AI Assistant: {ai_q}")
                 print("-" * 50)
-                
                 user_response = input("👤 You: ")
-                
-                # Update State & Restart Loop
                 current_state["user_intent"] += f" \nUser: {user_response}"
-                current_state["ai_response"] = None # Clear flag so it runs again
+                current_state["ai_response"] = None 
                 continue 
 
-            # --- CHECK 3: FAILURE ---
-            profile = current_state.get("user_profile")
-            missing = get_missing_fields(profile) if profile else ["Profile Missing"]
-
-            if not missing:
-                print("\n❌ Agent 3 ran, but no programs matched your hard filters.")
-                break
-            else:
-                # If we are here, it means ai_q was None/Empty, but we are still missing info
-                print(f"\n[DEBUG] Stuck loop details:")
-                print(f"  - Missing Fields: {missing}")
-                print(f"  - AI Response in State: {current_state.get('ai_response')}")
-                break
+            # --- CHECK 3: FAILURE (Layer 1 or 2 killed everything) ---
+            print("\n No eligible programs found.")
+            print("   Possible reasons:")
+            print("   1. Layer 1: Your Degree (E-Commerce) did not match any Program Domains.")
+            print("   2. Layer 2: Your GPA (2.11) or Fees did not pass the hard filters.")
+            break
 
         except Exception as e:
             print(f"\n[ERROR] Graph execution failed: {e}")
             break
-    # --- Final Output ---
-    print("\n" + "=" * 50)
-    print("--- ✅ WORKFLOW COMPLETE! ---")
-    print("=" * 50)
-    
-    final_ranked_list = current_state.get("ranked_programs")
-    
-    if final_ranked_list:
-        print(f"\n🎯 Found {len(final_ranked_list)} Matching Programs!\n Those program passes the Hard Filter, it gets a score based on 60% Qualifications (ECTS) and 40% Desire (Interests)")
-        
-        for i, program in enumerate(final_ranked_list):
-            print(f"{i+1}. {program.get('program_name')} ({program.get('university_name')})")
-            print(f"   📊 Final Score: {program.get('relevance_score', 0):.1f} / 10.0")
             
-            # --- PRINT THE REASONING ---
-            print(f"   💡 Analysis: {program.get('llm_reasoning', 'N/A')}")
-            # ---------------------------        
-            print("-" * 50)
-    else:
-        print("❌ No eligible programs found. (Check Hard Filters or Data)")
+    print("\n✅ WORKFLOW COMPLETE")

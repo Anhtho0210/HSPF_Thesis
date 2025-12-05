@@ -101,8 +101,15 @@ def merge_user_profiles(old_profile: Optional[UserProfile], new_profile: UserPro
     # 3. Merge Language
     if new_profile.language_proficiency:
         old_profile.language_proficiency = new_profile.language_proficiency
+    
+    # 4. Merge Professional & Tests (Work Experience)
+    if new_profile.professional_and_tests:
+        if not old_profile.professional_and_tests:
+            old_profile.professional_and_tests = ProfessionalAndTests()
+        if new_profile.professional_and_tests.relevant_work_experience_months is not None:
+            old_profile.professional_and_tests.relevant_work_experience_months = new_profile.professional_and_tests.relevant_work_experience_months
         
-    # 4. Merge Preferences
+    # 5. Merge Preferences
     if new_profile.preferences:
         if not old_profile.preferences: old_profile.preferences = Preferences()
         if new_profile.preferences.preferred_cities: old_profile.preferences.preferred_cities = new_profile.preferences.preferred_cities
@@ -158,57 +165,59 @@ def apply_ects_conversion(profile: UserProfile) -> UserProfile:
 # --- 5. CHECK MISSING FIELDS ---
 def get_missing_fields(profile: Optional[UserProfile]) -> List[str]:
     """
-    Analyzes profile. 
-    PRIORITY: Basic Info -> Academics -> Language -> Transcript Data.
+    Analyzes profile and returns missing fields ONE AT A TIME in priority order.
+    PRIORITY: Basic Info → Academics → Interests → Language → Work Experience → Transcript Data.
     """
     if profile is None:
         return ["Initial full profile text (name, GPA, major, citizenship, interests)"]
     
-    missing = []
-
-    # 1. Basic Info
-    if not profile.full_name: missing.append("full name")    
+    # 1. Basic Info (Ask one at a time)
+    if not profile.full_name: 
+        return ["full name"]
     if not profile.citizenship or not profile.citizenship.country_of_citizenship: 
-        missing.append("country of citizenship")
+        return ["country of citizenship"]
 
-    # 2. Academic Basics (Chattable)
+    # 2. Academic Background
     if not profile.academic_background:
         return ["academic background (bachelor field of study, GPA)"]
     
     acad = profile.academic_background
     if not acad.bachelor_field_of_study: 
-        missing.append("bachelor field of study")
+        return ["bachelor field of study"]
         
-    # GPA
+    # GPA (All sub-fields required)
     gpa = acad.bachelor_gpa
     if not gpa or not gpa.score or not gpa.max_scale or not gpa.min_passing_grade:
-        missing.append("full bachelor GPA details (score, max scale, min passing grade)")
+        return ["full bachelor GPA details (score, max scale, min passing grade)"]
 
-    # Interests
+    # 3. Interests (Separate question)
     has_interests = False
     if acad.fields_of_interest: has_interests = True
     if hasattr(profile, 'desired_program') and profile.desired_program and profile.desired_program.fields_of_interest:
         has_interests = True
     
     if not has_interests:
-        missing.append("3-5 technical fields of interest")
+        return ["3-5 technical fields of interest for your master's program"]
 
-    # 3. Language
+    # 4. Language (Separate question)
     if not profile.language_proficiency:
-        missing.append("language proficiency (e.g. IELTS/TOEFL)")
+        return ["language proficiency (e.g. IELTS/TOEFL)"]
 
-    # 4. Transcript & Meta-Data (Last)
-    if not missing:
-        if not acad.transcript_courses:
-            return ["official transcript (PDF upload)"]
+    # 5. Work Experience (Separate question)
+    if not profile.professional_and_tests or profile.professional_and_tests.relevant_work_experience_months is None:
+        return ["relevant work experience (in months, or 0 if none)"]
+
+    # 6. Transcript & Meta-Data (Last priority)
+    if not acad.transcript_courses:
+        return ["official transcript (PDF upload)"]
+    
+    # These are mandatory for ECTS calculation
+    if not acad.total_credits_earned: 
+        return ["total credits earned (explicit number)"]
+    if not acad.program_duration_semesters: 
+        return ["program duration (in semesters)"]
         
-        # These are mandatory for ECTS calculation
-        if not acad.total_credits_earned: 
-            missing.append("total credits earned (explicit number)")
-        if not acad.program_duration_semesters: 
-            missing.append("program duration (in semesters)")
-        
-    return missing
+    return []
 
 def get_desirable_missing_fields(profile: Optional[UserProfile], user_intent: str = "") -> List[str]:
     if not profile or not profile.preferences: return ["preferences"]
@@ -270,8 +279,12 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
                - Do NOT assume from terms like "degree", "CompSci", "CS degree", "tech degree", or "I have a degree", "degree in tech" or "studied programming".
              
              - For 'fields_of_interest': 
-               - Extract specific technical/research fields explicitly mentioned.
-               - If the user only says "interested in tech", ignore it.
+               - **CRITICAL**: This field is for the user's DESIRED MASTER'S PROGRAM interests, NOT their bachelor's courses.
+               - ONLY populate this if the user EXPLICITLY states what they want to study in their MASTER'S program.
+               - DO NOT extract course names from transcripts/PDFs and put them here.
+               - DO NOT infer interests from bachelor's courses (e.g., if transcript shows "Database" course, do NOT add "Database" to interests).
+               - Examples of valid input: "I want to study AI and Machine Learning", "interested in Data Science and Analytics".
+               - If the user has NOT explicitly mentioned their master's program interests, set this to null or empty list [].
 
              - For 'academic_background.bachelor_gpa': Only extract if the user provides actual GPA numbers. Set score, max_scale, and min_passing_grade to null if not provided.
              
@@ -281,8 +294,9 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
                - **original_credits**: The RAW credit value listed (do NOT convert to ECTS yourself).
 
              - For 'academic_background':
-               - Look for **'total_credits_earned'** (e.g., "Total Units: 140", "Credits: 128").
-               - Look for **'program_duration_semesters'** (e.g., "4 years" = 8, "3.5 years" = 7).
+               - **DO NOT** extract 'total_credits_earned' or 'program_duration_semesters' from PDFs.
+               - These fields should ONLY be populated when the user explicitly provides them in chat.
+               
              
              - For 'language_proficiency': Use 'exam_type' instead of 'exam'. For IELTS/TOEFL, use 'overall_score'.
              - The 'preferences' sections are optional.
