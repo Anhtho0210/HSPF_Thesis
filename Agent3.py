@@ -9,6 +9,8 @@ from langchain_core.output_parsers import JsonOutputParser
 from sklearn.metrics.pairwise import cosine_similarity
 from models import AgentState, UserProfile
 from pydantic import BaseModel, Field
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 load_dotenv()
 
@@ -220,41 +222,103 @@ def calculate_semantic_match(user_vector: List[float], program_vector: List[floa
 # ==========================================
 # LAYER 4: DEEP ECTS CHECK (Reality Check)
 # ==========================================
-def check_ects_match_with_embeddings(student_course_vectors: List[Any], student_courses: List[Any], program: dict) -> dict:
+def check_ects_match_with_embeddings(student_course_vectors: list, student_courses: list, program: dict) -> dict:
     requirements = program.get('specific_ects_requirements', [])
     if not requirements:
         return {'eligible': True, 'score': 1.0, 'details': "No ECTS constraints"}
 
-    total_domains = 0
-    met_domains = 0
-    details = []
-
+    # 1. Create a Ledger of Available Credits
+    # We clone the credits so we can "spend" them without modifying the original object
+    available_credits = [c.converted_ects for c in student_courses]
+    
+    # 2. Pre-Calculate All Similarities Matrix
+    # Shape: (Num_Requirements, Num_Student_Courses)
+    req_vectors = []
+    req_infos = [] # Store metadata to map back later
+    
     for domain in requirements:
         req_name = domain.get('domain_name', '')
         req_credits = domain.get('min_ects_total', 0)
-        if req_credits <= 0: continue
-        total_domains += 1
         
-        req_vector = safe_embed_query(req_name) 
-        if not req_vector: continue
-
-        similarities = cosine_similarity([req_vector], student_course_vectors)[0]
-        found_credits = 0.0
+        # Improvement: Enhance the embedding text if sub-modules exist
+        # This helps 'Business Admin' match 'Marketing' courses better
+        sub_modules = ", ".join([m.get('subject_area','') for m in domain.get('modules', [])])
+        embed_text = f"{req_name} {sub_modules}".strip()
         
-        # Threshold 0.60
-        for i, score in enumerate(similarities):
-            if score > 0.60: found_credits += student_courses[i].converted_ects
+        if req_credits > 0:
+            vec = safe_embed_query(embed_text)
+            if vec:
+                req_vectors.append(vec)
+                req_infos.append({
+                    'name': req_name, 
+                    'target': req_credits, 
+                    'filled': 0.0, 
+                    'status': '❌'
+                })
 
-        if found_credits >= (req_credits * 0.6): 
-            met_domains += 1
-            status = "✔"
-        else:
-            status = "❌"
-        details.append(f"{status} {req_name}: {int(found_credits)}/{int(req_credits)}")
-                
-    score = met_domains / total_domains if total_domains > 0 else 1.0
-    return {'eligible': True, 'score': score, 'details': ", ".join(details)}
+    if not req_vectors:
+        return {'eligible': True, 'score': 0.5, 'details': "Cannot embed requirements"}
 
+    # Calculate Matrix: Rows=Reqs, Cols=Courses
+    similarity_matrix = cosine_similarity(req_vectors, student_course_vectors)
+
+    # 3. Create a List of Potential Matches and Sort by Confidence
+    # We want to fulfill the STRONGEST matches first (Greedy Approach)
+    potential_matches = []
+    
+    rows, cols = similarity_matrix.shape
+    for r in range(rows):
+        for c in range(cols):
+            score = similarity_matrix[r][c]
+            if score > 0.60: # Keep your threshold
+                potential_matches.append({
+                    'req_idx': r,
+                    'course_idx': c,
+                    'score': score
+                })
+    
+    # Sort descending: Best match gets first dibs on credits
+    potential_matches.sort(key=lambda x: x['score'], reverse=True)
+
+    # 4. Consume Credits
+    for match in potential_matches:
+        r_idx = match['req_idx']
+        c_idx = match['course_idx']
+        
+        # How much does this requirement still need?
+        needed = req_infos[r_idx]['target'] - req_infos[r_idx]['filled']
+        if needed <= 0: continue # Requirement already full
+        
+        # How much does this course have left?
+        have = available_credits[c_idx]
+        if have <= 0: continue # Course already used up
+        
+        # Take the minimum of what's needed vs what's available
+        take = min(needed, have)
+        
+        # Update Ledger
+        req_infos[r_idx]['filled'] += take
+        available_credits[c_idx] -= take
+
+    # 5. Final Grading
+    met_count = 0
+    details = []
+    
+    for info in req_infos:
+        # Soft pass: If we found at least 60% of the required credits
+        if info['filled'] >= (info['target'] * 0.6):
+            info['status'] = '✔'
+            met_count += 1
+        
+        details.append(f"{info['status']} {info['name']}: {int(info['filled'])}/{int(info['target'])}")
+
+    final_score = met_count / len(req_infos) if req_infos else 1.0
+    
+    return {
+        'eligible': True, 
+        'score': final_score, 
+        'details': ", ".join(details)
+    }
 
 # ==========================================
 # MAIN NODE: AGENT 3 (FILTER & RANK)
