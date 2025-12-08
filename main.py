@@ -64,8 +64,8 @@ if __name__ == "__main__":
     # --- Define Initial State ---
     initial_raw_input = (
         "Hi, I'm Anny from Vietnam. I have a Bachelor in Electronic Commerce. "
-        "I want to study Data Science. "
-        "My interests are Data Structure, Web Data Analytics, and Digital Marketing."
+        "I want to study Digital Business "
+        "My interests are Business Informatics, Innovation, Transformation, and Data Analytics."
     )
     
     current_state = {

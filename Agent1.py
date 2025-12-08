@@ -270,8 +270,7 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
              
              CRITICAL RULES - ABSOLUTELY NO ASSUMPTIONS:
              - Do NOT invent or assume data that is not explicitly mentioned by the user.
-             - Do NOT infer or guess fields like 'bachelor_field_of_study' or 'fields_of_interest' from vague statements.
-             - If a field is not mentioned in the user's text, ask user again to get the answer (by returning null).
+             - If a field is not mentioned in the user's text, ask user again to get the answer .
 
              MANDATORY RULES FOR ACADEMIC FIELDS:
              - For 'academic_background.bachelor_field_of_study': 
@@ -287,6 +286,7 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
                - If the user has NOT explicitly mentioned their master's program interests, set this to null or empty list [].
 
              - For 'academic_background.bachelor_gpa': Only extract if the user provides actual GPA numbers. Set score, max_scale, and min_passing_grade to null if not provided.
+             - For academic_background.program_duration_semester, ask about the total semester in bachelor degree
              
              - For 'academic_background.transcript_courses': If the input contains a list of subjects/courses (e.g., from a PDF):
                - Extract them into 'academic_background.transcript_courses'.
@@ -299,11 +299,8 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
                
              
              - For 'language_proficiency': Use 'exam_type' instead of 'exam'. For IELTS/TOEFL, use 'overall_score'.
-             - The 'preferences' sections are optional.
              
              Crucial Context: The user's latest response might be a short answer. Map it to the CORRECT field:
-             - If asked about bachelor's degree field and user answers "Computer Science", put it in 'bachelor_field_of_study'.
-             - If asked about interests and user answers "AI", put them in 'fields_of_interest'.
              - If user says "Munich", populate 'preferences.preferred_cities'.
              - If user says "1000", it is likely 'preferences.max_tuition_fee_eur'.
              - If user says "No preference", set the specific list to [].
