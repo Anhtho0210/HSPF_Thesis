@@ -130,8 +130,13 @@ def apply_ects_conversion(profile: UserProfile) -> UserProfile:
     if not profile or not profile.academic_background: return profile
     acad = profile.academic_background
     
+    print(f"\n[DEBUG ECTS] Starting ECTS conversion...")
+    print(f"[DEBUG ECTS] total_credits_earned: {acad.total_credits_earned}")
+    print(f"[DEBUG ECTS] program_duration_semesters: {acad.program_duration_semesters}")
+    
     # We require explicit total credits and duration to calculate the factor
     if not acad.total_credits_earned or not acad.program_duration_semesters:
+        print(f"[DEBUG ECTS] Missing required fields - skipping conversion")
         return profile
 
     try:
@@ -188,9 +193,10 @@ def get_missing_fields(profile: Optional[UserProfile]) -> List[str]:
     # GPA (All sub-fields required)
     gpa = acad.bachelor_gpa
     if not gpa or not gpa.score or not gpa.max_scale or not gpa.min_passing_grade:
+        print(f"[DEBUG] GPA missing - gpa object: {gpa}, score: {gpa.score if gpa else 'N/A'}, max: {gpa.max_scale if gpa else 'N/A'}, min: {gpa.min_passing_grade if gpa else 'N/A'}")
         return ["full bachelor GPA details (score, max scale, min passing grade)"]
 
-    # 3. Interests (Separate question)
+    # 3. Interests (Separate question) 
     has_interests = False
     if acad.fields_of_interest: has_interests = True
     if hasattr(profile, 'desired_program') and profile.desired_program and profile.desired_program.fields_of_interest:
@@ -318,8 +324,24 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
         result = chain.invoke({"input": combined_input, "format_instructions": format_instructions})
         new_profile_update = UserProfile(**result)
         
+        # DEBUG: Print extracted GPA
+        print("\n[DEBUG] Extracted GPA from LLM:")
+        if new_profile_update.academic_background and new_profile_update.academic_background.bachelor_gpa:
+            gpa = new_profile_update.academic_background.bachelor_gpa
+            print(f"  Score: {gpa.score}, Max: {gpa.max_scale}, Min: {gpa.min_passing_grade}")
+        else:
+            print("  GPA is None or not extracted")
+        
         # --- CRITICAL: MERGE WITH EXISTING STATE ---
         final_profile = merge_user_profiles(existing_profile, new_profile_update)
+        
+        # DEBUG: Print merged GPA
+        print("\n[DEBUG] GPA after merge:")
+        if final_profile.academic_background and final_profile.academic_background.bachelor_gpa:
+            gpa = final_profile.academic_background.bachelor_gpa
+            print(f"  Score: {gpa.score}, Max: {gpa.max_scale}, Min: {gpa.min_passing_grade}")
+        else:
+            print("  GPA is None after merge")
         
         # Post-Processing
         if final_profile.academic_background:
@@ -330,6 +352,9 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
                 if denom != 0:
                     german_val = 1 + 3 * (gpa.max_scale - gpa.score) / denom
                     gpa.score_german = round(max(1.0, min(4.0, german_val)), 2)
+                    print(f"\n[DEBUG] GPA German conversion: {gpa.score_german}")
+                else:
+                    print("\n[DEBUG] GPA calculation skipped: denominator is 0")
 
             # ECTS Calc
             final_profile = apply_ects_conversion(final_profile)

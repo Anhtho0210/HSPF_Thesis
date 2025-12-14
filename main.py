@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # --- Define Initial State ---
     initial_raw_input = (
         "Hi, I'm Anny from Vietnam. I have a Bachelor in Electronic Commerce. "
-        "I want to study Digital Business "
+        "I want to study master of Digital Business "
         "My interests are Business Informatics, Innovation, Transformation, and Data Analytics."
     )
     
@@ -99,12 +99,14 @@ if __name__ == "__main__":
                 
                 if final_ranked_list:
                     print(f"🎯 Found {len(final_ranked_list)} Top Matches (Filtered from DB)\n")
+                    print("\n Final Score = 20% Degree Compalibility + 40% student intent + 40% meet ECTs requirements")
                     
-                    for i, program in enumerate(final_ranked_list[:5]): # Show top 5
+                    for i, program in enumerate(final_ranked_list[:20]): # Show top 20
                         print(f"{i+1}. {program.get('program_name')} ({program.get('university_name')})")
-                        print(f"   📊 Final Score: {program.get('relevance_score', 0):.1f} / 10.0")
+                        print(f"   📊 Final Score: {program.get('relevance_score')}")
                         
-                        # --- THIS IS THE NEW PART ---
+                        ects = program.get('ects_score', 0.0)  # Retrieves the saved 0.0-1.0 score
+                        print(f"   🎓 ECTS Audit:  {ects * 100:.0f}% Coverage")
                         # Display the reasoning from the 4 Layers
                         print(f"   💡 Logic Trace:")
                         print(f"      {program.get('llm_reasoning', 'N/A')}")

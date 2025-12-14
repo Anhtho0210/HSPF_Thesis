@@ -72,7 +72,7 @@ def batch_check_degrees_with_llm(student_major: str, all_program_domains: List[L
         key = tuple(sorted(domains)) 
         unique_sets[key] = domains
 
-    print(f"  Layer 1: Evaluating '{student_major}' against {len(unique_sets)} unique domain requirements...")
+    print(f"  Layer 2: Evaluating '{student_major}' against {len(unique_sets)} unique domain requirements...")
 
     scores_cache = {}
     
@@ -87,18 +87,43 @@ def batch_check_degrees_with_llm(student_major: str, all_program_domains: List[L
         1. Student's Major (The degree they have)
         2. Required Domains (The degrees the university accepts)
 
-        SCORING RULES:
-        - 1.0 (Perfect): The Major is explicitly in the Required list (e.g. "CS" vs "CS").
-        - 0.8-0.9 (Strong): The Major is a sub-field or very close synonym (e.g. "E-Commerce" vs "Business Informatics" or "Economics").
-        - 0.5-0.7 (Partial): The Major has some overlap but lacks core theory (e.g. "E-Commerce" vs "Computer Science").
-        - 0.0-0.2 (Reject): The Major is completely unrelated (e.g. "E-Commerce" vs "Agricuture" or "Physics").
-
-        Ignore the Program Name. Focus ONLY on the academic content of the degrees.
+        Step-by-Step Analysis Rules:
+        1. **DECONSTRUCT THE MAJOR:** If the student's major has a unique or "random" name, break it down into standard academic disciplines. 
+        - *Example:* "Digital Economy" -> Deconstructs to: Economics + Information Systems.
+        - *Example:* "Technomathematics" -> Deconstructs to: Mathematics + Engineering/CS.
         
+        2. **CHECK FOR MATCHES:** Compare the deconstructed disciplines to the Required Domains.
+        - Look for the **Best Single Match**. If one part of a hybrid degree matches, it is a valid hit.
+
+        3. **HANDLE "RELATED FIELDS":** - If the requirement list contains "related field", "relevant degree", or "etc", DO NOT reject.
+        - Instead, ask: "Is the student's major in the same General Faculty as the other specific requirements?"
+        - If yes, score High (0.8-0.9).
+
+        SCORING RUBRIC:
+        - **1.0 (Exact/Synonym):** The major is identical or a clear linguistic variation.
+        * *Example:* "Informatics" matches "Computer Science".
+        * *Example:* "Business Admin" matches "Management".
+
+        - **0.8-0.9 (Strong Hybrid / Sub-Specialty):** The major is a "random" or specific title, but >70% of its inferred curriculum fits the core requirement.
+        * *Example:* "Digital Economy" (Student) matches "Economics" (Required). -> [0.9] (It is Economics with a digital focus).
+        * *Example:* "Automotive Software Engineering" (Student) matches "Computer Science" (Required). -> [0.8] (It is Computer Science applied to cars).
+
+        - **0.6-0.7 (Partial/Interdisciplinary):** The major contains the requirement as a component, but it is not the main focus (~25-70% overlap).
+        * *Example:* "Mechatronics" (Student) matches "Computer Science" (Required). -> [0.6] (Contains coding, but focuses more on hardware/mechanics).
+        * *Example:* "Media Design" (Student) matches "Communication Science" (Required). -> [0.7] (Overlap in theory, but design is practical).
+
+        - **0.3-0.5 (Faculty Adjacent):** The major is in the same general faculty, but the theoretical foundation is different.
+        * *Example:* "Architecture" (Student) matches "Civil Engineering" (Required). -> [0.3] (Both build things, but the math/physics depth is totally different).
+        * *Example:* "Business Admin" (Student) matches "Economics" (Required). -> [0.5] (Related, but BA is practical while Econ is theoretical).
+
+        - **0.0-0.2 (No Fit):** The inferred curriculum has no meaningful overlap.
+        * *Example:* "Forestry" matches "Physics".
+        * *Example:* "English Literature" matches "Civil Engineering".
+
         Respond in JSON: {{ "score": float, "reasoning": "string" }}
         """),
         ("user", """Student's Major: "{student_major}"
-        Required Degree Domains: {target_domains}
+        Required Degree Domains: {target_domains} 
         
         Is this major a valid background?""")
     ])
@@ -225,7 +250,7 @@ def calculate_semantic_match(user_vector: List[float], program_vector: List[floa
 def check_ects_match_with_embeddings(student_course_vectors: list, student_courses: list, program: dict) -> dict:
     requirements = program.get('specific_ects_requirements', [])
     if not requirements:
-        return {'eligible': True, 'score': 1.0, 'details': "No ECTS constraints"}
+        return {'eligible': True, 'score': 0.7, 'details': "No ECTS constraints"}
 
     # 1. Create a Ledger of Available Credits
     # We clone the credits so we can "spend" them without modifying the original object
@@ -270,7 +295,7 @@ def check_ects_match_with_embeddings(student_course_vectors: list, student_cours
     for r in range(rows):
         for c in range(cols):
             score = similarity_matrix[r][c]
-            if score > 0.60: # Keep your threshold
+            if score > 0.60: # Keep threshold
                 potential_matches.append({
                     'req_idx': r,
                     'course_idx': c,
@@ -416,8 +441,8 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
             key = tuple(sorted(req_domains))
             d_score = domain_scores_map.get(key, 0.0)
             
-        # FILTER: Strict Cutoff (Reject < 0.3)
-        if d_score >= 0.3:
+        # FILTER: Strict Cutoff (Reject < 0.5)
+        if d_score >= 0.5:
             prog['_domain_score'] = d_score
             survivors_layer_2.append(prog)
             
@@ -438,31 +463,48 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     # 🔍 LAYER 3: SEMANTIC RANKING (The Matchmaker)
     # =========================================================
     print(f"\n--- Layer 3: Running Semantic Ranking ---")
+    print(f"  User Persona: {user_persona_text}")
+    print(f"  Embedding {len(program_texts)} program descriptions...")
     
     program_vectors = safe_batch_embed(program_texts, batch_size=50)
+    print(f"  ✓ Generated {len(program_vectors)} program vectors")
     
     ranked_candidates = []
     for i, prog in enumerate(survivors_layer_2):
+        prog_name = prog.get('program_name', 'Unknown')
+        print(f"\n  [L3 Check {i+1}/{len(survivors_layer_2)}] {prog_name}")
+        
         sem_score = 0.5
         if user_vector and i < len(program_vectors):
              sem_score = calculate_semantic_match(user_vector, program_vectors[i])
+             print(f"    → Semantic Match Score: {sem_score:.3f}")
+        else:
+             print(f"    → Semantic Match Score: {sem_score:.3f} (default - no vector)")
         
-        prog['_semantic_score'] = sem_score
+        prog['_semantic_score'] = sem_score  
         
-        # Weighted Score for Layer 3 (70% Semantic, 30% Degree Strength)
-        prelim_score = (sem_score * 0.7) + (prog['_domain_score'] * 0.3)
-        
+        domain_score = prog['_domain_score']
+        prelim_score = sem_score
+        #print(f"    → Domain Score: {domain_score:.3f}")
+        print(f"    → Preliminary Score: {prelim_score:.3f} (Semantic)")
+         
         # Relevance Threshold
-        if prelim_score > 0.4:
+        if prelim_score > 0.5:
             ranked_candidates.append(prog)
+            print(f"    ✅ PASSED relevance threshold (> 0.5)")
+        else:
+            print(f"    ❌ REJECTED - below relevance threshold (≤ 0.5)")
             
     # Sort and take Top 20
+    print(f"\n  Sorting {len(ranked_candidates)} candidates by semantic score...")
     ranked_candidates.sort(key=lambda x: x['_semantic_score'], reverse=True)
     top_candidates = ranked_candidates[:20]
 
     count_l3 = len(top_candidates)
     dropped_l3 = len(ranked_candidates) - count_l3
     print(f"✅ L3 Top Candidates: {count_l3} selected for Deep Scan (from {len(ranked_candidates)} relevant matches)")
+    if dropped_l3 > 0:
+        print(f"   (Dropped {dropped_l3} lower-ranked candidates to keep top 20)")
 
     # =========================================================
     # 🔬 LAYER 4: DEEP ECTS VERIFICATION (The Auditor)
@@ -476,10 +518,16 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         else:
             ects_check = {'eligible': True, 'score': 0.5, 'details': "Transcript missing"}
 
+        prog['ects_score'] = ects_check['score']     
+        prog['ects_details'] = ects_check['details']
+
         # Final Scoring
-        final_score = (prog['_semantic_score'] * 0.6) + (ects_check['score'] * 0.3) + (prog['_domain_score'] * 0.1)
-        
-        prog['relevance_score'] = round(final_score * 10, 1)
+        final_score = (
+            (prog['_semantic_score'] * 40) + 
+            (ects_check['score'] * 40) + 
+            (prog['_domain_score'] * 20)
+        )
+        prog['relevance_score'] = round(final_score, 1)
         prog['llm_reasoning'] = (
             f"Degree: {int(prog['_domain_score']*100)}% | "
             f"Semantic: {int(prog['_semantic_score']*100)}% | "
@@ -493,4 +541,4 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     print(f"🏁 DONE: Returning {len(final_ranked)} programs.")
     print("="*60 + "\n")
     
-    return {"eligible_programs": final_ranked, "ranked_programs": final_ranked[:10]}
+    return {"eligible_programs": final_ranked, "ranked_programs": final_ranked[:20]}

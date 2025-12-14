@@ -124,6 +124,9 @@ def get_extraction_chain():
         9.RULES FOR EXPERIENCE:
         - "1 year work experience" -> min_work_experience_months: 12
         - "Internship required" -> requires_internship: true
+
+        10. course_content_summary:
+        A dense, keyword-rich summary of all technical topics, subjects, and skills taught.
         
         **EXAMPLE OF DESIRED OUTPUT STRUCTURE:**
         {{
