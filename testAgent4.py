@@ -38,8 +38,20 @@ def query_perplexity_search_and_extract(program_name: str, uni_name: str, citize
          (If exact 2025 date is missing, provide the standard annual rule, e.g. 'Always July 15').
        - **Tuition**: Check for tuition fees (especially the ~1500 EUR/semester for Baden-Württemberg universities).
        - **Portal**: Is it 'Uni-Assist', 'VPD', or 'Direct'?
-       - **Documents**: List mandatory docs (CV, Transcript, etc.).
-       - **Country-Specific**: Check if there are special requirements for {citizenship} (e.g., APS Certificate, specific language waivers, notarization rules).
+       - **Document Checklist**: List ONLY the actual DOCUMENTS/FILES that applicants must submit or upload.
+         These are the physical items to prepare (e.g., "Passport copy", "CV/Resume", "Bachelor's degree certificate", 
+         "Official transcripts", "English language certificate", "Motivation letter", "Passport photo", etc.).
+         DO NOT include eligibility criteria or program requirements (like "grade 2.5 or better" or "degree in Computer Science").
+         DO NOT include country-specific documents here (like APS certificate).
+       - **Country-Specific**: Check if there are ADDITIONAL special requirements for {citizenship} specifically 
+         (e.g., APS Certificate for Vietnam/India/China, specific language waivers, notarization rules).
+         List these separately from the standard documents.
+    
+    CRITICAL DISTINCTIONS:
+    - "document_checklist" = Physical DOCUMENTS to submit that apply to ALL international applicants 
+      (passport, transcripts, certificates, CV, motivation letter, etc.)
+    - "country_specific_requirement" = ADDITIONAL requirements ONLY for {citizenship} (e.g., APS certificate)
+    - DO NOT mix program admission requirements (eligibility criteria like GPA thresholds) with the document checklist
     
     Return JSON structure:
     {{
@@ -47,9 +59,9 @@ def query_perplexity_search_and_extract(program_name: str, uni_name: str, citize
       "deadline_non_eu": "YYYY-MM-DD or 'July 15 (Annual)'",
       "tuition_fee_eur": "1500 or 0",
       "application_mode": "Uni-Assist / VPD / Direct",
-      "country_specific_requirement": "String (e.g. 'APS required' or 'None')",
-      "document_checklist": ["Item 1", "Item 2"],
-      "notes": "Any other critical info"
+      "country_specific_requirement": "String (e.g. 'APS certificate required' or 'None')",
+      "document_checklist": ["Document 1", "Document 2", "Document 3"],
+      "notes": "Any other critical info including program admission requirements/eligibility criteria"
     }}
     """
 
@@ -89,22 +101,18 @@ def query_perplexity_search_and_extract(program_name: str, uni_name: str, citize
 # --- TEST RUNNER ---
 if __name__ == "__main__":
     
-    prog_name = "Management and Economics"
-    uni_name = "University of Tübingen"
+    prog_name = "Master of E-Government"
+    uni_name = "Koblenz University"
     
     # TEST CASE 1: VIETNAM (Should trigger APS)
-    print("--- TEST CASE 1: USA ---")
-    data_vn = query_perplexity_search_and_extract(prog_name, uni_name, citizenship="USA")
-    print(json.dumps(data_vn, indent=2))
+    # print("--- TEST CASE 1: Vietnam ---")
+    # data_vn = query_perplexity_search_and_extract(prog_name, uni_name, citizenship="Vietnam")
+    # print(json.dumps(data_vn, indent=2))
     
-    print("\n" + "="*50 + "\n")
+    # print("\n" + "="*50 + "\n")
 
     # TEST CASE 2: INDIA (Should trigger APS)
-    # print("--- TEST CASE 2: INDIA ---")
-    # data_in = query_perplexity_search_and_extract(prog_name, uni_name, citizenship="India")
-    # print(json.dumps(data_in, indent=2))
+    print("--- TEST CASE 2: INDIA ---")
+    data_in = query_perplexity_search_and_extract(prog_name, uni_name, citizenship="India")
+    print(json.dumps(data_in, indent=2))
     
-    # TEST CASE 3: USA (Should NOT trigger APS, might trigger Language Waiver)
-    # print("--- TEST CASE 3: USA ---")
-    # data_us = query_perplexity_search_and_extract(prog_name, uni_name, citizenship="USA")
-    # print(json.dumps(data_us, indent=2))

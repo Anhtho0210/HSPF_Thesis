@@ -11,6 +11,7 @@ from models import AgentState, UserProfile
 from pydantic import BaseModel, Field
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 load_dotenv()
 
@@ -97,8 +98,9 @@ def batch_check_degrees_with_llm(student_major: str, all_program_domains: List[L
 
         3. **HANDLE "RELATED FIELDS":** - If the requirement list contains "related field", "relevant degree", or "etc", DO NOT reject.
         - Instead, ask: "Is the student's major in the same General Faculty as the other specific requirements?"
-        - If yes, score High (0.8-0.9).
-
+        - If yes, score (0.6-0.7).
+        - If no, score (0.0-0.2). 
+        
         SCORING RUBRIC:
         - **1.0 (Exact/Synonym):** The major is identical or a clear linguistic variation.
         * *Example:* "Informatics" matches "Computer Science".
@@ -466,30 +468,52 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     print(f"  User Persona: {user_persona_text}")
     print(f"  Embedding {len(program_texts)} program descriptions...")
     
-    program_vectors = safe_batch_embed(program_texts, batch_size=50)
-    print(f"  ✓ Generated {len(program_vectors)} program vectors")
+    # 1. Prepare Data for TF-IDF
+    # TF-IDF needs to see the whole "Corpus" (all programs) to know which words are rare.
+    # We combine User Persona + All Program Texts
+    all_texts = [user_persona_text] + program_texts
     
+    # 2. Train TF-IDF
+    tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+    tfidf_matrix = tfidf_vectorizer.fit_transform(all_texts)
+    
+    # The first vector is the User; the rest are Programs
+    user_tfidf = tfidf_matrix[0:1]
+    program_tfidf_matrix = tfidf_matrix[1:]
+
+    # 3. Calculate Embedding Vectors (Your existing code)
+    program_vectors = safe_batch_embed(program_texts, batch_size=50)
+
     ranked_candidates = []
+    
     for i, prog in enumerate(survivors_layer_2):
         prog_name = prog.get('program_name', 'Unknown')
         print(f"\n  [L3 Check {i+1}/{len(survivors_layer_2)}] {prog_name}")
         
-        sem_score = 0.5
+        # --- SCORE A: Semantic (Vector) ---
+        score_semantic = 0.0
         if user_vector and i < len(program_vectors):
-             sem_score = calculate_semantic_match(user_vector, program_vectors[i])
-             print(f"    → Semantic Match Score: {sem_score:.3f}")
-        else:
-             print(f"    → Semantic Match Score: {sem_score:.3f} (default - no vector)")
+             score_semantic = calculate_semantic_match(user_vector, program_vectors[i])
         
-        prog['_semantic_score'] = sem_score  
+        # --- SCORE B: Keyword (TF-IDF) ---
+        # Calculate cosine similarity on the TF-IDF vectors
+        # (How many exact keywords does this program share with the user?)
+        score_keyword = cosine_similarity(user_tfidf, program_tfidf_matrix[i:i+1])[0][0]
         
-        domain_score = prog['_domain_score']
-        prelim_score = sem_score
-        #print(f"    → Domain Score: {domain_score:.3f}")
-        print(f"    → Preliminary Score: {prelim_score:.3f} (Semantic)")
+        # --- SCORE C: Hybrid Combination ---
+        # Weighting: 70% Semantic (Concept) + 30% Keyword (Precision)
+        # This prevents "Keyword Stuffing" from winning, but rewards exact matches.
+        hybrid_score = (score_semantic * 0.7) + (score_keyword * 0.3)
+        
+        print(f"    → Vector Score: {score_semantic:.3f} (Concept)")
+        print(f"    → TF-IDF Score: {score_keyword:.3f} (Keywords)")
+        print(f"    → Hybrid Score: {hybrid_score:.3f}")
+
+        # Save for later
+        prog['_semantic_score'] = hybrid_score
          
         # Relevance Threshold
-        if prelim_score > 0.5:
+        if hybrid_score > 0.5:
             ranked_candidates.append(prog)
             print(f"    ✅ PASSED relevance threshold (> 0.5)")
         else:
