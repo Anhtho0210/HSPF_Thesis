@@ -252,7 +252,7 @@ def calculate_semantic_match(user_vector: List[float], program_vector: List[floa
 def check_ects_match_with_embeddings(student_course_vectors: list, student_courses: list, program: dict) -> dict:
     requirements = program.get('specific_ects_requirements', [])
     if not requirements:
-        return {'eligible': True, 'score': 0.7, 'details': "No ECTS constraints"}
+        return {'eligible': True, 'score': 1.0, 'details': "No ECTS constraints"}
 
     # 1. Create a Ledger of Available Credits
     # We clone the credits so we can "spend" them without modifying the original object
@@ -378,16 +378,27 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     if user_profile.academic_background:
         student_major = user_profile.academic_background.bachelor_field_of_study or "General"
         
-    # User Persona Vector (Layer 3)
-    user_intent = state.get("user_intent", "")
-    interests = []
+    # Collect interests from academic background
+    academic_interests = []
     if user_profile.academic_background:
-         interests = user_profile.academic_background.fields_of_interest
+         academic_interests = user_profile.academic_background.fields_of_interest or []
     
+    # Collect desired program names and interests (keywords for TF-IDF)
+    desired_programs = []
+    desired_interests = []
+    if user_profile.desired_program:
+        desired_programs = user_profile.desired_program.program_name or []
+        desired_interests = user_profile.desired_program.fields_of_interest or []
+    
+    # Combine all interests
+    all_interests = list(set(academic_interests + desired_interests))
+    
+    # Build user persona with keywords for better TF-IDF matching
+    # Include: desired master programs, interests, bachelor field
     user_persona_text = (
-        f"Student with Bachelor in {student_major}. "
-        f"Goal: {user_intent}. "
-        f"Interests: {', '.join(interests)}."
+        f"Master program: {', '.join(desired_programs)}. "
+        f"Interests: {', '.join(all_interests)}. "
+        f"Bachelor in {student_major}."
     )
     user_vector = safe_embed_query(user_persona_text)
 
@@ -504,7 +515,6 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         # Weighting: 70% Semantic (Concept) + 30% Keyword (Precision)
         # This prevents "Keyword Stuffing" from winning, but rewards exact matches.
         hybrid_score = (score_semantic * 0.7) + (score_keyword * 0.3)
-        
         print(f"    → Vector Score: {score_semantic:.3f} (Concept)")
         print(f"    → TF-IDF Score: {score_keyword:.3f} (Keywords)")
         print(f"    → Hybrid Score: {hybrid_score:.3f}")
@@ -547,9 +557,9 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
 
         # Final Scoring
         final_score = (
-            (prog['_semantic_score'] * 40) + 
+            (prog['_semantic_score'] * 50) + 
             (ects_check['score'] * 40) + 
-            (prog['_domain_score'] * 20)
+            (prog['_domain_score'] * 10)
         )
         prog['relevance_score'] = round(final_score, 1)
         prog['llm_reasoning'] = (
