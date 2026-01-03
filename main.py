@@ -54,10 +54,10 @@ def build_master_workflow():
     workflow.add_edge("chat", END)
     workflow.add_edge("wrap_up", END)
     
-    # Connect Agent 3 to Agent 4
-    workflow.add_edge("agent_3_filter", "agent_4_checklist")
+    # Connect Agent 3 to END (to allow display of top 20 programs)
+    workflow.add_edge("agent_3_filter", END)
     
-    # Connect Agent 4 to End
+    # Connect Agent 4 to END
     workflow.add_edge("agent_4_checklist", END)
 
     return workflow.compile()
@@ -107,7 +107,7 @@ if __name__ == "__main__":
                 break
 
             # --- CHECK 2: Agent 3 completed (ranked programs available) ---
-            if current_state.get("eligible_programs") and not current_state.get("_agent3_displayed"):
+            if current_state.get("ranked_programs") and not current_state.get("_agent3_displayed"):
                 print("\n" + "=" * 60)
                 print("✅ AGENT 3 COMPLETE: Top Candidates")
                 print("=" * 60)
@@ -118,7 +118,7 @@ if __name__ == "__main__":
                     print(f"🎯 Found {len(final_ranked_list)} Top Matches (Filtered from DB)\n")
                     print("Final Score = 50% Student Intent + 40% ECTS Requirements + 10% Degree Compatibility\n")
                     
-                    for i, program in enumerate(final_ranked_list[:20]): # Show top 20
+                    for i, program in enumerate(final_ranked_list[:10]): # Show top 10
                         print(f"{i+1}. {program.get('program_name')} ({program.get('university_name')})")
                         print(f"   📊 Final Score: {program.get('relevance_score')}")
                         print(f"   🎓 ECTS Coverage: {program.get('ects_score', 0.0) * 100:.0f}%")
@@ -136,10 +136,17 @@ if __name__ == "__main__":
                     print("=" * 60)
                     input()
                     
-                    # Continue to Agent 4
+                    # Manually invoke Agent 4
                     print("\n" + "=" * 60)
                     print("Proceeding to Agent 4: Document Checklist Generator...")
                     print("=" * 60)
+                    
+                    # Import and call Agent 4 directly
+                    from Agent4 import agent_4_checklist_node
+                    agent4_result = agent_4_checklist_node(current_state)
+                    current_state.update(agent4_result)
+                    
+                    # Continue the loop to check for completion
                     continue
                 else:
                     print("❌ Agent 3 found matches, but ranking failed.")

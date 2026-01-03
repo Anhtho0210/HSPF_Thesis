@@ -10,10 +10,18 @@ load_dotenv()
 PERPLEXITY_API_KEY = os.environ.get("PERPLEXITY_API_KEY")
 PERPLEXITY_URL = "https://api.perplexity.ai/chat/completions"
 
-def query_perplexity_search_and_extract(program_name: str, uni_name: str, citizenship: str = "Non-EU") -> Dict[str, Any]:
+def query_perplexity_search_and_extract(
+    program_name: str, 
+    uni_name: str, 
+    citizenship: str = "Non-EU",
+    deadline_info: str = "Not specified",
+    tuition_fee: float = 0.0,
+    application_mode: str = "Unknown",
+    preferred_semester: str = "Winter"
+) -> Dict[str, Any]:
     """
-    Finds official data for ANY international student.
-    DYNAMICALLY adjusts checks based on 'citizenship'.
+    Queries Perplexity to extract country-specific requirements and required documents.
+    Uses existing program data (deadline, tuition, application mode) from the database.
     """
     if not PERPLEXITY_API_KEY:
         print("❌ Error: PERPLEXITY_API_KEY not found.")
@@ -23,54 +31,51 @@ def query_perplexity_search_and_extract(program_name: str, uni_name: str, citize
     system_prompt = (
         "You are an expert University Admissions Researcher. "
         "Your goal is to find the OFFICIAL University website for a specific Master's degree "
-        f"and extract precise application data for a student from '{citizenship}' (Non-EU status). "
+        f"and extract precise application data for a student from '{citizenship}'. "
         "Output ONLY valid JSON."
     )
 
     user_prompt = f"""
     TARGET: Master's in "{program_name}" at "{uni_name}".
     APPLICANT ORIGIN: {citizenship}
+    PREFERRED START SEMESTER: {preferred_semester}
+    
+    KNOWN INFORMATION (from database):
+    - Application Deadline: {deadline_info}
+    - Tuition Fee: €{tuition_fee} per semester
+    - Application Mode: {application_mode}
 
     INSTRUCTIONS:
     1. SEARCH: Find the OFFICIAL "Admission Regulations" (Zulassungsordnung) or "Application Requirements" page.
-    2. FILTER: 
-       - Extract ONLY documents required for the **APPLICATION** (Admission) phase. 
-       - EXCLUDE documents for **ENROLLMENT** (e.g., Health Insurance, Semester Fee confirmation).
-    3. EXTRACT:
-       - **Deadline**: Specific date for {citizenship} students base on EU, non-EU countries.
-       - **Tuition Fee**: Total fees per semester in EUR (use 0 if none).
-       - **Application Mode**: "Uni-Assist", "Direct", or "VPD".
-       - **Country Specifics**: 
-         * CHECK: Is {citizenship} listed as requiring specific documents?
-         * CRITICAL RULE: If {citizenship} is **China**, **Vietnam**, or **India**, you MUST check for "APS" (Akademische Prüfstelle) 
-         * **CRITICAL RULE:** check addtional requirement such as GMAT, GRE, ... for some specific countries or non-EU countries
-         * **PAKISTAN RULE:** If {citizenship} is **Pakistan**, check if "HEC Attestation" or "Embassy Verification" is mentioned (but do NOT ask for APS).
-         * **FALLBACK:** If the website is silent but the student is from China/Vietnam/India, do NOT say "None". Output: "APS Certificate (Standard Federal Requirement)".
+    2. FOCUS ON: Extract ONLY the following information:
        
-    - **Document Checklist**: A COMPLETE list of PDF documents required for upload.
-         * CRITICAL RULES for Checklist:
-         * **INCLUDE administrative basics:** You MUST list "Passport Copy", "CV", and "Online Application Form" if they are mentioned.
-         * **Standardize Names:** Use "Bachelor Certificate" instead of "Proof of first degree". Use "Transcript of Records" instead of "Overview of grades".
-         * **Handling Selection Criteria:** If a document (e.g. GMAT, GRE, Portfolio) is listed as "Selection Criteria", "Recommended", or "Bonus Points" (not strictly mandatory for eligibility), **you MUST append "(Optional)" to the name.**
-         * **Example:** Output "GMAT Result (Optional)" instead of just "GMAT Result".
-         * **Keep it Clean:** Max 10 words per item.
-
-    - **Notes**: Extract ONLY rules related to **Document Formats/Logistics**.
-         * KEEP: "Official notarized translations required", "Send hard copies by post", "Upload limit 5MB".
-         * REMOVE: Admission requirements (e.g. "Needs 2.5 GPA", "Needs 18 ECTS in Math"). 
-         * REMOVE: General program info or deadlines (already listed above).
-         * MAX LENGTH: 2 sentences.
+       A. **Country-Specific Requirements for {citizenship}**:
+          * CRITICAL RULE: If {citizenship} is **China**, **Vietnam**, or **India**, you MUST check for "APS" (Akademische Prüfstelle) certificate requirement.
+          * PAKISTAN RULE: If {citizenship} is **Pakistan**, check if "HEC Attestation" or "Embassy Verification" is mentioned (but do NOT ask for APS).
+          * Check for additional requirements such as GMAT, GRE, or other standardized tests specifically for {citizenship} or non-EU countries.
+          * FALLBACK: If the website is silent but the student is from China/Vietnam/India, output: "APS Certificate (Standard Federal Requirement)".
+          * If no country-specific requirements exist, output: "None".
+       
+       B. **Document Checklist**: A COMPLETE list of PDF documents required for the APPLICATION phase.
+          * FILTER: Extract ONLY documents for **APPLICATION** (Admission). EXCLUDE **ENROLLMENT** documents (e.g., Health Insurance, Semester Fee confirmation).
+          * INCLUDE administrative basics: "Passport Copy", "CV", "Motivation Letter" if mentioned.
+          * STANDARDIZE NAMES: Use "Bachelor Certificate" instead of "Proof of first degree". Use "Transcript of Records" instead of "Overview of grades".
+          * HANDLING OPTIONAL ITEMS: If a document (e.g. GMAT, GRE, Portfolio) is listed as "Selection Criteria", "Recommended", or "Bonus Points" (not strictly mandatory), **append "(Optional)" to the name**.
+          * Example: "GMAT Result (Optional)" instead of "GMAT Result".
+          * Keep it clean: Max 10 words per item.
+       
+       C. **Notes**: Extract ONLY rules related to **Document Formats/Logistics**.
+          * KEEP: "Official notarized translations required", "Send hard copies by post", "Upload limit 5MB".
+          * REMOVE: Admission requirements (e.g. "Needs 2.5 GPA", "Needs 18 ECTS in Math").
+          * REMOVE: General program info or deadlines (already provided above).
+          * MAX LENGTH: 2 sentences.
     
     Return JSON structure:
     {{
-      "official_url": "The URL you found",
-      "deadline_eu": "YYYY-MM-DD or 'July 15 (Annual)'",
-      "deadline_non_eu": "YYYY-MM-DD or 'July 15 (Annual)'",
-      "tuition_fee_eur": number,
-      "application_mode": "Uni-Assist / VPD / Direct",
-      "country_specific_requirement": "String (e.g. 'APS certificate required' or 'None')",
-      "document_checklist": ["Document 1", "Document 2", "GMAT (Optional), ..."],
-      "notes": "Any other critical info including program admission requirements/eligibility criteria"
+      "official_url": "The official program URL you found",
+      "country_specific_requirement": "String (e.g. 'APS certificate required; GRE (Quantitative 164+) required' or 'None')",
+      "document_checklist": ["Document 1", "Document 2", "GMAT (Optional)", ...],
+      "notes": "Document format/logistics rules only"
     }}
     """
 
@@ -89,7 +94,7 @@ def query_perplexity_search_and_extract(program_name: str, uni_name: str, citize
     }
 
     try:
-        print(f"  🔍 Searching application requirements for {program_name} at {uni_name}...")
+        print(f"  🔍 Searching country-specific requirements for {program_name} at {uni_name}...")
         response = requests.post(PERPLEXITY_URL, json=payload, headers=headers)
         response.raise_for_status()
         
@@ -116,6 +121,7 @@ def agent_4_checklist_node(state: AgentState) -> AgentState:
     1. Takes the ranked programs from Agent 3
     2. Asks the user to select their top 3 programs
     3. Generates a detailed document checklist for each selected program
+    Uses existing program data (deadline, tuition, application mode) from the database.
     """
     
     print("\n" + "=" * 60)
@@ -129,11 +135,19 @@ def agent_4_checklist_node(state: AgentState) -> AgentState:
         print("❌ No ranked programs found. Agent 4 cannot proceed.")
         return state
     
+    # Get user citizenship
     if not user_profile or not user_profile.citizenship:
-        print("❌ User citizenship not found. Using 'Non-EU' as default.")
-        citizenship = "Non-EU"
+        print("❌ User citizenship not found. Using 'Vietnam' as default.")
+        citizenship = "Vietnam"
     else:
-        citizenship = user_profile.citizenship.country_of_citizenship or "Non-EU"
+        citizenship = user_profile.citizenship.country_of_citizenship or "Vietnam"
+    
+    # Get user's preferred semester
+    preferred_semester = "Winter"
+    if user_profile and user_profile.preferences and user_profile.preferences.preferred_start_semester:
+        preferred_semester = user_profile.preferences.preferred_start_semester
+    
+    print(f"\n📋 User Info: Citizenship = {citizenship}, Preferred Semester = {preferred_semester}")
     
     # Ask user to select top 3 programs (programs already displayed in main.py)
     print("\n" + "=" * 60)
@@ -176,27 +190,64 @@ def agent_4_checklist_node(state: AgentState) -> AgentState:
         print(f"\n📌 Processing: {program_name} at {uni_name}")
         print("-" * 60)
         
-        # Query Perplexity for checklist
+        # Extract deadline, tuition, and application mode from program data
+        tuition_fee = program.get("tuition_fee_per_semester_eur", 0.0)
+        application_mode = program.get("application_mode", "Unknown")
+        
+        # Determine deadline based on preferred semester and citizenship
+        deadline_info = "Not specified"
+        deadlines = program.get("deadlines", {})
+        
+        # Determine which semester to use
+        semester_key = "winter_semester" if "winter" in preferred_semester.lower() else "summer_semester"
+        semester_deadlines = deadlines.get(semester_key)
+        
+        if semester_deadlines:
+            # Determine EU vs Non-EU
+            is_eu = citizenship in ["Germany", "France", "Italy", "Spain", "Netherlands", "Belgium", "Austria", "Sweden", "Denmark", "Finland", "Poland", "Czech Republic", "Hungary", "Romania", "Bulgaria", "Greece", "Portugal", "Ireland", "Croatia", "Slovenia", "Slovakia", "Lithuania", "Latvia", "Estonia", "Cyprus", "Malta", "Luxembourg"]
+            
+            applicant_type = "eu_applicants" if is_eu else "non_eu_applicants"
+            deadline_window = semester_deadlines.get(applicant_type)
+            
+            if deadline_window and deadline_window.get("end_date"):
+                deadline_info = deadline_window.get("end_date")
+        
+        print(f"  📅 Deadline ({preferred_semester}): {deadline_info}")
+        print(f"  💰 Tuition Fee: €{tuition_fee}/semester")
+        print(f"  📝 Application Mode: {application_mode}")
+        
+        # Query Perplexity for country-specific requirements and documents
         checklist_data = query_perplexity_search_and_extract(
             program_name=program_name,
             uni_name=uni_name,
-            citizenship=citizenship
+            citizenship=citizenship,
+            deadline_info=deadline_info,
+            tuition_fee=tuition_fee,
+            application_mode=application_mode,
+            preferred_semester=preferred_semester
         )
         
         if checklist_data:
-            # Merge checklist data with program info
+            # Merge checklist data with program info (including deadline, tuition, application mode)
             program_with_checklist = {
                 **program,  # Keep all original program data
-                "checklist_data": checklist_data
+                "checklist_data": {
+                    **checklist_data,
+                    # Add the program data we already have
+                    "deadline": deadline_info,
+                    "tuition_fee_eur": tuition_fee,
+                    "application_mode": application_mode,
+                    "preferred_semester": preferred_semester
+                }
             }
             selected_programs_with_checklists.append(program_with_checklist)
             
             # Display checklist
             print(f"\n✅ Checklist generated successfully!")
             print(f"   🔗 Official URL: {checklist_data.get('official_url', 'N/A')}")
-            print(f"   📅 Deadline (Non-EU): {checklist_data.get('deadline_non_eu', 'N/A')}")
-            print(f"   💰 Tuition Fee: €{checklist_data.get('tuition_fee_eur', 0)} per semester")
-            print(f"   📝 Application Mode: {checklist_data.get('application_mode', 'N/A')}")
+            print(f"   📅 Deadline ({preferred_semester}): {deadline_info}")
+            print(f"   💰 Tuition Fee: €{tuition_fee} per semester")
+            print(f"   📝 Application Mode: {application_mode}")
             
             country_req = checklist_data.get('country_specific_requirement', 'None')
             if country_req and country_req != 'None':
@@ -211,7 +262,17 @@ def agent_4_checklist_node(state: AgentState) -> AgentState:
                 print(f"\n   💡 Notes: {notes}")
         else:
             print(f"   ⚠️  Could not retrieve checklist data.")
-            selected_programs_with_checklists.append(program)
+            # Still add program with basic info even if Perplexity fails
+            program_with_checklist = {
+                **program,
+                "checklist_data": {
+                    "deadline": deadline_info,
+                    "tuition_fee_eur": tuition_fee,
+                    "application_mode": application_mode,
+                    "preferred_semester": preferred_semester
+                }
+            }
+            selected_programs_with_checklists.append(program_with_checklist)
     
     # Save results to state
     state["selected_programs_with_checklists"] = selected_programs_with_checklists
@@ -228,7 +289,8 @@ def agent_4_checklist_node(state: AgentState) -> AgentState:
         
         checklist_data = program.get('checklist_data')
         if checklist_data:
-            print(f"   📅 Deadline (Non-EU): {checklist_data.get('deadline_non_eu', 'N/A')}")
+            semester_label = checklist_data.get('preferred_semester', 'Winter')
+            print(f"   📅 Deadline ({semester_label}): {checklist_data.get('deadline', 'N/A')}")
             print(f"   💰 Tuition: €{checklist_data.get('tuition_fee_eur', 0)}/semester")
             print(f"   📝 Application Mode: {checklist_data.get('application_mode', 'N/A')}")
             

@@ -396,9 +396,9 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     # Build user persona with keywords for better TF-IDF matching
     # Include: desired master programs, interests, bachelor field
     user_persona_text = (
-        f"Master program: {', '.join(desired_programs)}. "
-        f"Interests: {', '.join(all_interests)}. "
-        f"Bachelor in {student_major}."
+        f"{', '.join(desired_programs)}, "
+        f"{', '.join(all_interests)}, "
+        f"{student_major}"
     )
     user_vector = safe_embed_query(user_persona_text)
 
@@ -512,9 +512,9 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         score_keyword = cosine_similarity(user_tfidf, program_tfidf_matrix[i:i+1])[0][0]
         
         # --- SCORE C: Hybrid Combination ---
-        # Weighting: 70% Semantic (Concept) + 30% Keyword (Precision)
+        # Weighting: 50% Semantic (Concept) + 50% Keyword (Precision)
         # This prevents "Keyword Stuffing" from winning, but rewards exact matches.
-        hybrid_score = (score_semantic * 0.7) + (score_keyword * 0.3)
+        hybrid_score = (score_semantic * 0.5) + (score_keyword * 0.5)
         print(f"    → Vector Score: {score_semantic:.3f} (Concept)")
         print(f"    → TF-IDF Score: {score_keyword:.3f} (Keywords)")
         print(f"    → Hybrid Score: {hybrid_score:.3f}")
@@ -529,16 +529,16 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         else:
             print(f"    ❌ REJECTED - below relevance threshold (≤ 0.5)")
             
-    # Sort and take Top 20
+    # Sort and take Top 10
     print(f"\n  Sorting {len(ranked_candidates)} candidates by semantic score...")
     ranked_candidates.sort(key=lambda x: x['_semantic_score'], reverse=True)
-    top_candidates = ranked_candidates[:20]
+    top_candidates = ranked_candidates[:10]
 
     count_l3 = len(top_candidates)
     dropped_l3 = len(ranked_candidates) - count_l3
     print(f"✅ L3 Top Candidates: {count_l3} selected for Deep Scan (from {len(ranked_candidates)} relevant matches)")
     if dropped_l3 > 0:
-        print(f"   (Dropped {dropped_l3} lower-ranked candidates to keep top 20)")
+        print(f"   (Dropped {dropped_l3} lower-ranked candidates to keep top 10)")
 
     # =========================================================
     # 🔬 LAYER 4: DEEP ECTS VERIFICATION (The Auditor)
@@ -575,4 +575,4 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     print(f"🏁 DONE: Returning {len(final_ranked)} programs.")
     print("="*60 + "\n")
     
-    return {"eligible_programs": final_ranked, "ranked_programs": final_ranked[:20]}
+    return {"eligible_programs": final_ranked, "ranked_programs": final_ranked[:10]}
