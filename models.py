@@ -207,3 +207,4 @@ class AgentState(TypedDict):
     eligible_programs: List[dict]
     ranked_programs: List[dict]
     selected_programs_with_checklists: List[dict]  # Agent 4 output
+    final_application_plans: List[dict]  # Agent 5 output

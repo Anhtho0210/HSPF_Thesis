@@ -149,31 +149,45 @@ def agent_4_checklist_node(state: AgentState) -> AgentState:
     
     print(f"\n📋 User Info: Citizenship = {citizenship}, Preferred Semester = {preferred_semester}")
     
-    # Ask user to select top 3 programs (programs already displayed in main.py)
-    print("\n" + "=" * 60)
-    print("Please select your TOP 3 programs by entering their numbers (e.g., 1 3 5)")
-    print("=" * 60)
+    # Determine how many programs to select (up to 3, or all if fewer)
+    max_selections = min(3, len(ranked_programs))
     
-    selected_indices = []
-    while len(selected_indices) != 3:
-        try:
-            user_input = input("\n👤 Enter 3 program numbers separated by spaces: ").strip()
-            selected_indices = [int(x) - 1 for x in user_input.split()]
-            
-            if len(selected_indices) != 3:
-                print(f"❌ Please select exactly 3 programs. You selected {len(selected_indices)}.")
-                selected_indices = []
-                continue
-            
-            # Validate indices
-            if any(idx < 0 or idx >= len(ranked_programs) for idx in selected_indices):
-                print(f"❌ Invalid program number(s). Please choose between 1 and {len(ranked_programs)}.")
-                selected_indices = []
-                continue
+    # Ask user to select programs
+    print("\n" + "=" * 60)
+    if max_selections == 1:
+        print(f"Only 1 program available. It will be automatically selected.")
+        selected_indices = [0]
+    else:
+        print(f"Please select up to {max_selections} programs by entering their numbers (e.g., 1 2 3)")
+        print(f"You can select between 1 and {max_selections} programs.")
+        print("=" * 60)
+        
+        selected_indices = []
+        while len(selected_indices) == 0:
+            try:
+                user_input = input(f"\n👤 Enter 1-{max_selections} program numbers separated by spaces: ").strip()
+                selected_indices = [int(x) - 1 for x in user_input.split()]
                 
-        except ValueError:
-            print("❌ Invalid input. Please enter numbers only (e.g., 1 3 5)")
-            selected_indices = []
+                if len(selected_indices) == 0:
+                    print(f"❌ Please select at least 1 program.")
+                    continue
+                
+                if len(selected_indices) > max_selections:
+                    print(f"❌ Please select at most {max_selections} programs. You selected {len(selected_indices)}.")
+                    selected_indices = []
+                    continue
+                
+                # Validate indices
+                if any(idx < 0 or idx >= len(ranked_programs) for idx in selected_indices):
+                    print(f"❌ Invalid program number(s). Please choose between 1 and {len(ranked_programs)}.")
+                    selected_indices = []
+                    continue
+                    
+            except ValueError:
+                print(f"❌ Invalid input. Please enter numbers only (e.g., 1 2 3)")
+                selected_indices = []
+    
+    print(f"\n✅ Selected {len(selected_indices)} program(s)")
     
     # Generate checklists for selected programs
     print("\n" + "=" * 60)

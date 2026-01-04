@@ -20,6 +20,8 @@ from Agent3 import agent_3_filter_node
 
 # --- Import nodes from Agent 4 ---
 from Agent4 import agent_4_checklist_node
+from Agent5 import agent_5_planner_node
+from Agent6 import agent_6_report_node
 
 # --- 1. BUILD THE MASTER WORKFLOW ---
 def build_master_workflow():
@@ -36,6 +38,8 @@ def build_master_workflow():
     
     # Add Agent 4 Node
     workflow.add_node("agent_4_checklist", agent_4_checklist_node)
+    workflow.add_node("agent_5_planner", agent_5_planner_node)
+    workflow.add_node("agent_6_report", agent_6_report_node)
 
     workflow.set_entry_point("parsing")
 
@@ -57,8 +61,10 @@ def build_master_workflow():
     # Connect Agent 3 to END (to allow display of top 20 programs)
     workflow.add_edge("agent_3_filter", END)
     
-    # Connect Agent 4 to END
-    workflow.add_edge("agent_4_checklist", END)
+    # Connect Agent 4 -> Agent 5 -> Agent 6 -> END
+    workflow.add_edge("agent_4_checklist", "agent_5_planner")
+    workflow.add_edge("agent_5_planner", "agent_6_report")
+    workflow.add_edge("agent_6_report", END)
 
     return workflow.compile()
 
@@ -98,11 +104,11 @@ if __name__ == "__main__":
             # Update current state
             current_state.update(next_state)
 
-            # --- CHECK 1: Agent 4 completed (selected programs with checklists) ---
-            if current_state.get("selected_programs_with_checklists"):
-                # Agent 4 has completed - workflow is done
+            # --- CHECK 1: Agent 6 completed (PDF generated) ---
+            if current_state.get("reports_generated"):
+                # Agent 6 has completed - workflow is done
                 print("\n" + "=" * 60)
-                print("✅ WORKFLOW COMPLETE")
+                print("✅ WORKFLOW COMPLETE - PDF REPORT GENERATED")
                 print("=" * 60)
                 break
 
@@ -143,11 +149,68 @@ if __name__ == "__main__":
                     
                     # Import and call Agent 4 directly
                     from Agent4 import agent_4_checklist_node
+                    from Agent5 import agent_5_planner_node
+                    from Agent6 import agent_6_report_node
+                    
                     agent4_result = agent_4_checklist_node(current_state)
                     current_state.update(agent4_result)
                     
-                    # Continue the loop to check for completion
-                    continue
+                    # Now invoke Agent 5
+                    print("\n" + "=" * 60)
+                    print("Proceeding to Agent 5: Application Timeline Planner...")
+                    print("=" * 60)
+                    
+                    agent5_result = agent_5_planner_node(current_state)
+                    current_state.update(agent5_result)
+                    
+                    # Now invoke Agent 6
+                    print("\n" + "=" * 60)
+                    print("Proceeding to Agent 6: PDF Report Generator...")
+                    print("=" * 60)
+                    
+                    agent6_result = agent_6_report_node(current_state)
+                    current_state.update(agent6_result)
+                    
+                    # Display Agent 5 output and Agent 6 completion
+                    if current_state.get("final_application_plans"):
+                        print("\n" + "=" * 60)
+                        print("🎉 TIMELINE GENERATED - Creating PDF Report...")
+                        print("=" * 60)
+                        
+                        plans = current_state.get("final_application_plans")
+                        
+                        for plan in plans:
+                            print(f"\n📘 PROGRAM: {plan['program_name']}")
+                            print(f"   🏛️  {plan['university']}")
+                            print("-" * 40)
+                            
+                            for event in plan['timeline']:
+                                # Pretty print date
+                                d_str = event['date'].strftime("%Y-%m-%d")
+                                
+                                # Add icons based on urgency
+                                icon = "⚪"
+                                if event['type'] == "overdue": icon = "🔥"
+                                elif event['type'] == "critical": icon = "🚨"
+                                elif event['type'] == "deadline": icon = "🏁"
+                                elif event['type'] == "fatal": icon = "❌"
+                                elif event['type'] == "action": icon = "📤"
+                                elif event['type'] == "task": icon = "📝"
+                                
+                                print(f"   {icon} [{d_str}] {event['event']}")
+                            
+                            print("-" * 40)
+                    
+                    # Check if Agent 6 completed
+                    if current_state.get("reports_generated"):
+                        print("\n" + "=" * 60)
+                        print("✅ PDF REPORT SUCCESSFULLY GENERATED!")
+                        print("=" * 60)
+                        print("📄 File: My_Application_Strategy.pdf")
+                        print("📦 Contains: User profile, program details, timeline, and checklists")
+                    
+                    # Exit the workflow - Agent 6 is the final step
+                    break
                 else:
                     print("❌ Agent 3 found matches, but ranking failed.")
                     break
@@ -161,14 +224,8 @@ if __name__ == "__main__":
                 user_response = input("👤 You: ")
                 current_state["user_intent"] += f" \nUser: {user_response}"
                 current_state["ai_response"] = None 
-                continue 
+                continue
 
-            # --- CHECK 4: FAILURE (Layer 1 or 2 killed everything) ---
-            print("\n❌ No eligible programs found.")
-            print("   Possible reasons:")
-            print("   1. Layer 1: Your Degree did not match any Program Domains.")
-            print("   2. Layer 2: Your GPA or other hard filters did not pass.")
-            break
 
         except Exception as e:
             print(f"\n[ERROR] Graph execution failed: {e}")
