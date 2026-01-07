@@ -87,10 +87,14 @@ def get_extraction_chain():
            - "Uni-Assist" -> "Uni-Assist"
            - "Direct" / "Online Portal" -> "Direct"
            - "Unknown" if ambiguous
-           
-        4. **Fees**: 
+         4. **Fees**: 
            - "Tuition Fee" is usually 0 for public unis. 
            - "Semester Contribution" is usually 100-400 EUR. Separate them.
+           - **Non-EU Tuition Fee**: Check ALL three fields (Fees Text AND Fee Information Text) for non-EU/EEA/international student fees.
+             - Look for patterns in ANY of these fields: "1,500 EUR per semester for non-EU", "non-EU citizens pay X EUR", "international students from non-EU/EEA: X EUR", "non-EEA countries: X EUR"
+             - Common patterns: "Approx. 1,500 EUR per semester for students from non-EU countries", "non-EU citizens pay a tuition of 1,500 EUR per semester"
+             - If found in any field, set 'non_eu_tuition_fee_eur' to that amount (extract the numeric value)
+             - If no specific non-EU fee mentioned in any field, leave as null
 
         5. **GPA**: Look for "German grading system". If it says "2.5 or better", output 2.5. If not found, return null.
         6. **Location**: Infere the 'State' (Bundesland) based on the City
@@ -144,22 +148,23 @@ def get_extraction_chain():
         {format_instructions}
         """),
         ("user", """
-        Raw Program Data:
-        Name: {name}
-        Institution: {institution}
-        Submit To: {submit_to}
-        Admission Text: {admission_req}
-        Language Text: {language_req}
-        Deadlines Text: {application_deadline}  
-        Fees Text: {tuition_fee} | {semester_fee}
-        Description: {description}
-        City: {city}
+         Raw Program Data:
+         Name: {name}
+         Institution: {institution}
+         Submit To: {submit_to}
+         Admission Text: {admission_req}
+         Language Text: {language_req}
+         Deadlines Text: {application_deadline}  
+         Fees Text: {tuition_fee} | {semester_fee}
+         Fee Information Text: {fee_information}
+         Description: {description}
+         City: {city}
         """)
     ])
     
     return prompt | LLM | parser
 
-def process_catalog(input_file="TESTING_MASTER_LIST_ALL.json", output_file="structured_program_db.json"):
+def process_catalog(input_file="TESTING_MASTER_LIST_BW.json", output_file="structured_program_db_BW.json"):
     try:
         with open(input_file, 'r', encoding='utf-8') as f:
             raw_data = json.load(f)
@@ -191,6 +196,7 @@ def process_catalog(input_file="TESTING_MASTER_LIST_ALL.json", output_file="stru
                 "description": program.get("description", ""),
                 "tuition_fee": program.get("tuition_fee", ""),
                 "semester_fee": program.get("semester_fee", ""),
+                "fee_information": program.get("fee_information", ""),
                 "city": program.get("city", ""),
                 "format_instructions": format_instructions
             })

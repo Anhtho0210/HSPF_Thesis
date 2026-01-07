@@ -28,6 +28,16 @@ llm_flash = ChatGoogleGenerativeAI(
     temperature=0.0 # Strict logic, no creativity
 )
 
+# --- CONSTANTS ---
+# List of EU/EEA countries for tuition fee and deadline filtering
+EU_COUNTRIES = [
+    "Germany", "France", "Italy", "Spain", "Netherlands", "Belgium", "Austria", 
+    "Sweden", "Denmark", "Finland", "Poland", "Czech Republic", "Hungary", 
+    "Romania", "Bulgaria", "Greece", "Portugal", "Ireland", "Croatia", 
+    "Slovenia", "Slovakia", "Lithuania", "Latvia", "Estonia", "Cyprus", 
+    "Malta", "Luxembourg"
+]
+
 # --- HELPERS (Embeddings) ---
 def safe_embed_query(text: str) -> List[float]:
     """Single text embedding with retry."""
@@ -175,11 +185,28 @@ def check_hard_constraints(student: UserProfile, program: dict) -> dict:
     # --- 2. TUITION FEE CHECK ---
     if student.preferences and student.preferences.max_tuition_fee_eur is not None:
         max_fee = student.preferences.max_tuition_fee_eur
-        prog_fee = program.get('tuition_fee_per_semester_eur', 0.0)
+        
+        # Determine if student is from EU/EEA country
+        student_country = None
+        if student.citizenship and student.citizenship.country_of_citizenship:
+            student_country = student.citizenship.country_of_citizenship
+        
+        is_eu_student = student_country in EU_COUNTRIES if student_country else False
+        
+        # Use appropriate tuition fee based on student's origin
+        # Non-EU students should be evaluated against non_eu_tuition_fee_eur if available
+        if not is_eu_student and program.get('non_eu_tuition_fee_eur') is not None:
+            # Non-EU student: use non_eu_tuition_fee_eur if available
+            prog_fee = program.get('non_eu_tuition_fee_eur', 0.0)
+            fee_type = "non-EU"
+        else:
+            # EU student or no specific non-EU fee: use general tuition fee
+            prog_fee = program.get('tuition_fee_per_semester_eur', 0.0)
+            fee_type = "EU/general"
         
         # Allow buffer of 100 EUR (e.g. for semester contributions vs tuition)
         if max_fee > 0 and prog_fee > (max_fee + 100):
-            reasons.append(f"Tuition {prog_fee}€ > Budget {max_fee}€")
+            reasons.append(f"Tuition {prog_fee}€ ({fee_type}) > Budget {max_fee}€")
 
     # --- 3. LOCATION CHECK (City & State) ---
     if student.preferences:
@@ -365,7 +392,7 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     print("=" * 60 + "\n")
 
     try:
-        with open("structured_program_db.json", 'r', encoding='utf-8') as f:
+        with open("structured_program_db_BW.json", 'r', encoding='utf-8') as f:
             catalog = json.load(f)
     except FileNotFoundError:
         return {"eligible_programs": []}

@@ -14,11 +14,8 @@ import random
 
 today = datetime.date.today().isoformat()
 
-# --- Configuration for Limiting Programs ---
 PROGRAM_LIMIT = None  # Set to None for unlimited crawling, or a number (e.g., 10) to limit
-# --- End Configuration ---
 
-# --- Configuration for Baden-Württemberg Filter ---
 # Comprehensive list of cities and towns in Baden-Württemberg with universities/colleges
 BADEN_WUERTTEMBERG_CITIES = {
     # Major cities
@@ -27,9 +24,7 @@ BADEN_WUERTTEMBERG_CITIES = {
     "Ludwigsburg", "Tübingen", "Konstanz", "Aalen", "Offenburg"
 }
 
-# Set to True to enable Baden-Württemberg filtering
 ENABLE_BW_FILTER = True
-# --- End Baden-Württemberg Configuration ---
 
 logging.basicConfig(filename='./logs/log_'+str(today) +
                     '.txt', level=logging.DEBUG)
@@ -44,8 +39,8 @@ driver.get(parent_url)
 # --- UPDATED PARAMETERS FOR JSON OUTPUT ---
 params = [
     "program_id", "name", "institution", "city", "url",
-    "tuition_fee","semester_fee", "start_date", "description", "admission_req",
-    "language_req", "application_deadline","submit_to"
+    "tuition_fee", "semester_fee", "fee_information", "start_date", "description", "admission_req",
+    "language_req", "application_deadline", "submit_to"
 ]
 cols = params # Use the same for the column names/keys
 # --- END UPDATED PARAMETERS ---
@@ -58,7 +53,7 @@ def fetch_links():
     until the PROGRAM_LIMIT is reached or no more pages are available.
     """
     all_urls = []
-    
+     
     # 1. Ensure the driver is on the correct search results page
     # (Assuming apply_filters has been called and the page is loaded)
     
@@ -242,7 +237,9 @@ def paramData(param, item_link):
         if (param == 'submit_to'):
             return textcombiner("8","registration") # Index '8'
         if (param == 'semester_fee'):
-            return textcombiner("4","costs") # Index '4'
+            return extract_dt_dd_by_label("Semester contribution")
+        if (param == 'fee_information'):
+            return extract_dt_dd_by_label("Additional information on tuition fees")
         
         # --- NEW PARAMETERS - NEEDS HTML INSPECTION! ---
         if (param == "city"):
@@ -312,11 +309,11 @@ def extractor(item_links):
 
 
 def exportJSON(): # <--- NEW FUNCTION
-    limit_suffix = "ALL" if PROGRAM_LIMIT is None else str(PROGRAM_LIMIT)
+    limit_suffix = "BW" if PROGRAM_LIMIT is None else str(PROGRAM_LIMIT)
     filename = f"TESTING_MASTER_LIST_{limit_suffix}"
 
     if not final_data:
-        print("No data to export.")
+        print("No data to export.") 
         return
 
     # Convert the list of lists (final_data) into a list of dictionaries

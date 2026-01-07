@@ -168,6 +168,10 @@ class ProgramHardFilters(BaseModel):
     
     # Financial
     tuition_fee_per_semester_eur: float = Field(default=0.0)
+    non_eu_tuition_fee_eur: Optional[float] = Field(
+        description="Specific tuition fee for non-EU/EEA students if different from general tuition fee",
+        default=None
+    )
     semester_contribution_eur: float = Field(default=0.0)
     
     # Academic Requirements
