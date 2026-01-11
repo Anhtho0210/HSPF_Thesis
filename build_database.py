@@ -14,7 +14,7 @@ from models import ProgramHardFilters
 load_dotenv()
 
 LLM = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+    model="gemini-2.5-pro",
     temperature=0.0,
     api_key=os.environ.get("GEMINI_API_KEY")
 )
@@ -164,7 +164,7 @@ def get_extraction_chain():
     
     return prompt | LLM | parser
 
-def process_catalog(input_file="TESTING_MASTER_LIST_BW.json", output_file="structured_program_db_BW.json"):
+def process_catalog(input_file="MASTER_LIST_ALL_BW.json", output_file="structured_program_db_all_bw.json"):
     try:
         with open(input_file, 'r', encoding='utf-8') as f:
             raw_data = json.load(f)

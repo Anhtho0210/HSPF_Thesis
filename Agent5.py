@@ -114,7 +114,7 @@ def agent_5_planner_node(state: Dict[str, Any]) -> Dict[str, Any]:
                     ideal_start = deadline_dt - datetime.timedelta(days=180)
                     timeline_events.append(create_event(
                         ideal_start, 
-                        "START APS PROCEDURE", 
+                        "Check APS Schedule and Start as soon as possible", 
                         "Apply immediately. Processing takes ~6 months.", 
                         "critical"
                     ))

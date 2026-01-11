@@ -4,7 +4,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, InvalidSessionIdException
 import time
 import logging
 import datetime
@@ -18,10 +18,17 @@ PROGRAM_LIMIT = None  # Set to None for unlimited crawling, or a number (e.g., 1
 
 # Comprehensive list of cities and towns in Baden-Württemberg with universities/colleges
 BADEN_WUERTTEMBERG_CITIES = {
-    # Major cities
+    # Major University Cities
     "Stuttgart", "Karlsruhe", "Mannheim", "Freiburg", "Heidelberg",
     "Ulm", "Heilbronn", "Pforzheim", "Reutlingen", "Esslingen",
-    "Ludwigsburg", "Tübingen", "Konstanz", "Aalen", "Offenburg"
+    "Ludwigsburg", "Tübingen", "Konstanz", "Aalen", "Offenburg",
+
+    # Additional University/Hochschule Locations
+    "Friedrichshafen", "Schwäbisch Gmünd", "Villingen-Schwenningen",
+    "Ravensburg", "Weingarten", "Biberach", "Furtwangen",
+    "Nürtingen", "Geislingen", "Rottenburg", "Lörrach",
+    "Mosbach", "Heidenheim", "Albstadt", "Sigmaringen",
+    "Kehl", "Trossingen", "Künzelsau", "Schwäbisch Hall"
 }
 
 ENABLE_BW_FILTER = True
@@ -122,8 +129,8 @@ def fetch_links():
                 
             print(f"Clicked 'Next' button via CSS: {NEXT_BUTTON_SELECTOR}")
             
-            # Mandatory ethical delay after a click/request
-            time.sleep(random.uniform(2, 5)) 
+            # Brief delay after pagination click
+            time.sleep(random.uniform(0.5, 1)) 
             
             # Wait for the content to change (ensure old links are gone)
             wait.until(EC.staleness_of(current_page_elements[0]))
@@ -265,52 +272,102 @@ def paramData(param, item_link):
         return "N/A" # Always return a default value on failure
 
 
+def recreate_browser_session():
+    """
+    Recreates the browser session when it becomes invalid.
+    Returns True if successful, False otherwise.
+    """
+    global driver, wait
+    try:
+        print("🔄 Attempting to recreate browser session...")
+        # Try to quit the old driver if it exists
+        try:
+            driver.quit()
+        except:
+            pass
+        
+        # Create new driver and wait objects
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service)
+        wait = WebDriverWait(driver, 10)
+        
+        print("✅ Browser session recreated successfully")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to recreate browser session: {e}")
+        logging.critical(f"Failed to recreate browser session: {e}", exc_info=True)
+        return False
+
 def extractor(item_links):
     if (item_links):
         for item_link in item_links:
-            try:
-                print("## Visiting Link: ", item_link)
-                driver.get(item_link)
-                dataFromURL = []
-                for param in params:
-                    dataFromURL.append(paramData(param, item_link))
-                
-                # Check if all data is "N/A", if so, skip.
-                if len(dataFromURL) < len(params) or all(item == 'N/A' for item in dataFromURL):
-                    print("Skipping link due to failed extraction.")
-                    continue
-
-                # --- Baden-Württemberg Filter ---
-                if ENABLE_BW_FILTER:
-                    # Get the city from the extracted data (city is at index 3 in params list)
-                    city_index = params.index("city")
-                    extracted_city = dataFromURL[city_index]
+            max_retries = 2
+            retry_count = 0
+            
+            while retry_count <= max_retries:
+                try:
+                    print("## Visiting Link: ", item_link)
+                    driver.get(item_link)
+                    dataFromURL = []
+                    for param in params:
+                        dataFromURL.append(paramData(param, item_link))
                     
-                    # Check if the city is in Baden-Württemberg
-                    if extracted_city not in BADEN_WUERTTEMBERG_CITIES:
-                        print(f"⚠️  Skipping program - City '{extracted_city}' is not in Baden-Württemberg")
-                        continue
+                    # Check if all data is "N/A", if so, skip.
+                    if len(dataFromURL) < len(params) or all(item == 'N/A' for item in dataFromURL):
+                        print("Skipping link due to failed extraction.")
+                        break  # Break out of retry loop, move to next link
+
+                    # --- Baden-Württemberg Filter ---
+                    if ENABLE_BW_FILTER:
+                        # Get the city from the extracted data (city is at index 3 in params list)
+                        city_index = params.index("city")
+                        extracted_city = dataFromURL[city_index]
+                        
+                        # Check if the city is in Baden-Württemberg
+                        if extracted_city not in BADEN_WUERTTEMBERG_CITIES:
+                            print(f"⚠️  Skipping program - City '{extracted_city}' is not in Baden-Württemberg")
+                            break  # Break out of retry loop, move to next link
+                        else:
+                            print(f"✅ City '{extracted_city}' is in Baden-Württemberg - Adding program")
+                    # --- End Baden-Württemberg Filter ---
+
+                    #print("result: ", [f"{p}: {d}" for p, d in zip(params, dataFromURL)])
+
+                    final_data.append(dataFromURL)
+                    print("Done extracting from: ", item_link)
+                    time.sleep(0.5)  # Brief delay between programs
+                    break  # Success! Break out of retry loop
+                    
+                except InvalidSessionIdException as e:
+                    print(f'⚠️  Browser session lost for link {item_link}: {e}')
+                    logging.critical(f"InvalidSessionIdException for {item_link}", exc_info=True)
+                    
+                    # Try to recreate the session
+                    if recreate_browser_session():
+                        retry_count += 1
+                        if retry_count <= max_retries:
+                            print(f"🔄 Retrying link (attempt {retry_count}/{max_retries})...")
+                            time.sleep(2)  # Brief pause before retry
+                            continue
+                        else:
+                            print(f"❌ Max retries reached for {item_link}, skipping...")
+                            break
                     else:
-                        print(f"✅ City '{extracted_city}' is in Baden-Württemberg - Adding program")
-                # --- End Baden-Württemberg Filter ---
-
-                #print("result: ", [f"{p}: {d}" for p, d in zip(params, dataFromURL)])
-
-                final_data.append(dataFromURL)
-                time.sleep(1)
-                print("Done extracting from: ", item_link)
-                time.sleep(3)
-            except Exception as e:
-                print(f'inside extractor loop exception for link {item_link}: {e}')
-                logging.critical(e, exc_info=True)
-                continue
+                        print(f"❌ Could not recreate browser session, stopping extraction.")
+                        return  # Exit the entire extraction process
+                        
+                except Exception as e:
+                    print(f'inside extractor loop exception for link {item_link}: {e}')
+                    logging.critical(e, exc_info=True)
+                    break  # Break out of retry loop, move to next link
+                    
     if not item_links:
         logging.critical("Empty item_links array.")
 
 
 def exportJSON(): # <--- NEW FUNCTION
-    limit_suffix = "BW" if PROGRAM_LIMIT is None else str(PROGRAM_LIMIT)
-    filename = f"TESTING_MASTER_LIST_{limit_suffix}"
+    limit_suffix = "ALL_BW" if PROGRAM_LIMIT is None else str(PROGRAM_LIMIT)
+    filename = f"MASTER_LIST_{limit_suffix}"
 
     if not final_data:
         print("No data to export.") 
@@ -357,7 +414,13 @@ def main():
     finally:
         print('inside finally')
         print("final_data length total: ", len(final_data))
-        driver.quit()
+        try:
+            driver.quit()
+            print("✅ Browser closed successfully")
+        except InvalidSessionIdException:
+            print("⚠️  Browser session was already closed or invalid - this is safe to ignore")
+        except Exception as e:
+            print(f"⚠️  Error while closing browser: {e}")
 
 
 if __name__ == "__main__":

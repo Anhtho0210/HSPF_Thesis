@@ -98,11 +98,7 @@ def draw_matching_section(c, y, program, user_profile, width):
     semantic_weighted = int(semantic_score * 50)
     ects_weighted = int(ects_score * 40)
     
-    c.drawString(65, y, f"Final Score = (Degree × 10%) + (Interest × 50%) + (ECTS × 40%)")
-    y -= 10
-    c.drawString(65, y, f"            = ({int(domain_score)}% × 10%) + ({int(semantic_score)}% × 50%) + ({int(ects_score)}% × 40%)")
-    y -= 10
-    c.drawString(65, y, f"            = {domain_weighted} + {semantic_weighted} + {ects_weighted} = {relevance_score}/100")
+    c.drawString(65, y, f"Score = ({int(domain_score)} * 0.1) + ({int(semantic_score)} * 0.5) + ({int(ects_score)} * 0.4) = {relevance_score}/100")
     c.setFillColorRGB(0, 0, 0)
     y -= 13
     
@@ -146,8 +142,8 @@ def draw_score_bar(c, x, y, score, max_width=200):
     filled_width = (score / 100) * max_width
     if score >= 80:
         c.setFillColorRGB(0.2, 0.7, 0.2)  # Green
-    elif score >= 60:
-        c.setFillColorRGB(0.8, 0.6, 0)    # Orange
+    elif score >= 50:
+        c.setFillColorRGB(0.8, 0.6, 0)    # Orange/Yellow
     else:
         c.setFillColorRGB(0.8, 0.2, 0.2)  # Red
     
@@ -448,7 +444,7 @@ def draw_application_strategy_section(c, y, program, user_profile, width):
             y -= 11
             c.drawString(75, y, "• Verifies authenticity of your academic documents")
             y -= 11
-            c.drawString(75, y, "• Processing time: 2-3 months (START EARLY!)")
+            c.drawString(75, y, "• Processing time: 6 months recommended (START EARLY!)")
             y -= 11
             c.drawString(75, y, "• Cost: ~€180")
             y -= 11
@@ -480,7 +476,7 @@ def draw_application_strategy_section(c, y, program, user_profile, width):
     c.setFont("Helvetica", 9)
     
     if student_country in ["China", "Vietnam", "India"]:
-        c.drawString(65, y, "1. Start APS process NOW (2-3 months lead time)")
+        c.drawString(65, y, "1. Start APS process NOW (6 months lead time recommended)")
         y -= 11
         c.drawString(65, y, "2. Prepare documents while waiting for APS")
         y -= 11
@@ -685,7 +681,7 @@ def draw_executive_summary(c, y, plans, user_profile, width):
     student_country = user_profile.citizenship.country_of_citizenship if user_profile and user_profile.citizenship else None
     
     if student_country in ["China", "Vietnam", "India"]:
-        c.drawString(65, y, "1. Start APS certificate process immediately (2-3 months)")
+        c.drawString(65, y, "1. Start APS certificate process immediately (6 months recommended)")
         y -= 10
         c.drawString(65, y, "2. Prepare language test (TOEFL/IELTS)")
         y -= 10
@@ -764,7 +760,7 @@ def draw_disclaimer_section(c, plans, user_profile, width, height):
         c.setFont("Helvetica-Bold", 9)
         c.drawString(55, y, "Processing Time:")
         c.setFont("Helvetica", 9)
-        c.drawString(150, y, "2-3 months (START EARLY!)")
+        c.drawString(150, y, "6 months recommended (START EARLY!)")
         y -= 11
         
         c.setFont("Helvetica-Bold", 9)
@@ -924,18 +920,7 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
     # ==============================
     # 2. APPLICANT PROFILE BOX
     # ==============================
-    # Increased height to fit target program, interests (with wrapping), and transcript file
-    box_height = 145
-    c.setLineWidth(1)
-    c.setFillColorRGB(0.95, 0.95, 0.95) # Light grey
-    c.rect(45, y - box_height - 5, width-90, box_height, fill=1, stroke=1)
-    c.setFillColorRGB(0, 0, 0) # Black text
-    
-    # Title
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(55, y-15, "👤 APPLICANT PROFILE")
-    
-    # --- EXTRACT DATA ---
+    # --- EXTRACT DATA FIRST (to calculate box height) ---
     u_cit = "Unknown"
     if user_profile and user_profile.citizenship:
         u_cit = getattr(user_profile.citizenship, 'country_of_citizenship', 'Unknown')
@@ -953,7 +938,6 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
         u_major = getattr(user_profile.academic_background, 'bachelor_field_of_study', 'Unknown')
         u_credits = getattr(user_profile.academic_background, 'total_credits_earned', 'N/A')
         u_ects = getattr(user_profile.academic_background, 'total_converted_ects', 'N/A')
-    
     
     # Extract desired program and field of interests from user profile
     desired_programs = []
@@ -975,7 +959,44 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
     # Truncate target programs if too long, but NOT interests
     if len(target_programs_display) > 70:
         target_programs_display = target_programs_display[:67] + "..."
-
+    
+    # --- CALCULATE HOW MANY LINES INTERESTS WILL TAKE ---
+    interests_x = 200
+    max_interests_width = width - interests_x - 55
+    
+    # Count wrapped lines for interests
+    num_interest_lines = 1  # At least 1 line
+    if len(target_interests_display) > 0:
+        words = target_interests_display.split()
+        line = ""
+        line_count = 0
+        for word in words:
+            test_line = line + word + " "
+            if c.stringWidth(test_line, "Helvetica", 9) < max_interests_width:
+                line = test_line
+            else:
+                if line:
+                    line_count += 1
+                line = word + " "
+        if line:
+            line_count += 1
+        num_interest_lines = max(1, line_count)
+    
+    # Calculate dynamic box height based on interests
+    # Base: 145, add 10 pixels per extra interest line beyond 1
+    extra_lines = max(0, num_interest_lines - 1)
+    box_height = 145 + (extra_lines * 10)
+    
+    # Draw the box
+    c.setLineWidth(1)
+    c.setFillColorRGB(0.95, 0.95, 0.95) # Light grey
+    c.rect(45, y - box_height - 5, width-90, box_height, fill=1, stroke=1)
+    c.setFillColorRGB(0, 0, 0) # Black text
+    
+    # Title
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(55, y-15, "👤 APPLICANT PROFILE")
+    
     # --- ROW 1: Origin & GPA ---
     c.setFont("Helvetica", 10)
     c.drawString(55, y-35, f"Origin: {u_cit}")
@@ -988,12 +1009,10 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
     if len(u_major) > 35: u_major = u_major[:35] + "..."
     c.drawString(55, y-55, f"B.Sc Major: {u_major}")
     
-    c.setFont("Helvetica-Bold", 10) # Bold for emphasis
     if u_ects != "N/A":
-        c.drawString(300, y-55, f"Credits: {u_credits} → ECTS: {u_ects}")
+        c.drawString(300, y-55, f"Credits: {u_credits} (ECTS: {u_ects})")
     else:
         c.drawString(300, y-55, f"Total Credits: {u_credits}")
-    c.setFont("Helvetica", 10)
 
     # --- ROW 3: TARGET MASTER PROGRAM ---
     c.setLineWidth(0.5)
@@ -1032,15 +1051,16 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
             c.drawString(interests_x, interests_y, line.strip())
     
     # --- ROW 5: ATTACHED TRANSCRIPT FILE ---
-    y_file = y - 110  # Position below interests
+    # Position dynamically based on number of interest lines
+    y_file = y - 95 - (num_interest_lines * 10) - 15  # Start after interests + spacing
     c.setFont("Helvetica-Bold", 10)
     c.drawString(55, y_file, "Transcript File:")
     c.setFont("Helvetica", 9)
     
     # Get the PDF filename from user profile or state
-    pdf_filename = "ToR.pdf"  # Default, should be extracted from actual file
+    pdf_filename = "Bachelor_Courses.pdf"  # Default, should be extracted from actual file
     if user_profile and hasattr(user_profile, 'transcript_file'):
-        pdf_filename = getattr(user_profile, 'transcript_file', 'ToR.pdf')
+        pdf_filename = getattr(user_profile, 'transcript_file', 'Bachelor_Courses.pdf')
     
     c.drawString(200, y_file, f"📄 {pdf_filename}")
 
@@ -1073,11 +1093,12 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
         # Meta
         c.setFont("Helvetica-Bold", 10)
         c.drawString(50, y, f"University: {plan['university']}")
-        c.drawString(300, y, f"Tuition: €{plan['tuition']}/sem")
         y -= 15
         c.setFont("Helvetica", 9)
-        c.drawString(50, y, f"Mode: {plan['application_mode']}  |  URL: {plan['official_url'][:50]}...")
-        y -= 25
+        c.drawString(50, y, f"Mode: {plan['application_mode']}")
+        y -= 12
+        c.drawString(50, y, f"URL: {plan['official_url'][:60]}...")
+        y -= 15
         
         # NEW: Matching Score Section
         y = draw_matching_section(c, y, plan, user_profile, width)

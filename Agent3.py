@@ -392,7 +392,7 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     print("=" * 60 + "\n")
 
     try:
-        with open("structured_program_db_BW.json", 'r', encoding='utf-8') as f:
+        with open("structured_program_db_all_bw.json", 'r', encoding='utf-8') as f:
             catalog = json.load(f)
     except FileNotFoundError:
         return {"eligible_programs": []}

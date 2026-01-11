@@ -73,16 +73,16 @@ def build_master_workflow():
 if __name__ == "__main__":
     
     # 1. Prepare Data
-    pdf_filename = "ToR.pdf"
+    pdf_filename = "Bachelor_Courses.pdf"
     app = build_master_workflow()
  
     # --- Define Initial State ---
     initial_raw_input = (
-        "Hi, I'm Anny from China. I have a Bachelor in Data Science. "
-        "I want to study master of Data Science "
-        "My interests are Data Science, Artificial Intelligence, Databases, Data Analytics, Machine Learning, Data Visualization."
+        "Hi, I'm Anny from Vietnam. I have a Bachelor in Electronic Commerce. "
+        "I want to study master of Business Management "
+        "My interests are Business Management, Artificial Intelligence, Databases, Data Analytics, Machine Learning, Data Visualization, Change Management, Innovation Technologies, Digital Management."
     )
-    
+     
     current_state = {
         "user_intent": initial_raw_input, # <--- Updated to match Anny's intent
         "pdf_path": pdf_filename, 
