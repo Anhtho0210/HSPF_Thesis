@@ -122,10 +122,17 @@ def merge_user_profiles(old_profile: Optional[UserProfile], new_profile: UserPro
 # --- 4. HELPER: ECTS LOGIC ---
 def apply_ects_conversion(profile: UserProfile) -> UserProfile:
     """
-    Strict Calculation Logic:
-    1. Factor = 30 / (Total_Credits_Earned / Semesters)
-    2. Total ECTS = Total_Credits_Earned * Factor
-    3. Course ECTS = Course_Credit * Factor
+    ECTS Conversion Logic:
+    
+    European Bachelor's degrees are typically 180-240 ECTS over 6-8 semesters.
+    
+    For non-European systems:
+    1. If credits are already close to ECTS range (170-250), assume they ARE ECTS (factor = 1.0)
+    2. Otherwise, calculate factor based on standard Bachelor's degree:
+       - 6 semesters → 180 ECTS target
+       - 8 semesters → 240 ECTS target
+    3. Factor = Target_ECTS / Total_Credits_Earned
+    4. Apply factor to all courses
     """
     if not profile or not profile.academic_background: return profile
     acad = profile.academic_background
@@ -140,27 +147,42 @@ def apply_ects_conversion(profile: UserProfile) -> UserProfile:
         return profile
 
     try:
-        # 1. Calculate Factor
-        credits_per_semester = acad.total_credits_earned / acad.program_duration_semesters
+        total_credits = acad.total_credits_earned
+        semesters = acad.program_duration_semesters
         
-        if credits_per_semester > 0:
-            conversion_factor = 30.0 / credits_per_semester
+        # 1. Check if already in ECTS range (European system)
+        if 170 <= total_credits <= 250:
+            print(f"[DEBUG ECTS] Credits already in ECTS range - using factor 1.0")
+            conversion_factor = 1.0
+        else:
+            # 2. Calculate target ECTS based on program duration
+            # Standard: 30 ECTS per semester
+            target_ects = semesters * 30.0
             
-            # Sanity Check
-            if 0.9 <= conversion_factor <= 1.1: 
-                conversion_factor = 1.0
+            # 3. Calculate conversion factor
+            conversion_factor = target_ects / total_credits
             
-            acad.ects_conversion_factor = round(conversion_factor, 2)
-            
-            # 2. Calculate Total Degree ECTS (Using the explicit total, NOT summing courses)
-            acad.total_converted_ects = round(acad.total_credits_earned * conversion_factor, 1)
-            
-            # 3. Apply to Individual Courses
-            if acad.transcript_courses:
-                for course in acad.transcript_courses:
-                    if course.original_credits:
-                        val = float(course.original_credits) * conversion_factor
-                        course.converted_ects = round(val, 1)
+            print(f"[DEBUG ECTS] Target ECTS: {target_ects}")
+            print(f"[DEBUG ECTS] Conversion factor: {conversion_factor}")
+        
+        # Sanity Check: If factor is very close to 1.0, just use 1.0
+        if 0.95 <= conversion_factor <= 1.05:
+            conversion_factor = 1.0
+            print(f"[DEBUG ECTS] Factor close to 1.0 - using 1.0")
+        
+        acad.ects_conversion_factor = round(conversion_factor, 2)
+        
+        # 4. Calculate Total Degree ECTS
+        acad.total_converted_ects = round(total_credits * conversion_factor, 1)
+        
+        print(f"[DEBUG ECTS] Final total ECTS: {acad.total_converted_ects}")
+        
+        # 5. Apply to Individual Courses
+        if acad.transcript_courses:
+            for course in acad.transcript_courses:
+                if course.original_credits:
+                    val = float(course.original_credits) * conversion_factor
+                    course.converted_ects = round(val, 1)
 
     except Exception as e:
         print(f"  [Logic] ECTS Error: {e}")

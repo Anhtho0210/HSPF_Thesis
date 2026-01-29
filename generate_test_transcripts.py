@@ -198,69 +198,9 @@ create_transcript_pdf(
     semesters=6
 )
 
-# Profile 3: Chinese Engineering Student - Realistic Mechanical Engineering Degree
+# Profile 3: Spanish Economics Student - Realistic Economics Degree (ECTS) - RENUMBERED FROM 004
 create_transcript_pdf(
-    filename="PROFILE_003_CN_ENG_Transcript.pdf",
-    student_name="Wei Zhang",
-    university="Tsinghua University",
-    courses=[
-        # General Education (Semesters 1-2)
-        {"name": "English I", "credits": 3, "grade": "A"},
-        {"name": "English II", "credits": 3, "grade": "A"},
-        {"name": "Chinese Literature", "credits": 2, "grade": "A-"},
-        {"name": "Marxist Philosophy", "credits": 3, "grade": "A"},
-        {"name": "Modern Chinese History", "credits": 2, "grade": "A-"},
-        {"name": "Physical Education I", "credits": 1, "grade": "A"},
-        {"name": "Physical Education II", "credits": 1, "grade": "A"},
-        
-        # Mathematics & Science Foundation (Semesters 1-3)
-        {"name": "Engineering Mathematics I", "credits": 5, "grade": "A"},
-        {"name": "Engineering Mathematics II", "credits": 5, "grade": "A"},
-        {"name": "Physics for Engineers I", "credits": 4, "grade": "A"},
-        {"name": "Physics for Engineers II", "credits": 4, "grade": "A"},
-        {"name": "Chemistry for Engineers", "credits": 3, "grade": "A-"},
-        
-        # Engineering Foundation (Semesters 2-4)
-        {"name": "Engineering Drawing", "credits": 3, "grade": "A"},
-        {"name": "Engineering Mechanics", "credits": 4, "grade": "A"},
-        {"name": "Materials Science", "credits": 3, "grade": "A"},
-        {"name": "Thermodynamics", "credits": 4, "grade": "A"},
-        {"name": "Fluid Mechanics", "credits": 4, "grade": "A"},
-        {"name": "Electrical Engineering Basics", "credits": 3, "grade": "A-"},
-        
-        # Mechanical Engineering Core (Semesters 3-6)
-        {"name": "Machine Design", "credits": 4, "grade": "A"},
-        {"name": "Manufacturing Processes", "credits": 4, "grade": "A"},
-        {"name": "Heat Transfer", "credits": 3, "grade": "A"},
-        {"name": "Dynamics of Machinery", "credits": 3, "grade": "A"},
-        {"name": "Control Systems", "credits": 4, "grade": "A"},
-        {"name": "CAD/CAM", "credits": 3, "grade": "A"},
-        {"name": "Finite Element Analysis", "credits": 3, "grade": "A"},
-        {"name": "Vibration Analysis", "credits": 3, "grade": "A"},
-        
-        # Specialization: Automotive & Robotics (Semesters 5-7)
-        {"name": "Automotive Engineering", "credits": 4, "grade": "A"},
-        {"name": "Robotics", "credits": 3, "grade": "A"},
-        {"name": "Mechatronics", "credits": 4, "grade": "A"},
-        {"name": "Industrial Automation", "credits": 3, "grade": "A"},
-        {"name": "Vehicle Dynamics", "credits": 3, "grade": "A"},
-        
-        # Electives (Semesters 6-7)
-        {"name": "Quality Engineering", "credits": 3, "grade": "A-"},
-        {"name": "Engineering Economics", "credits": 3, "grade": "A"},
-        {"name": "Project Management", "credits": 3, "grade": "A"},
-        
-        # Final Project (Semester 8)
-        {"name": "Internship", "credits": 4, "grade": "A"},
-        {"name": "Capstone Design Project", "credits": 5, "grade": "A"},
-    ],
-    total_credits=140,
-    semesters=8
-)
-
-# Profile 4: Spanish Economics Student - Realistic Economics Degree (ECTS)
-create_transcript_pdf(
-    filename="PROFILE_004_ES_ECON_Transcript.pdf",
+    filename="PROFILE_003_ES_ECON_Transcript.pdf",
     student_name="Maria Garcia",
     university="Universidad Complutense de Madrid",
     courses=[
@@ -327,74 +267,117 @@ create_transcript_pdf(
     semesters=8
 )
 
-# Profile 5: US Liberal Arts Student - Realistic Interdisciplinary Degree
+# Profile 4: German Business Informatics Student - Realistic Wirtschaftsinformatik Degree (ECTS)
 create_transcript_pdf(
-    filename="PROFILE_005_US_LIBERAL_Transcript.pdf",
-    student_name="Alex Johnson",
-    university="US University (Liberal Arts)",
+    filename="PROFILE_004_DE_BINF_Transcript.pdf",
+    student_name="Lukas Müller",
+    university="Hochschule München",
     courses=[
-        # General Education Requirements (Years 1-2)
-        {"name": "English Composition I", "credits": 3, "grade": "A"},
-        {"name": "English Composition II", "credits": 3, "grade": "A-"},
-        {"name": "Public Speaking", "credits": 3, "grade": "A"},
-        {"name": "World History", "credits": 3, "grade": "A-"},
-        {"name": "Introduction to Sociology", "credits": 3, "grade": "A"},
-        {"name": "Introduction to Philosophy", "credits": 3, "grade": "A-"},
-        {"name": "Art Appreciation", "credits": 3, "grade": "A"},
-        {"name": "Physical Education", "credits": 2, "grade": "A"},
+        # Mathematics \u0026 Foundations (Semesters 1-2)
+        {"name": "Mathematics I", "credits": 6, "grade": "2.3"},
+        {"name": "Mathematics II", "credits": 6, "grade": "2.0"},
+        {"name": "Statistics", "credits": 6, "grade": "2.7"},
+        {"name": "Linear Algebra", "credits": 6, "grade": "2.3"},
         
-        # Psychology Major Courses (Years 1-4)
-        {"name": "Introduction to Psychology", "credits": 3, "grade": "A"},
-        {"name": "Cognitive Psychology", "credits": 3, "grade": "A"},
-        {"name": "Social Psychology", "credits": 3, "grade": "A"},
-        {"name": "Developmental Psychology", "credits": 3, "grade": "A-"},
-        {"name": "Abnormal Psychology", "credits": 3, "grade": "B+"},
-        {"name": "Neuroscience", "credits": 3, "grade": "A"},
-        {"name": "Experimental Psychology", "credits": 3, "grade": "A-"},
-        {"name": "Perception and Cognition", "credits": 3, "grade": "A"},
-        {"name": "Learning and Memory", "credits": 3, "grade": "A"},
-        {"name": "Psychology of Technology", "credits": 3, "grade": "A"},
-        {"name": "Human Factors", "credits": 3, "grade": "A-"},
-        {"name": "Cognitive Science", "credits": 3, "grade": "A"},
+        # Computer Science Foundations (Semesters 1-3)
+        {"name": "Introduction to Programming", "credits": 6, "grade": "1.7"},
+        {"name": "Object-Oriented Programming", "credits": 6, "grade": "2.0"},
+        {"name": "Data Structures and Algorithms", "credits": 6, "grade": "2.3"},
+        {"name": "Database Systems", "credits": 6, "grade": "2.0"},
+        {"name": "Software Engineering", "credits": 6, "grade": "2.3"},
+        {"name": "Web Technologies", "credits": 6, "grade": "2.0"},
         
-        # Statistics Minor (Years 2-3)
-        {"name": "Statistics I", "credits": 3, "grade": "A"},
-        {"name": "Statistics II", "credits": 3, "grade": "A"},
-        {"name": "Behavioral Statistics", "credits": 3, "grade": "A"},
-        {"name": "Applied Statistics", "credits": 3, "grade": "A"},
-        {"name": "Data Analysis", "credits": 3, "grade": "A"},
-        {"name": "Quantitative Methods", "credits": 3, "grade": "A"},
-        {"name": "Regression Analysis", "credits": 3, "grade": "A-"},
-        {"name": "Data Visualization", "credits": 3, "grade": "A"},
+        # Business Foundations (Semesters 1-3)
+        {"name": "Business Administration", "credits": 6, "grade": "2.3"},
+        {"name": "Accounting", "credits": 6, "grade": "2.7"},
+        {"name": "Marketing", "credits": 6, "grade": "2.3"},
+        {"name": "Microeconomics", "credits": 6, "grade": "2.7"},
+        {"name": "Macroeconomics", "credits": 6, "grade": "3.0"},
         
-        # Computer Science Electives (Years 2-4)
-        {"name": "Introduction to Computer Science", "credits": 3, "grade": "A"},
-        {"name": "Programming in Python", "credits": 3, "grade": "A-"},
-        {"name": "Database Fundamentals", "credits": 3, "grade": "B+"},
-        {"name": "Web Technologies", "credits": 3, "grade": "A"},
-        {"name": "Machine Learning Basics", "credits": 3, "grade": "A-"},
+        # Business Informatics Core (Semesters 3-5)
+        {"name": "Business Process Management", "credits": 6, "grade": "2.0"},
+        {"name": "Enterprise Resource Planning (SAP)", "credits": 6, "grade": "2.3"},
+        {"name": "IT Project Management", "credits": 6, "grade": "2.0"},
+        {"name": "Business Intelligence", "credits": 6, "grade": "2.3"},
+        {"name": "Data Analytics", "credits": 6, "grade": "2.0"},
+        {"name": "IT Service Management", "credits": 6, "grade": "2.3"},
+        {"name": "Enterprise Architecture", "credits": 6, "grade": "2.3"},
         
-        # HCI/UX Specialization (Years 3-4)
-        {"name": "Human-Computer Interaction", "credits": 3, "grade": "A"},
-        {"name": "User Experience Design", "credits": 3, "grade": "A"},
-        {"name": "Information Architecture", "credits": 3, "grade": "A"},
-        {"name": "Usability Testing", "credits": 3, "grade": "A-"},
-        {"name": "Interaction Design", "credits": 3, "grade": "A"},
-        {"name": "Visual Design", "credits": 3, "grade": "A-"},
+        # Advanced Topics (Semesters 5-6)
+        {"name": "Digital Business Models", "credits": 6, "grade": "2.0"},
+        {"name": "Cloud Computing", "credits": 6, "grade": "2.3"},
+        {"name": "IT Security", "credits": 6, "grade": "2.7"},
+        {"name": "Digital Transformation", "credits": 6, "grade": "2.0"},
+        {"name": "IT Consulting", "credits": 6, "grade": "2.3"},
         
-        # Research Methods (Years 3-4)
-        {"name": "Research Methods in Psychology", "credits": 3, "grade": "A-"},
-        {"name": "Research Design", "credits": 3, "grade": "A-"},
-        {"name": "Survey Methods", "credits": 3, "grade": "A"},
-        {"name": "Qualitative Research", "credits": 3, "grade": "A"},
-        {"name": "Ethics in Research", "credits": 3, "grade": "A"},
+        # Electives (Semesters 6-7)
+        {"name": "Machine Learning for Business", "credits": 6, "grade": "2.3"},
+        {"name": "E-Commerce Systems", "credits": 6, "grade": "2.0"},
+        {"name": "Business Law", "credits": 6, "grade": "2.7"},
         
-        # Final Year (Year 4)
-        {"name": "Senior Thesis", "credits": 6, "grade": "A"},
-        {"name": "Internship", "credits": 3, "grade": "A"},
-        {"name": "Capstone Project", "credits": 3, "grade": "A"},
+        # Practical Experience (Semester 7)
+        {"name": "Internship (Practical Semester)", "credits": 24, "grade": "2.0"},
+        
+        # Final Project (Semester 7)
+        {"name": "Bachelor Thesis", "credits": 12, "grade": "2.3"},
     ],
-    total_credits=120,
+    total_credits=210,
+    semesters=7
+)
+
+# Profile 5: Pakistani Marketing Student - Realistic Marketing Degree
+create_transcript_pdf(
+    filename="PROFILE_005_PK_MKT_Transcript.pdf",
+    student_name="Ayesha Khan",
+    university="Lahore University of Management Sciences (LUMS)",
+    courses=[
+        # General Education (Semesters 1-2)
+        {"name": "English Composition", "credits": 4, "grade": "A-"},
+        {"name": "Business Communication", "credits": 4, "grade": "A"},
+        {"name": "Islamic Studies", "credits": 3, "grade": "B+"},
+        {"name": "Pakistan Studies", "credits": 3, "grade": "B+"},
+        {"name": "Computer Applications", "credits": 4, "grade": "A"},
+        
+        # Business Foundations (Semesters 1-3)
+        {"name": "Principles of Management", "credits": 4, "grade": "A-"},
+        {"name": "Financial Accounting", "credits": 4, "grade": "B+"},
+        {"name": "Managerial Accounting", "credits": 4, "grade": "B+"},
+        {"name": "Business Mathematics", "credits": 4, "grade": "A-"},
+        {"name": "Business Statistics", "credits": 4, "grade": "A"},
+        {"name": "Microeconomics", "credits": 4, "grade": "B+"},
+        {"name": "Macroeconomics", "credits": 4, "grade": "B+"},
+        
+        # Marketing Core (Semesters 2-5)
+        {"name": "Principles of Marketing", "credits": 4, "grade": "A"},
+        {"name": "Consumer Behavior", "credits": 4, "grade": "A"},
+        {"name": "Marketing Research", "credits": 4, "grade": "A-"},
+        {"name": "Brand Management", "credits": 4, "grade": "A"},
+        {"name": "Strategic Marketing", "credits": 4, "grade": "A-"},
+        {"name": "Marketing Analytics", "credits": 4, "grade": "A"},
+        {"name": "Services Marketing", "credits": 4, "grade": "A-"},
+        {"name": "International Marketing", "credits": 4, "grade": "B+"},
+        
+        # Digital Marketing Specialization (Semesters 4-6)
+        {"name": "Digital Marketing", "credits": 4, "grade": "A"},
+        {"name": "Social Media Marketing", "credits": 4, "grade": "A"},
+        {"name": "Content Marketing", "credits": 4, "grade": "A"},
+        {"name": "Search Engine Marketing", "credits": 4, "grade": "A-"},
+        {"name": "E-Commerce", "credits": 4, "grade": "A-"},
+        {"name": "Marketing Automation", "credits": 4, "grade": "A"},
+        
+        # Supporting Courses (Semesters 3-6)
+        {"name": "Integrated Marketing Communications", "credits": 4, "grade": "A"},
+        {"name": "Sales Management", "credits": 4, "grade": "B+"},
+        {"name": "Retail Management", "credits": 4, "grade": "B+"},
+        {"name": "Public Relations", "credits": 4, "grade": "A-"},
+        {"name": "Advertising Management", "credits": 4, "grade": "A"},
+        {"name": "Business Ethics", "credits": 3, "grade": "A-"},
+        
+        # Final Project (Semester 8)
+        {"name": "Marketing Internship", "credits": 4, "grade": "A"},
+        {"name": "Capstone Project", "credits": 4, "grade": "A"},
+    ],
+    total_credits=128,
     semesters=8
 )
 
@@ -402,6 +385,6 @@ print("\n✅ All 5 transcript PDFs created successfully!")
 print("\nFiles created:")
 print("1. PROFILE_001_VN_CS_Transcript.pdf")
 print("2. PROFILE_002_IN_BUS_Transcript.pdf")
-print("3. PROFILE_003_CN_ENG_Transcript.pdf")
-print("4. PROFILE_004_ES_ECON_Transcript.pdf")
-print("5. PROFILE_005_US_LIBERAL_Transcript.pdf")
+print("3. PROFILE_003_ES_ECON_Transcript.pdf")
+print("4. PROFILE_004_DE_BINF_Transcript.pdf")
+print("5. PROFILE_005_PK_MKT_Transcript.pdf")
