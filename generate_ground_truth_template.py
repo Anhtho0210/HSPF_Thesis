@@ -57,6 +57,12 @@ for profile in profiles:
         english_level = gold.get('english_level', 'N/A')
         student_english = f"{english_test}: {english_score}" if english_test != 'None' else f"Level: {english_level}"
         
+        # Get program's English requirement
+        english_req = program.get('english_requirements', {})
+        prog_english_level = english_req.get('min_cefr_level', 'Not specified')
+        if prog_english_level == 'None':
+            prog_english_level = 'Not required'
+        
         # Determine if should pass (leave blank for manual labeling)
         hard_constraints_data.append({
             'Profile ID': profile_id,
@@ -75,7 +81,7 @@ for profile in profiles:
             'Program City': city,
             'Location Pass?': '',  # To be filled manually
             'Student English': student_english,
-            'Program English Requirement': program.get('language_requirements', {}).get('english', 'Not specified'),
+            'Program English Requirement': prog_english_level,
             'English Pass?': '',  # To be filled manually
             'Student Work Exp (months)': gold.get('work_experience_months', 0),
             'Program Min Work Exp': program.get('min_work_experience_months', 0),
@@ -187,11 +193,13 @@ for profile in profiles:
     for program in programs:
         program_id = program['program_id']
         program_name = program['program_name']
+        course_summary = program.get('course_content_summary', '')
         
         ranking_data.append({
             'Profile ID': profile_id,
             'Program ID': program_id,
             'Program Name': program_name,
+            'Course Content Summary': course_summary,
             'Student Interests': interests,
             'Student Desired Programs': desired_programs,
             'Relevance Score (1-5)': '',  # 5=Perfect, 4=High, 3=Medium, 2=Low, 1=None
