@@ -546,9 +546,9 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         score_keyword = cosine_similarity(user_tfidf, program_tfidf_matrix[i:i+1])[0][0]
         
         # --- SCORE C: Hybrid Combination ---
-        # Weighting: 80% Semantic (Concept) + 20% Keyword (Precision)
+        # Weighting: 70% Semantic (Concept) + 30% Keyword (Precision)
         # This prevents "Keyword Stuffing" from winning, but rewards exact matches.
-        hybrid_score = (score_semantic * 0.8) + (score_keyword * 0.2)
+        hybrid_score = (score_semantic * 0.7) + (score_keyword * 0.3)
         print(f"    → Vector Score: {score_semantic:.3f} (Concept)")
         print(f"    → TF-IDF Score: {score_keyword:.3f} (Keywords)")
         print(f"    → Hybrid Score: {hybrid_score:.3f}")
@@ -557,11 +557,11 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         prog['_semantic_score'] = hybrid_score
          
         # Relevance Threshold - lowered to 0.3 for better recall
-        if hybrid_score > 0.3:
+        if hybrid_score > 0.4:
             ranked_candidates.append(prog)
-            print(f"    ✅ PASSED relevance threshold (> 0.3)")
+            print(f"    ✅ PASSED relevance threshold (> 0.4)")
         else:
-            print(f"    ❌ REJECTED - below relevance threshold (≤ 0.3)")
+            print(f"    ❌ REJECTED - below relevance threshold (≤ 0.4)")
             
     # Sort and take Top 10
     print(f"\n  Sorting {len(ranked_candidates)} candidates by semantic score...")

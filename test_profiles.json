@@ -81,7 +81,7 @@
                     ]
                 },
                 "expected_top_programs": [
-                    "Applied Artificial Intelligence (MAAI)",
+                    "Food Science and Technology",
                     "Computer and Information Science"
                 ],
                 "should_trigger_aps": true
@@ -160,8 +160,12 @@
                     ]
                 },
                 "expected_top_programs": [
-                    "Digital Business Management (MSc)",
-                    "International Business and Intercultural Management (MSc)"
+                    "Master of Science in Economics",
+                    "Industrial Artificial Intelligence",
+                    "Economics and Finance (MSc)",
+                    "International Business and Intercultural Management (MSc)",
+                    "Applied Artificial Intelligence (MAAI)",
+                    "Digital Business Management (MSc)"
                 ],
                 "should_trigger_aps": true
             }
@@ -323,7 +327,8 @@
                     ]
                 },
                 "expected_top_programs": [
-                    "Digital Business Management (MSc)",
+                    "Master of Science in Economics",
+                    "Computer and Information Science",
                     "Applied Computer Science"
                 ],
                 "should_trigger_aps": false
