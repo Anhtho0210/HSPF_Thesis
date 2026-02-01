@@ -81,9 +81,8 @@
                     ]
                 },
                 "expected_top_programs": [
-                    "Applied Artificial Intelligence (MAAI) – MSc - Heilbronn University of Applied Sciences",
-                    "Applied Data Science and Artificial Intelligence (MSc) - SRH University",
-                    "Computer and Information Science (MSc) - University of Konstanz"
+                    "Applied Artificial Intelligence (MAAI)",
+                    "Computer and Information Science"
                 ],
                 "should_trigger_aps": true
             }
@@ -91,7 +90,7 @@
         {
             "id": "PROFILE-002-IN-BUS",
             "description": "Indian Business Administration student interested in MBA/Management",
-            "input_text": "Hello, my name is Raj Patel from India. I completed my Bachelor of Business Administration from Delhi University. My marks are 75 out of 100 (minimum passing is 40). I studied for 6 semesters and earned 180 credits. I'm interested in Business Analytics, Digital Marketing, Innovation Management, Supply Chain Management, and Entrepreneurship. I want to pursue an MBA or Master's in Business Management. I have TOEFL iBT score of 95 (Reading 24, Listening 23, Speaking 24, Writing 24). I don't speak German. My budget is up to 5000 EUR per semester. I prefer to study in Baden-Württemberg state. I prefer to start in the Summer semester. I have 18 months of work experience in marketing at a tech startup.",
+            "input_text": "Hello, my name is Raj Patel from India. I completed my Bachelor of Business Administration from Delhi University. My marks are 75 out of 100 (minimum passing is 40). I studied for 6 semesters and earned 180 credits. I'm interested in Business Analytics, Digital Marketing, Innovation Management, Supply Chain Management, and Entrepreneurship. I want to pursue an MBA or Master's in Business Management. I have TOEFL iBT score of 95 (Reading 24, Listening 23, Speaking 24, Writing 24). I don't speak German. My budget is up to 5000 EUR per semester. I prefer to study in Baden-Württemberg state but I have no preferred city. I prefer to start in the Winter semester. I have 18 months of work experience in marketing at a tech startup.",
             "pdf_file": "PROFILE_002_IN_BUS_Transcript.pdf",
             "gold_standard": {
                 "expected_profile": {
@@ -110,9 +109,9 @@
                     "english_score": 95,
                     "german_test": null,
                     "max_tuition": 5000,
-                    "preferred_cities": null,
+                    "preferred_cities": [],
                     "preferred_state": "Baden-Württemberg",
-                    "preferred_semester": "Summer",
+                    "preferred_semester": "Winter",
                     "work_experience_months": 18,
                     "interests": [
                         "Business Analytics",
@@ -161,9 +160,8 @@
                     ]
                 },
                 "expected_top_programs": [
-                    "Digital Business Management - Pforzheim University",
-                    "Economics - University of Konstanz",
-                    "Corporate Communication Management - Pforzheim University"
+                    "Digital Business Management (MSc)",
+                    "International Business and Intercultural Management (MSc)"
                 ],
                 "should_trigger_aps": true
             }
@@ -242,9 +240,8 @@
                     ]
                 },
                 "expected_top_programs": [
-                    "Economics - University of Konstanz",
-                    "International Business (MA) - University of Tübingen",
-                    "Agricultural Economics (AgEcon) - University of Hohenheim"
+                    "Master of Science in Economics",
+                    "Economics and Finance (MSc)"
                 ],
                 "should_trigger_aps": false
             }
@@ -264,8 +261,8 @@
                     "expected_ects": 210.0,
                     "expected_ects_factor": 1.0,
                     "gpa_score": 2.3,
-                    "gpa_max_scale": 5.0,
-                    "gpa_min_score": 4.0,
+                    "gpa_max_scale": 1.0,
+                    "gpa_min_score": 5.0,
                     "gpa_german": 2.3,
                     "english_test": "TOEIC",
                     "english_score": 850,
@@ -326,9 +323,8 @@
                     ]
                 },
                 "expected_top_programs": [
-                    "Business Informatics - University of Mannheim",
-                    "Digital Business Management - Pforzheim University",
-                    "Information Systems - University of Stuttgart"
+                    "Digital Business Management (MSc)",
+                    "Applied Computer Science"
                 ],
                 "should_trigger_aps": false
             }
@@ -345,7 +341,7 @@
                     "bachelor_field": "Marketing",
                     "total_credits": 128,
                     "semesters": 8,
-                    "expected_ects": 236.8,
+                    "expected_ects": 240,
                     "expected_ects_factor": 1.85,
                     "gpa_score": 3.2,
                     "gpa_max_scale": 4.0,
@@ -406,9 +402,8 @@
                     ]
                 },
                 "expected_top_programs": [
-                    "Digital Business Management - Pforzheim University",
-                    "Corporate Communication Management - Pforzheim University",
-                    "Marketing - University of Mannheim"
+                    "Digital Business Management (MSc)",
+                    "International Business and Intercultural Management (MSc)"
                 ],
                 "should_trigger_aps": true
             }

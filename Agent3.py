@@ -20,12 +20,16 @@ if not os.environ.get("GEMINI_API_KEY"):
 
 # --- INITIALIZE MODELS ---
 # Embedding Model for Semantic Search (Layer 3 & 4)
-embeddings_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+embeddings_model = GoogleGenerativeAIEmbeddings(
+    model="models/embedding-001",
+    google_api_key=os.environ.get("GEMINI_API_KEY")
+)
 
 # LLM for Intelligent Degree Checking (Layer 1)
 llm_flash = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash", 
-    temperature=0.0 # Strict logic, no creativity
+    model="gemini-2.5-pro", 
+    temperature=0.0, # Strict logic, no creativity
+    google_api_key=os.environ.get("GEMINI_API_KEY")
 )
 
 # --- CONSTANTS ---
@@ -391,11 +395,14 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     print(user_profile.model_dump_json(indent=2))
     print("=" * 60 + "\n")
 
-    try:
-        with open("structured_program_db_all_bw.json", 'r', encoding='utf-8') as f:
-            catalog = json.load(f)
-    except FileNotFoundError:
-        return {"eligible_programs": []}
+    # Use program_database from state if provided (for testing), otherwise load from file
+    catalog = state.get("program_database")
+    if not catalog:
+        try:
+            with open("structured_program_db_all_bw.json", 'r', encoding='utf-8') as f:
+                catalog = json.load(f)
+        except FileNotFoundError:
+            return {"eligible_programs": []}
 
     total_start = len(catalog)
     print(f"📥 INPUT: Loaded {total_start} programs from database.")
@@ -539,9 +546,9 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         score_keyword = cosine_similarity(user_tfidf, program_tfidf_matrix[i:i+1])[0][0]
         
         # --- SCORE C: Hybrid Combination ---
-        # Weighting: 50% Semantic (Concept) + 50% Keyword (Precision)
+        # Weighting: 80% Semantic (Concept) + 20% Keyword (Precision)
         # This prevents "Keyword Stuffing" from winning, but rewards exact matches.
-        hybrid_score = (score_semantic * 0.5) + (score_keyword * 0.5)
+        hybrid_score = (score_semantic * 0.8) + (score_keyword * 0.2)
         print(f"    → Vector Score: {score_semantic:.3f} (Concept)")
         print(f"    → TF-IDF Score: {score_keyword:.3f} (Keywords)")
         print(f"    → Hybrid Score: {hybrid_score:.3f}")
@@ -549,12 +556,12 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         # Save for later
         prog['_semantic_score'] = hybrid_score
          
-        # Relevance Threshold
-        if hybrid_score > 0.5:
+        # Relevance Threshold - lowered to 0.3 for better recall
+        if hybrid_score > 0.3:
             ranked_candidates.append(prog)
-            print(f"    ✅ PASSED relevance threshold (> 0.5)")
+            print(f"    ✅ PASSED relevance threshold (> 0.3)")
         else:
-            print(f"    ❌ REJECTED - below relevance threshold (≤ 0.5)")
+            print(f"    ❌ REJECTED - below relevance threshold (≤ 0.3)")
             
     # Sort and take Top 10
     print(f"\n  Sorting {len(ranked_candidates)} candidates by semantic score...")
@@ -571,9 +578,13 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     # 🔬 LAYER 4: DEEP ECTS VERIFICATION (The Auditor)
     # =========================================================
     print(f"\n--- Layer 4: Running Deep ECTS Verification ---")
+    print(f"  Checking {len(top_candidates)} programs against student transcript...")
     
     final_results = []
-    for prog in top_candidates:
+    for i, prog in enumerate(top_candidates, 1):
+        prog_name = prog.get('program_name', 'Unknown')
+        print(f"\n  [L4 Check {i}/{len(top_candidates)}] {prog_name}")
+        
         if student_course_vectors:
             ects_check = check_ects_match_with_embeddings(student_course_vectors, student_courses, prog)
         else:
@@ -581,6 +592,9 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
 
         prog['ects_score'] = ects_check['score']     
         prog['ects_details'] = ects_check['details']
+        
+        print(f"    → ECTS Match Score: {ects_check['score']:.2f}")
+        print(f"    → ECTS Details: {ects_check['details']}")
 
         # Final Scoring
         final_score = (
@@ -594,6 +608,9 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
             f"Semantic: {int(prog['_semantic_score']*100)}% | "
             f"ECTS: {ects_check['details']}"
         )
+        print(f"    → Final Relevance Score: {final_score:.1f}")
+        print(f"      (Semantic: {prog['_semantic_score']*50:.1f} + ECTS: {ects_check['score']*40:.1f} + Degree: {prog['_domain_score']*10:.1f})")
+        
         final_results.append(prog)
 
     # Final Sort

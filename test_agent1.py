@@ -308,101 +308,194 @@ def test_gpa_conversion():
     return passed_tests == total_tests
 
 def test_field_extraction():
-    """Test extraction of all required fields from natural language"""
+    """Test extraction of all required fields from natural language for all 5 profiles"""
     print_test_header("Field Extraction from Natural Language")
     
     # Load test profiles
     with open('test_profiles.json', 'r') as f:
         data = json.load(f)
     
-    # Test Profile 1 (Vietnamese CS student)
-    profile = data['test_profiles'][0]
+    total_profiles_passed = 0
+    total_profiles = len(data['test_profiles'])
     
-    print(f"\n{YELLOW}Testing Profile 1 (Vietnamese CS)...{RESET}")
-    
-    try:
-        # Create AgentState
-        state: AgentState = {
-            "user_intent": profile['input_text'],
-            "pdf_path": profile['pdf_file'],
-            "user_profile": None,
-            "ai_response": None
-        }
+    for profile_data in data['test_profiles']:
+        profile_id = profile_data['id']
+        gold = profile_data['gold_standard']['expected_profile']
         
-        result = parse_profile_node(state)
+        print(f"\n{YELLOW}Testing {profile_id}...{RESET}")
         
-        # Print extracted profile JSON
-        if result.get('user_profile'):
-            print_extracted_profile(result['user_profile'], profile['id'])
-        
-        if not result.get('user_profile'):
-            print_result("Field Extraction", False, details="No user_profile returned")
-            return False
-        
-        user_profile = result['user_profile']
-        
-        # Define required fields and expected values
-        tests = [
-            ("Full Name", user_profile.full_name, "Linh Nguyen"),
-            ("Citizenship", user_profile.citizenship.country_of_citizenship if user_profile.citizenship else None, "Vietnam"),
-            ("Bachelor Field", user_profile.academic_background.bachelor_field_of_study if user_profile.academic_background else None, "Computer Science"),
-            ("Total Credits", user_profile.academic_background.total_credits_earned if user_profile.academic_background else None, 130),
-            ("Semesters", user_profile.academic_background.program_duration_semesters if user_profile.academic_background else None, 8),
-        ]
-        
-        # Add GPA tests if available
-        if user_profile.academic_background and user_profile.academic_background.bachelor_gpa:
-            gpa = user_profile.academic_background.bachelor_gpa
-            tests.extend([
-                ("GPA Score", gpa.score, 3.5),
-                ("GPA Max Scale", gpa.max_scale, 4.0),
-            ])
-        
-        # Add language test if available
-        if user_profile.language_proficiency and len(user_profile.language_proficiency) > 0:
-            tests.extend([
-                ("English Test", user_profile.language_proficiency[0].exam_type, "IELTS"),
-                ("English Score", user_profile.language_proficiency[0].overall_score, 7.0),
-            ])
-        
-        # Add preferences if available
-        if user_profile.preferences:
-            tests.extend([
-                ("Max Tuition", user_profile.preferences.max_tuition_fee_eur, 3000),
-                ("Preferred Semester", user_profile.preferences.preferred_start_semester, "Winter"),
-            ])
-        
-        passed_tests = 0
-        for field_name, actual, expected in tests:
-            passed = actual == expected
-            print_result(
-                f"Extract {field_name}",
-                passed,
-                expected=expected,
-                actual=actual
-            )
-            if passed:
-                passed_tests += 1
-        
-        # Check interests extraction
-        if user_profile.academic_background:
-            interests = user_profile.academic_background.fields_of_interest or []
-            has_ai = any("AI" in str(interest) or "Artificial Intelligence" in str(interest) for interest in interests)
-            has_ml = any("ML" in str(interest) or "Machine Learning" in str(interest) for interest in interests)
+        try:
+            # Create AgentState
+            state: AgentState = {
+                "user_intent": profile_data['input_text'],
+                "pdf_path": profile_data['pdf_file'],
+                "user_profile": None,
+                "ai_response": None
+            }
             
-            print_result(
-                "Extract Interests (AI/ML)",
-                has_ai or has_ml,
-                expected="Contains AI or ML",
-                actual=f"{len(interests)} interests found"
-            )
-        
-        print(f"\n{BLUE}Field Extraction Summary: {passed_tests}/{len(tests)} tests passed{RESET}")
-        return passed_tests >= len(tests) * 0.8  # 80% pass rate
-        
-    except Exception as e:
-        print_result("Field Extraction", False, details=f"Error: {str(e)}")
-        return False
+            result = parse_profile_node(state)
+            
+            # Print extracted profile JSON
+            if result.get('user_profile'):
+                print_extracted_profile(result['user_profile'], profile_id)
+            
+            if not result.get('user_profile'):
+                print_result("Field Extraction", False, details="No user_profile returned")
+                continue
+            
+            user_profile = result['user_profile']
+            
+            # Define required fields and expected values from gold standard
+            tests = []
+            
+            # Basic fields
+            tests.append(("Full Name", user_profile.full_name, gold['full_name']))
+            tests.append(("Citizenship", 
+                         user_profile.citizenship.country_of_citizenship if user_profile.citizenship else None, 
+                         gold['citizenship']))
+            
+            # Academic background
+            if user_profile.academic_background:
+                acad = user_profile.academic_background
+                tests.extend([
+                    ("Bachelor Field", acad.bachelor_field_of_study, gold['bachelor_field']),
+                    ("Total Credits", acad.total_credits_earned, gold['total_credits']),
+                    ("Semesters", acad.program_duration_semesters, gold['semesters']),
+                ])
+                
+                # GPA tests
+                if acad.bachelor_gpa:
+                    gpa = acad.bachelor_gpa
+                    tests.extend([
+                        ("GPA Score", gpa.score, gold['gpa_score']),
+                        ("GPA Max Scale", gpa.max_scale, gold['gpa_max_scale']),
+                        ("GPA Min Score", gpa.min_passing_grade, gold['gpa_min_score']),
+                    ])
+                
+                # Check interests
+                interests = acad.fields_of_interest or []
+                expected_interests = gold.get('interests', [])
+                if expected_interests:
+                    # Check if at least 50% of expected interests are found
+                    found_count = sum(1 for exp_int in expected_interests 
+                                    if any(exp_int.lower() in str(act_int).lower() 
+                                          for act_int in interests))
+                    tests.append(("Interests Coverage", 
+                                 found_count >= len(expected_interests) * 0.5,
+                                 f"≥{len(expected_interests)//2} of {len(expected_interests)}"))
+            
+            # Language proficiency - English
+            if user_profile.language_proficiency:
+                english_tests = [lang for lang in user_profile.language_proficiency 
+                               if lang.language and 'english' in lang.language.lower()]
+                if english_tests:
+                    eng = english_tests[0]
+                    tests.append(("English Test", eng.exam_type, gold.get('english_test')))
+                    if gold.get('english_score'):
+                        tests.append(("English Score", eng.overall_score, gold['english_score']))
+                    if gold.get('english_level'):
+                        tests.append(("English Level", eng.level, gold['english_level']))
+                
+                # German language
+                german_tests = [lang for lang in user_profile.language_proficiency 
+                              if lang.language and 'german' in lang.language.lower()]
+                if german_tests:
+                    ger = german_tests[0]
+                    if gold.get('german_test'):
+                        tests.append(("German Test", ger.exam_type, gold['german_test']))
+                    if gold.get('german_level'):
+                        tests.append(("German Level", ger.level, gold['german_level']))
+                elif gold.get('german_test') is None:
+                    # If gold standard expects null, check that no German test was extracted
+                    tests.append(("German Test (should be null)", len(german_tests) == 0, True))
+            
+            # Professional experience - CRITICAL: Check for 0 vs null
+            if user_profile.professional_and_tests:
+                work_exp = user_profile.professional_and_tests.relevant_work_experience_months
+                expected_work_exp = gold['work_experience_months']
+                
+                # Special handling: 0 should NOT be null
+                if expected_work_exp == 0:
+                    tests.append(("Work Experience (0 not null)", 
+                                 work_exp == 0,
+                                 f"0 (not null)"))
+                else:
+                    tests.append(("Work Experience Months", work_exp, expected_work_exp))
+            else:
+                # If no professional_and_tests, check if expected is 0
+                if gold['work_experience_months'] == 0:
+                    tests.append(("Work Experience (should be 0)", False, "0"))
+            
+            # Preferences
+            if user_profile.preferences:
+                prefs = user_profile.preferences
+                tests.extend([
+                    ("Max Tuition", prefs.max_tuition_fee_eur, gold['max_tuition']),
+                    ("Preferred Semester", prefs.preferred_start_semester, gold['preferred_semester']),
+                ])
+                
+                # Preferred cities - THREE CASES:
+                # 1. List with cities: ["Munich", "Stuttgart"] - student mentioned specific cities
+                # 2. Empty array []: student explicitly said "no preferred city"
+                # 3. null: student didn't mention cities at all
+                expected_cities = gold.get('preferred_cities')
+                actual_cities = prefs.preferred_cities
+                
+                if expected_cities is not None and len(expected_cities) > 0:
+                    # Case 1: Student mentioned specific cities
+                    found_city = any(exp_city.lower() in str(actual_cities).lower() 
+                                   for exp_city in expected_cities) if actual_cities else False
+                    tests.append(("Preferred Cities", found_city, 
+                                 f"Contains at least one of {expected_cities}"))
+                elif expected_cities is not None and len(expected_cities) == 0:
+                    # Case 2: Student explicitly said "no preferred city" - expect empty array []
+                    is_empty_array = actual_cities is not None and len(actual_cities) == 0
+                    tests.append(("Preferred Cities (empty array)", is_empty_array, 
+                                 "[] (explicit no preference)"))
+                elif expected_cities is None:
+                    # Case 3: Student didn't mention cities - expect null
+                    is_null = actual_cities is None
+                    tests.append(("Preferred Cities (null)", is_null, 
+                                 "null (not mentioned)"))
+                
+                # Preferred state
+                if gold.get('preferred_state'):
+                    actual_state = prefs.preferred_state
+                    expected_state = gold['preferred_state']
+                    tests.append(("Preferred State", 
+                                 expected_state.lower() in str(actual_state).lower() if actual_state else False,
+                                 expected_state))
+            
+            # Run all tests for this profile
+            passed_tests = 0
+            for test_item in tests:
+                if len(test_item) == 3:
+                    field_name, actual, expected = test_item
+                    if isinstance(actual, bool):
+                        passed = actual
+                    else:
+                        passed = actual == expected
+                    print_result(
+                        f"Extract {field_name}",
+                        passed,
+                        expected=expected,
+                        actual=actual
+                    )
+                    if passed:
+                        passed_tests += 1
+            
+            # Profile passes if at least 80% of tests pass
+            profile_passed = passed_tests >= len(tests) * 0.8
+            print(f"\n{BLUE}{profile_id} Summary: {passed_tests}/{len(tests)} tests passed{RESET}")
+            
+            if profile_passed:
+                total_profiles_passed += 1
+            
+        except Exception as e:
+            print_result(f"Field Extraction - {profile_id}", False, details=f"Error: {str(e)}")
+    
+    print(f"\n{BLUE}Overall Field Extraction Summary: {total_profiles_passed}/{total_profiles} profiles passed{RESET}")
+    return total_profiles_passed >= total_profiles * 0.8  # 80% of profiles must pass
 
 def test_pdf_parsing():
     """Test PDF transcript parsing"""
