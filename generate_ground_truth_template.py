@@ -20,6 +20,20 @@ with open('test_sample_programs.json', 'r') as f:
 
 print(f"Loaded {len(profiles)} profiles and {len(programs)} programs")
 
+# Helper function for formatting ECTS requirements
+def _format_ects_requirements(requirements):
+    """Format ECTS requirements for display in Excel."""
+    if not requirements:
+        return "None"
+    
+    formatted = []
+    for req in requirements:
+        domain = req.get('domain_name', 'Unknown')
+        min_ects = req.get('min_ects_total', 0)
+        formatted.append(f"{domain}: {min_ects} ECTS")
+    
+    return " | ".join(formatted) if formatted else "None"
+
 # Create workbook
 wb = Workbook()
 wb.remove(wb.active)  # Remove default sheet
@@ -93,6 +107,8 @@ for profile in profiles:
             'Student ECTS': gold.get('expected_ects'),
             'Program Min ECTS': program.get('min_degree_ects', 180),
             'ECTS Pass?': '',  # To be filled manually
+            'Program ECTS Domain Requirements': _format_ects_requirements(program.get('specific_ects_requirements', [])),
+            'ECTS Domain Pass?': '',  # To be filled manually (check if student transcript meets domain requirements)
             'Overall Should Pass?': '',  # To be filled manually
             'Notes': ''
         })
@@ -252,8 +268,10 @@ instructions = [
     ["  3. For each constraint, mark 'YES' or 'NO' in the '...Pass?' columns"],
     ["  4. Note: Location check now uses preferred cities instead of state"],
     ["  5. Note: English language proficiency is now explicitly checked"],
-    ["  6. Mark 'Overall Should Pass?' as 'YES' only if ALL constraints pass"],
-    ["  7. Add notes for edge cases or unclear situations"],
+    ["  6. Check 'ECTS Domain Pass?': Review if student transcript has required ECTS in specific domains"],
+    ["     (e.g., 60 ECTS in Economics/Finance/Math for some programs)"],
+    ["  7. Mark 'Overall Should Pass?' as 'YES' only if ALL constraints pass (including ECTS domains)"],
+    ["  8. Add notes for edge cases or unclear situations"],
     [""],
     ["Sheet 2: Degree Compatibility"],
     ["  1. Compare student's bachelor field with program's required degree domains"],

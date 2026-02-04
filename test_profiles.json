@@ -244,8 +244,9 @@
                     ]
                 },
                 "expected_top_programs": [
-                    "Master of Science in Economics",
-                    "Economics and Finance (MSc)"
+                    "Economics and Finance (MSc)",
+                    "Master of Science in Corporate Management & Economics | CME",
+                    "International Business and Intercultural Management (MSc)"
                 ],
                 "should_trigger_aps": false
             }
@@ -337,7 +338,7 @@
         {
             "id": "PROFILE-005-PK-MKT",
             "description": "Pakistani Marketing student interested in Digital Marketing",
-            "input_text": "Hello, I'm Ayesha Khan from Pakistan. I have a Bachelor's degree in Marketing from Lahore University of Management Sciences (LUMS). My CGPA is 3.2 out of 4.0 (minimum passing is 2.0). I studied for 8 semesters and earned 128 credits. I'm interested in Digital Marketing, Brand Management, Consumer Behavior, Social Media Marketing, and Marketing Analytics. I want to study a Master's in Marketing or Digital Marketing. I have IELTS 6.5 (overall) with Reading 7.0, Listening 6.5, Speaking 6.0, Writing 6.5. I don't speak German yet. My maximum tuition budget is 4000 EUR per semester. I prefer to study in Baden-Württemberg state. I want to start in the Summer semester. I have 24 months of work experience as a Marketing Executive at a digital agency.",
+            "input_text": "Hello, I'm Ayesha Khan from Pakistan. I have a Bachelor's degree in Marketing from Lahore University of Management Sciences (LUMS). My CGPA is 3.2 out of 4.0 (minimum passing is 2.0). I studied for 8 semesters and earned 128 credits. I'm interested in Digital Marketing, Brand Management, Consumer Behavior, Social Media Marketing, and Marketing Analytics. I want to study a Master's in Marketing or Digital Marketing. I have IELTS 6.5 (overall) with Reading 7.0, Listening 6.5, Speaking 6.0, Writing 6.5. I don't speak German yet. My maximum tuition budget is 4000 EUR per semester. I prefer to study in Baden-Württemberg state. I don't have prefered semester. I have 24 months of work experience as a Marketing Executive at a digital agency.",
             "pdf_file": "PROFILE_005_PK_MKT_Transcript.pdf",
             "gold_standard": {
                 "expected_profile": {
@@ -358,7 +359,7 @@
                     "max_tuition": 4000,
                     "preferred_cities": null,
                     "preferred_state": "Baden-Württemberg",
-                    "preferred_semester": "Summer",
+                    "preferred_semester": null,
                     "work_experience_months": 24,
                     "interests": [
                         "Digital Marketing",

@@ -264,24 +264,71 @@ for row_idx in range(2, ws_hard.max_row + 1):
         semester_pass = "YES"
     ws_hard.cell(row_idx, 25).value = semester_pass
     
-    # ECTS Check
+    # ECTS Total Check
     student_ects = ws_hard.cell(row_idx, 26).value or 0
     program_ects = ws_hard.cell(row_idx, 27).value or 180
     ects_pass = "YES" if student_ects >= program_ects else "NO"
     ws_hard.cell(row_idx, 28).value = ects_pass
     
-    # Overall Pass
-    all_checks = [gpa_pass, tuition_pass, location_pass, english_pass, work_pass, semester_pass, ects_pass]
-    overall_pass = "YES" if all(check == "YES" for check in all_checks) else "NO"
-    ws_hard.cell(row_idx, 29).value = overall_pass
+    # ECTS Domain Requirements Check
+    # For now, we'll mark as "YES" if no requirements, or "MANUAL" if requirements exist
+    # This requires checking student's transcript against specific domain requirements
+    ects_domain_reqs = program.get('specific_ects_requirements', [])
+    if not ects_domain_reqs:
+        ects_domain_pass = "YES"  # No domain requirements
+    else:
+        # Mark as MANUAL for manual review since we need to check transcript details
+        ects_domain_pass = "MANUAL"  # Requires manual verification against transcript
+    ws_hard.cell(row_idx, 29).value = ects_domain_pass
     
-    # Add note if failed
-    if overall_pass == "NO":
-        failed = [name for name, val in zip(
-            ["GPA", "Tuition", "Location", "English", "Work Exp", "Semester", "ECTS"],
-            all_checks
-        ) if val == "NO"]
-        ws_hard.cell(row_idx, 30).value = f"Failed: {', '.join(failed)}"
+    # Overall Pass (including ECTS domain check)
+    all_checks = [gpa_pass, tuition_pass, location_pass, english_pass, work_pass, semester_pass, ects_pass, ects_domain_pass]
+    # If any check is MANUAL, overall should be MANUAL for review
+    if "MANUAL" in all_checks:
+        overall_pass = "MANUAL"
+    else:
+        overall_pass = "YES" if all(check == "YES" for check in all_checks) else "NO"
+    ws_hard.cell(row_idx, 30).value = overall_pass
+    
+    
+    # Add detailed notes about failures
+    notes = []
+    
+    if gpa_pass == "NO":
+        notes.append(f"GPA: {student_gpa} > {program_gpa}")
+    
+    if tuition_pass == "NO":
+        fee_type = "Non-EU" if not is_eu else "EU"
+        notes.append(f"Tuition: {applicable_tuition}€ ({fee_type}) > {student_budget}€ budget")
+    
+    if location_pass == "NO":
+        notes.append(f"Location: {program_city} not in preferred cities")
+    
+    if english_pass == "NO":
+        notes.append(f"English: {student_english} < {program_english} required")
+    
+    if work_pass == "NO":
+        notes.append(f"Work Exp: {student_exp}m < {program_exp}m required")
+    
+    if semester_pass == "NO":
+        if "winter" in str(pref_semester).lower():
+            notes.append(f"Semester: Winter not available")
+        elif "summer" in str(pref_semester).lower():
+            notes.append(f"Semester: Summer not available")
+    
+    if ects_pass == "NO":
+        notes.append(f"ECTS: {student_ects} < {program_ects} required")
+    
+    if ects_domain_pass == "MANUAL":
+        domain_desc = " | ".join([f"{req.get('domain_name', 'Unknown')}: {req.get('min_ects_total', 0)} ECTS" for req in ects_domain_reqs])
+        notes.append(f"ECTS Domain: Requires manual check - {domain_desc}")
+    
+    if notes:
+        ws_hard.cell(row_idx, 31).value = " | ".join(notes)
+    elif overall_pass == "YES":
+        ws_hard.cell(row_idx, 31).value = "All constraints passed"
+    elif overall_pass == "MANUAL":
+        ws_hard.cell(row_idx, 31).value = "Requires manual ECTS domain verification"
 
 print(f"  Filled {ws_hard.max_row - 1} rows")
 
