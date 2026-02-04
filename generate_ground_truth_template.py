@@ -67,9 +67,19 @@ for profile in profiles:
         
         # Get student's English proficiency
         english_test = gold.get('english_test', 'None')
-        english_score = gold.get('english_score', 'N/A')
-        english_level = gold.get('english_level', 'N/A')
-        student_english = f"{english_test}: {english_score}" if english_test != 'None' else f"Level: {english_level}"
+        english_score = gold.get('english_score')
+        english_level = gold.get('english_level')
+        
+        # Format student English: use score if available, otherwise use level
+        if english_test != 'None':
+            if english_score is not None:
+                student_english = f"{english_test}: {english_score}"
+            elif english_level is not None:
+                student_english = f"Level: {english_level}"
+            else:
+                student_english = f"{english_test}: N/A"
+        else:
+            student_english = f"Level: {english_level}" if english_level else "Level: N/A"
         
         # Get program's English requirement
         english_req = program.get('english_requirements', {})

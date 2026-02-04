@@ -6,7 +6,7 @@ Run this BEFORE manual labeling to verify Agent3 works with test data
 import json
 import sys
 from pathlib import Path
-from Agent3 import agent_3_filter_node
+from Agent3 import agent_3_filter_node, EU_COUNTRIES
 from Agent1 import parse_profile_node
 from models import AgentState
 
@@ -33,29 +33,54 @@ def calculate_layer_pass_rates(user_profile, programs):
     }
     
     # Extract user profile attributes
-    is_eu = user_profile.citizenship and user_profile.citizenship.is_eu_citizen if user_profile.citizenship else False
-    gpa_german = user_profile.academic_background.gpa_german if user_profile.academic_background else 4.0
-    max_tuition = user_profile.preferences.max_tuition if user_profile.preferences else 0
-    preferred_cities = user_profile.preferences.preferred_cities if user_profile.preferences else []
-    preferred_semester = user_profile.preferences.preferred_semester if user_profile.preferences else 'No preference'
-    work_exp_months = user_profile.professional_and_tests.work_experience_months if user_profile.professional_and_tests else 0
+    # Determine if student is from EU/EEA country
+    student_country = None
+    if user_profile.citizenship and user_profile.citizenship.country_of_citizenship:
+        student_country = user_profile.citizenship.country_of_citizenship
+    
+    is_eu = student_country in EU_COUNTRIES if student_country else False
+    
+    # Get GPA (German scale)
+    gpa_german = 4.0  # Default worst passing grade
+    if user_profile.academic_background and user_profile.academic_background.bachelor_gpa:
+        gpa_german = user_profile.academic_background.bachelor_gpa.score_german or 4.0
+    
+    # Get preferences
+    max_tuition = 0
+    preferred_cities = []
+    preferred_semester = 'No preference'
+    if user_profile.preferences:
+        max_tuition = user_profile.preferences.max_tuition_fee_eur or 0
+        preferred_cities = [c.lower() for c in (user_profile.preferences.preferred_cities or [])]
+        preferred_semester = user_profile.preferences.preferred_start_semester or 'No preference'
+    
+    # Get work experience
+    work_exp_months = 0
+    if user_profile.professional_and_tests:
+        work_exp_months = user_profile.professional_and_tests.relevant_work_experience_months or 0
     
     for program in programs:
-        # L1.1: GPA Filter
+        # L1.1: GPA Filter (with 0.05 buffer)
         program_min_gpa = program.get('min_gpa_german_scale')
-        if program_min_gpa is None or gpa_german <= program_min_gpa:
+        if program_min_gpa is None:
             stats['gpa_pass'] += 1
             gpa_ok = True
         else:
-            gpa_ok = False
+            # Check: student_gpa <= required (lower is better)
+            # Allow buffer: if student has 2.55 and limit is 2.5, we check 2.55 <= 2.5 + 0.05
+            if gpa_german <= (program_min_gpa + 0.05):
+                stats['gpa_pass'] += 1
+                gpa_ok = True
+            else:
+                gpa_ok = False
         
-        # L1.2: Tuition Filter
+        # L1.2: Tuition Filter (with 100 EUR buffer)
         if is_eu:
             applicable_tuition = program.get('tuition_fee_per_semester_eur', 0) or 0
         else:
             applicable_tuition = program.get('non_eu_tuition_fee_eur', 0) or 0
         
-        if applicable_tuition <= max_tuition:
+        if applicable_tuition <= (max_tuition + 100):
             stats['tuition_pass'] += 1
             tuition_ok = True
         else:
@@ -66,7 +91,8 @@ def calculate_layer_pass_rates(user_profile, programs):
         language_ok = True
         
         # L1.4: Location Filter
-        if not preferred_cities or program.get('city') in preferred_cities:
+        prog_city = str(program.get('city', '')).lower()
+        if not preferred_cities or (prog_city and prog_city in preferred_cities):
             stats['location_pass'] += 1
             location_ok = True
         else:
@@ -76,14 +102,19 @@ def calculate_layer_pass_rates(user_profile, programs):
         deadlines = program.get('deadlines', {})
         semester_ok = False
         
-        if preferred_semester == 'No preference':
+        wanted_start = preferred_semester.lower()
+        has_winter = deadlines.get('winter_semester') is not None
+        has_summer = deadlines.get('summer_semester') is not None
+        
+        if "winter" in wanted_start:
+            if has_winter:
+                semester_ok = True
+        elif "summer" in wanted_start:
+            if has_summer:
+                semester_ok = True
+        else:
+            # No specific preference (e.g. "No preference", or just "Any")
             semester_ok = True
-        elif preferred_semester == 'Winter':
-            if deadlines.get('winter_semester'):
-                semester_ok = True
-        elif preferred_semester == 'Summer':
-            if deadlines.get('summer_semester'):
-                semester_ok = True
         
         if semester_ok:
             stats['semester_pass'] += 1
@@ -295,18 +326,48 @@ def quick_test_agent3():
         
         # Print layer-by-layer statistics
         print(f"\n{BLUE}{'='*80}{RESET}")
-        print(f"{BLUE}LAYER-BY-LAYER PASS RATES (Actual Agent3 Results){RESET}")
+        print(f"{BLUE}LAYER-BY-LAYER PASS RATES (Detailed Breakdown){RESET}")
         print(f"{BLUE}{'='*80}{RESET}")
         
         for result in successful:
             if 'layer_stats' in result:
                 stats = result['layer_stats']
+                total = stats['total_programs']
+                layer1_pass = stats['all_hard_pass']
+                
                 print(f"\n{YELLOW}{result['profile_id']}:{RESET}")
-                print(f"  Layer 1 (Hard Constraints): {stats['all_hard_pass']:2d}/{stats['total_programs']} ({stats['all_hard_pct']:5.1f}%)")
-                print(f"  Final Result:                {result['passed_filters']:2d}/{result['total_programs']} ({result['filter_rate']*100:5.1f}%)")
+                print(f"  Total Programs: {total}")
+                
+                # Layer 1: Individual Hard Constraints
+                print(f"\n  {BLUE}Layer 1 - Hard Constraints (Individual):{RESET}")
+                print(f"    • GPA:            {stats['gpa_pass']:2d}/{total} ({stats['gpa_pct']:5.1f}%)")
+                print(f"    • Tuition:        {stats['tuition_pass']:2d}/{total} ({stats['tuition_pct']:5.1f}%)")
+                print(f"    • Language:       {stats['language_pass']:2d}/{total} ({stats['language_pct']:5.1f}%)")
+                print(f"    • Location:       {stats['location_pass']:2d}/{total} ({stats['location_pct']:5.1f}%)")
+                print(f"    • Semester:       {stats['semester_pass']:2d}/{total} ({stats['semester_pct']:5.1f}%)")
+                print(f"    • Work Exp:       {stats['work_exp_pass']:2d}/{total} ({stats['work_exp_pct']:5.1f}%)")
+                print(f"    {GREEN}→ ALL Combined:   {layer1_pass:2d}/{total} ({stats['all_hard_pct']:5.1f}%){RESET}")
+                
+                # Calculate Layer 2 and Layer 3 from filtered results
+                # Layer 2 would be after degree compatibility (we'll estimate from final results)
+                # For now, we'll show the progression
+                final_pass = result['passed_filters']
+                
+                # Estimate Layer 2 (assuming degree compatibility filters some programs)
+                # This is a simplified view - actual Layer 2/3 breakdown would need more instrumentation
+                if layer1_pass > 0:
+                    layer2_pct = (final_pass / layer1_pass) * 100
+                    print(f"\n  {BLUE}Layer 2 - Degree Compatibility:{RESET}")
+                    print(f"    Programs passing: {final_pass}/{layer1_pass} ({layer2_pct:5.1f}% of Layer 1)")
+                    print(f"    Overall:          {final_pass}/{total} ({result['filter_rate']*100:5.1f}% of total)")
+                else:
+                    print(f"\n  {BLUE}Layer 2 - Degree Compatibility:{RESET}")
+                    print(f"    No programs passed Layer 1")
+                
+                print(f"\n  {GREEN}Final Result: {final_pass}/{total} programs ({result['filter_rate']*100:5.1f}%){RESET}")
         
-        print(f"\n{YELLOW}Note: Compare these percentages with 'Layer Summary' sheet in agent3_ground_truth_FILLED.xlsx{RESET}")
-        print(f"{YELLOW}      Run 'python add_layer_percentages.py' to generate the comparison sheet.{RESET}")
+        print(f"\n{YELLOW}Note: Layer 2 shows programs that pass degree compatibility after passing Layer 1{RESET}")
+        print(f"{YELLOW}      Compare with ground truth in agent3_ground_truth_FILLED.xlsx{RESET}")
         
         
         if avg_match_rate is not None and avg_match_rate >= 0.5:

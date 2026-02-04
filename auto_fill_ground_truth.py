@@ -36,7 +36,7 @@ def compare_cefr_levels(student_level, required_level):
         parts = student_level.split(":")
         if "Level" in parts[0]:
             level_part = parts[1].strip()
-            if level_part == "N/A":
+            if level_part == "N/A" or level_part == "None":
                 return False
             student_level = level_part
         else:
