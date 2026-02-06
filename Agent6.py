@@ -31,7 +31,8 @@ def draw_wrapped_text(c, text, x, y, max_width, line_height=12):
 def draw_matching_section(c, y, program, user_profile, width):
     """Draw the 'Why This Matches You' section with scores and reasoning."""
     # Check if we have enough space for this section
-    if y < 300:
+    # Check if we have enough space for this section
+    if y < 120:
         c.showPage()
         y = 750
     
@@ -156,7 +157,7 @@ def draw_score_bar(c, x, y, score, max_width=200):
 def draw_requirements_section(c, y, program, user_profile, width):
     """Draw detailed program requirements with student's actual values."""
     # Check if we have enough space for this section
-    if y < 350:
+    if y < 120:
         c.showPage()
         y = 750
     
@@ -281,7 +282,7 @@ def draw_requirements_section(c, y, program, user_profile, width):
 def draw_cost_section(c, y, program, user_profile, width):
     """Draw tuition fee breakdown with EU/non-EU distinction."""
     # Check if we have enough space for this section
-    if y < 250:
+    if y < 100:
         c.showPage()
         y = 750
     
@@ -322,7 +323,7 @@ def draw_cost_section(c, y, program, user_profile, width):
     
     # Semester contribution
     semester_contrib = program.get('semester_contribution_eur', 0)
-    c.drawString(65, y, f"• Semester Contribution: €{semester_contrib} (mandatory for all)")
+    c.drawString(65, y, f"• Semester Contribution: €{semester_contrib} (mandatory for all, avg. ~€200-€300)")
     c.setFont("Helvetica", 8)
     c.setFillColorRGB(0.4, 0.4, 0.4)
     c.drawString(75, y-10, "Includes: Student services, public transport, admin fees")
@@ -371,7 +372,8 @@ def draw_cost_section(c, y, program, user_profile, width):
 def draw_application_strategy_section(c, y, program, user_profile, width):
     """Draw application strategy with mode details and country-specific requirements."""
     # Check if we have enough space for this section
-    if y < 300:
+    # Check if we have enough space for this section
+    if y < 120:
         c.showPage()
         y = 750
     
@@ -847,8 +849,8 @@ def draw_disclaimer_section(c, plans, user_profile, width, height):
         c.drawString(55, y, "Fee Amount:")
         c.setFont("Helvetica", 9)
         c.drawString(150, y, "€1,500 per semester (for non-EU/EEA students)")
-        y -= 11
-        
+        y -= 25
+
         c.setFont("Helvetica-Bold", 9)
         c.drawString(55, y, "Who pays:")
         y -= 11
@@ -874,6 +876,28 @@ def draw_disclaimer_section(c, plans, user_profile, width, height):
         c.setFont("Helvetica", 8)
         c.drawString(150, y, "Other German states (e.g., Bavaria, Berlin) are tuition-free for all students")
         y -= 25
+
+    # Anabin Database Information
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "📋 University Recognition (Anabin)")
+    y -= 15
+    c.setFont("Helvetica", 9)
+    c.drawString(55, y, "Student needs to check uni recognition strictly :Anabin Database")
+    y -= 11
+    c.drawString(55, y, "Anabin is the central German government database for checking whether a foreign")
+    y -= 11
+    c.drawString(55, y, "university and degree are recognized in Germany.")
+    y -= 13
+    
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(55, y, "Website:")
+    c.setFont("Helvetica", 8)
+    full_url = "https://anabin.kmk.org/anabin.html"
+    c.setFillColorRGB(0, 0, 0.8)
+    c.drawString(150, y, full_url)
+    c.linkURL(full_url, (150, y, 400, y+10), relative=1)
+    c.setFillColorRGB(0, 0, 0)
+    y -= 25
     
     # Final reminder
     c.setFont("Helvetica-Bold", 11)
@@ -1077,7 +1101,7 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
     # ==============================
     for plan in plans:
         # Check if we need a new page before starting a program
-        if y < 250: 
+        if y < 80: 
             c.showPage()
             y = height - 50
             
@@ -1097,7 +1121,13 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
         c.setFont("Helvetica", 9)
         c.drawString(50, y, f"Mode: {plan['application_mode']}")
         y -= 12
-        c.drawString(50, y, f"URL: {plan['official_url'][:60]}...")
+        # Draw clickable URL
+        full_url = plan['official_url']
+        c.setFillColorRGB(0, 0, 0.8)  # Make it blue to look like a link
+        c.drawString(50, y, f"URL: {full_url}")
+        # Add actual link
+        c.linkURL(full_url, (50, y, width-50, y+10), relative=1)
+        c.setFillColorRGB(0, 0, 0)
         y -= 15
         
         # NEW: Matching Score Section
@@ -1122,7 +1152,7 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
         y = draw_application_strategy_section(c, y, plan, user_profile, width)
         
         # Check if we need a new page before timeline
-        if y < 200:
+        if y < 80:
             c.showPage()
             y = height - 50
         
@@ -1162,7 +1192,7 @@ def generate_pdf_report(plans, user_profile, user_intent, filename="My_Applicati
         y -= 15
 
         # Check if we need a new page before checklist
-        if y < 150: 
+        if y < 80: 
             c.showPage()
             y = height - 50
 

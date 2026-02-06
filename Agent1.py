@@ -324,14 +324,18 @@ def parse_profile_node(state: AgentState) -> Dict[str, Any]:
              - For 'academic_background':
                - **DO NOT** extract 'total_credits_earned' or 'program_duration_semesters' from PDFs.
                - These fields should ONLY be populated when the user explicitly provides them in chat.
-               
-             
+
+             - For 'professional_and_tests.relevant_work_experience_months':
+                - If user says "no experience", "none", "fresh graduate", "student", or "0", set this to 0.
+                - Do NOT set to null if they explicitly say "no" or "0".
+
              - For 'language_proficiency': Use 'exam_type' instead of 'exam'. For IELTS/TOEFL, use 'overall_score'.
              
              Crucial Context: The user's latest response might be a short answer. Map it to the CORRECT field:
              - If user says "Munich", populate 'preferences.preferred_cities'.
              - If user says "1000", it is likely 'preferences.max_tuition_fee_eur'.
              - If user says "No preference", set the specific list to [].
+             - If user says "0" or "none", check if it implies 'professional_and_tests.relevant_work_experience_months' is 0.
              
              REMEMBER: When in doubt, return null. Do NOT invent data. Only output the JSON.
              

@@ -20,8 +20,9 @@ if not os.environ.get("GEMINI_API_KEY"):
 
 # --- INITIALIZE MODELS ---
 # Embedding Model for Semantic Search (Layer 3 & 4)
+# NOTE: Use 'models/gemini-embedding-001' - this is the correct model name for Gemini API
 embeddings_model = GoogleGenerativeAIEmbeddings(
-    model="models/embedding-001",
+    model="models/gemini-embedding-001",
     google_api_key=os.environ.get("GEMINI_API_KEY")
 )
 
@@ -49,6 +50,7 @@ def safe_embed_query(text: str) -> List[float]:
         try:
             return embeddings_model.embed_query(text)
         except Exception as e:
+            print(f"⚠️ Embedding Error (Query): {e}")
             time.sleep(0.5)
     return []
 
@@ -60,6 +62,7 @@ def safe_batch_embed(texts: List[str], batch_size: int = 50) -> List[List[float]
         try:
             all_embeddings.extend(embeddings_model.embed_documents(batch))
         except Exception as e:
+            print(f"⚠️ Embedding Error (Batch): {e}")
             all_embeddings.extend([[0.0]*768 for _ in batch])
     return all_embeddings
 
@@ -387,7 +390,7 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     print("="*60)
     
     user_profile = state.get("user_profile")
-    if not user_profile: return {"eligible_programs": []}
+    if not user_profile: return {"eligible_programs": [], "_agent3_ran": True}
 
     # Use program_database from state if provided (for testing), otherwise load from file
     catalog = state.get("program_database")
@@ -396,7 +399,7 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
             with open("structured_program_db_all_bw.json", 'r', encoding='utf-8') as f:
                 catalog = json.load(f)
         except FileNotFoundError:
-            return {"eligible_programs": []}
+            return {"eligible_programs": [], "_agent3_ran": True}
 
     total_start = len(catalog)
     print(f"📥 INPUT: Loaded {total_start} programs from database.")
@@ -428,7 +431,19 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         f"{', '.join(all_interests)}, "
         f"{student_major}"
     )
+    
+    print(f"\n📝 User Persona Text for Embedding: '{user_persona_text}'")
+    print(f"   - Desired Programs: {desired_programs}")
+    print(f"   - All Interests: {all_interests}")
+    print(f"   - Student Major: {student_major}")
+    
     user_vector = safe_embed_query(user_persona_text)
+    
+    if not user_vector or len(user_vector) == 0:
+        print("⚠️ WARNING: User vector embedding failed or is empty!")
+        print("   This will result in 0 semantic scores. Check API connectivity.")
+    else:
+        print(f"✅ User vector created successfully (dimension: {len(user_vector)})")
 
     # Transcript Vectors (Layer 4)
     student_courses = []
@@ -456,7 +471,7 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     
     if not survivors_layer_1:
         print("❌ Funnel ended at Layer 1.")
-        return {"eligible_programs": []}
+        return {"eligible_programs": [], "_agent3_ran": True}
 
     # =========================================================
     # 🧠 LAYER 2: LLM DEGREE CHECK (The Intelligent Gatekeeper)
@@ -498,7 +513,7 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
 
     if not survivors_layer_2:
         print("❌ Funnel ended at Layer 2.")
-        return {"eligible_programs": []}
+        return {"eligible_programs": [], "_agent3_ran": True}
 
     # =========================================================
     # 🔍 LAYER 3: SEMANTIC RANKING (The Matchmaker)
@@ -531,8 +546,15 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
         
         # --- SCORE A: Semantic (Vector) ---
         score_semantic = 0.0
-        if user_vector and i < len(program_vectors):
-             score_semantic = calculate_semantic_match(user_vector, program_vectors[i])
+        if user_vector and len(user_vector) > 0 and i < len(program_vectors) and len(program_vectors[i]) > 0:
+            score_semantic = calculate_semantic_match(user_vector, program_vectors[i])
+        else:
+            # Fallback score if vectors are missing
+            score_semantic = 0.5
+            if not user_vector or len(user_vector) == 0:
+                print(f"    ⚠️ User vector is empty - using fallback score 0.5")
+            elif i >= len(program_vectors) or len(program_vectors[i]) == 0:
+                print(f"    ⚠️ Program vector is empty - using fallback score 0.5")
         
         # --- SCORE B: Keyword (TF-IDF) ---
         # Calculate cosine similarity on the TF-IDF vectors
@@ -613,4 +635,7 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     print(f"🏁 DONE: Returning {len(final_ranked)} programs.")
     print("="*60 + "\n")
     
-    return {"eligible_programs": final_ranked, "ranked_programs": final_ranked[:10]}
+    # DEBUG: Verify the flag is being set
+    return_dict = {'eligible_programs': final_ranked, 'ranked_programs': final_ranked[:10], '_agent3_ran': True}
+    print(f"[DEBUG Agent3] Returning with _agent3_ran = {return_dict.get('_agent3_ran')}")
+    return return_dict

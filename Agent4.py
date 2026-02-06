@@ -58,6 +58,7 @@ def query_perplexity_search_and_extract(
        
        B. **Document Checklist**: A COMPLETE list of PDF documents required for the APPLICATION phase.
           * FILTER: Extract ONLY documents for **APPLICATION** (Admission). EXCLUDE **ENROLLMENT** documents (e.g., Health Insurance, Semester Fee confirmation).
+          * CHECK SPECIFICALLY: Does the university require a Completed Online Application Form (do online/fill out/printout)? If yes, YOU MUST INCLUDE IT.
           * INCLUDE administrative basics: "Passport Copy", "CV", "Motivation Letter" if mentioned.
           * STANDARDIZE NAMES: Use "Bachelor Certificate" instead of "Proof of first degree". Use "Transcript of Records" instead of "Overview of grades".
           * HANDLING OPTIONAL ITEMS: If a document (e.g. GMAT, GRE, Portfolio) is listed as "Selection Criteria", "Recommended", or "Bonus Points" (not strictly mandatory), **append "(Optional)" to the name**.
