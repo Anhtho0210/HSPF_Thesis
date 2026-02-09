@@ -214,9 +214,35 @@ def get_missing_fields(profile: Optional[UserProfile]) -> List[str]:
         
     # GPA (All sub-fields required)
     gpa = acad.bachelor_gpa
-    if not gpa or not gpa.score or not gpa.max_scale or not gpa.min_passing_grade:
-        print(f"[DEBUG] GPA missing - gpa object: {gpa}, score: {gpa.score if gpa else 'N/A'}, max: {gpa.max_scale if gpa else 'N/A'}, min: {gpa.min_passing_grade if gpa else 'N/A'}")
-        return ["full bachelor GPA details (score, max scale, min passing grade)"]
+    
+    # Check if GPA is already in German format (max_scale = 1.0, which is the best grade)
+    # Or if score_german is already set
+    is_german_format = False
+    if gpa and gpa.score:
+        # German grading system: 1.0 (best) to 5.0/6.0 (worst)
+        if gpa.max_scale == 1.0:
+            is_german_format = True
+            # Auto-fill min_passing_grade if not set
+            if not gpa.min_passing_grade:
+                gpa.min_passing_grade = 5.0  # Standard German passing grade
+                print(f"[DEBUG] Detected German grading format - auto-setting min_passing_grade to 5.0")
+        # Also check if score_german is already calculated
+        elif gpa.score_german is not None:
+            is_german_format = True
+    
+    # Only ask for GPA details if not already in German format and fields are missing
+    if not is_german_format:
+        if not gpa or not gpa.score or not gpa.max_scale or not gpa.min_passing_grade:
+            print(f"[DEBUG] GPA missing - gpa object: {gpa}, score: {gpa.score if gpa else 'N/A'}, max: {gpa.max_scale if gpa else 'N/A'}, min: {gpa.min_passing_grade if gpa else 'N/A'}")
+            return ["full bachelor GPA details (score, max scale, min passing grade)"]
+    else:
+        # For German format, just ensure we have the score
+        if not gpa or not gpa.score:
+            return ["bachelor GPA score"]
+        # Set score_german to the same as score if not already set
+        if gpa.score_german is None:
+            gpa.score_german = gpa.score
+            print(f"[DEBUG] German format detected - setting score_german to {gpa.score}")
 
     # 3. Interests (Separate question) 
     has_interests = False

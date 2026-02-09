@@ -73,14 +73,12 @@ def build_master_workflow():
 if __name__ == "__main__":
     
     # 1. Prepare Data
-    pdf_filename = "Bachelor_Courses.pdf"
+    pdf_filename = "PROFILE_005_PK_MKT_Transcript.pdf"
     app = build_master_workflow()
  
     # --- Define Initial State ---
     initial_raw_input = (
-        "Hi, I'm Anny from Vietnam. I have a Bachelor in Electronic Commerce. "
-        "I want to study master of Business Management "
-        "My interests are Business Management, Artificial Intelligence, Databases, Data Analytics, Machine Learning, Data Visualization, Change Management, Innovation Technologies, Digital Management."
+            "Hello, I'm Ayesha Khan from Pakistan. I have a Bachelor's degree in Marketing from Lahore University of Management Sciences (LUMS). My CGPA is 3.2 out of 4.0 (minimum passing is 2.0). I studied for 8 semesters and earned 128 credits. I'm interested in Digital Marketing, Brand Management, Consumer Behavior, Social Media Marketing, and Marketing Analytics. I want to study a Master's in Marketing or Digital Marketing. I have IELTS 6.5 (overall) with Reading 7.0, Listening 6.5, Speaking 6.0, Writing 6.5. I don't speak German yet. My maximum tuition budget is 4000 EUR per semester. I prefer to study in Baden-Württemberg state. I don't have prefered semester. I have 24 months of work experience as a Marketing Executive at a digital agency."
     )
      
     current_state = {
@@ -225,6 +223,23 @@ if __name__ == "__main__":
                 current_state["user_intent"] += f" \nUser: {user_response}"
                 current_state["ai_response"] = None 
                 continue
+
+            # --- SAFETY CHECK: Prevent infinite loop if Agent3 returned empty results ---
+            # If ranked_programs exists in state (even if empty), Agent3 has run
+            if "ranked_programs" in current_state:
+                # Agent3 has run and returned results
+                if not current_state.get("ranked_programs"):
+                    # Empty list - no programs found
+                    print("\n" + "=" * 60)
+                    print("❌ WORKFLOW COMPLETE - No matching programs found")
+                    print("=" * 60)
+                    print("Agent 3 checked all programs but found no matches.")
+                    print("Try widening your criteria (tuition, location, interests).")
+                    break
+                elif current_state.get("_agent3_displayed"):
+                    # Programs were displayed and processed
+                    print("\n[System] Agent processing complete - exiting")
+                    break
 
 
         except Exception as e:

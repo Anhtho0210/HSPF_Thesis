@@ -46,7 +46,10 @@ def query_perplexity_search_and_extract(
     - Application Mode: {application_mode}
 
     INSTRUCTIONS:
-    1. SEARCH: Find the OFFICIAL "Admission Regulations" (Zulassungsordnung) or "Application Requirements" page.
+    1. SEARCH: Find TWO PAGES:
+       a) The program-specific "Admission Regulations" (Zulassungsordnung) or "Application Requirements" page
+       b) The general Master's application page (usually at /en/study/application/master/ or similar)
+       
     2. FOCUS ON: Extract ONLY the following information:
        
        A. **Country-Specific Requirements for {citizenship}**:
@@ -57,10 +60,16 @@ def query_perplexity_search_and_extract(
           * If no country-specific requirements exist, output: "None".
        
        B. **Document Checklist**: A COMPLETE list of PDF documents required for the APPLICATION phase.
+          * SEARCH BOTH: Program-specific requirements AND general university-wide application requirements.
+          * FOR UNIVERSITY OF STUTTGART SPECIFICALLY: You MUST check the general application page and include these base requirements:
+            - "Transcript of Records (with ECTS points per module)"
+            - "Bachelor's Degree Certificate (with overall grade)"
+            - "Module Descriptions from Bachelor's Program" (required for students from other universities)
+            - "Online Application Form (C@MPUS submission required)"
+            - "Passport Copy"
           * FILTER: Extract ONLY documents for **APPLICATION** (Admission). EXCLUDE **ENROLLMENT** documents (e.g., Health Insurance, Semester Fee confirmation).
-          * CHECK SPECIFICALLY: Does the university require a Completed Online Application Form (do online/fill out/printout)? If yes, YOU MUST INCLUDE IT.
           * INCLUDE administrative basics: "Passport Copy", "CV", "Motivation Letter" if mentioned.
-          * STANDARDIZE NAMES: Use "Bachelor Certificate" instead of "Proof of first degree". Use "Transcript of Records" instead of "Overview of grades".
+          * STANDARDIZE NAMES: Use "Bachelor Certificate" or "Bachelor's Degree Certificate" instead of "Proof of first degree". Use "Transcript of Records" instead of "Overview of grades".
           * HANDLING OPTIONAL ITEMS: If a document (e.g. GMAT, GRE, Portfolio) is listed as "Selection Criteria", "Recommended", or "Bonus Points" (not strictly mandatory), **append "(Optional)" to the name**.
           * Example: "GMAT Result (Optional)" instead of "GMAT Result".
           * Keep it clean: Max 10 words per item.

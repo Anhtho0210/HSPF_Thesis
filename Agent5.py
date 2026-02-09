@@ -81,6 +81,20 @@ def agent_5_planner_node(state: Dict[str, Any]) -> Dict[str, Any]:
     if not selected_programs:
         return {"final_application_plans": []}
 
+    # Get user citizenship to check for APS requirement
+    user_profile = state.get("user_profile")
+    user_citizenship = None
+    if user_profile and hasattr(user_profile, 'citizenship'):
+        if hasattr(user_profile.citizenship, 'country_of_citizenship'):
+            user_citizenship = user_profile.citizenship.country_of_citizenship
+    
+    # Countries that require APS certificate
+    APS_COUNTRIES = ["China", "Vietnam", "India", "Mongolia"]
+    requires_aps = user_citizenship in APS_COUNTRIES if user_citizenship else False
+    
+    if requires_aps:
+        print(f"   ℹ️  User citizenship: {user_citizenship} - APS certificate required for all programs")
+
     today = datetime.date.today()
     final_plans = []
     
@@ -109,8 +123,15 @@ def agent_5_planner_node(state: Dict[str, Any]) -> Dict[str, Any]:
                     "type": "fatal"
                 })
             else:
-                # 2. RULE: APS (Vietnam/China/India) -> 6 Months Before
-                if "APS" in country_req or "APS" in checklist_data.get("document_checklist", []):
+                # 2. RULE: APS (Vietnam/China/India/Mongolia) -> 6 Months Before
+                # Check both program requirements AND user citizenship
+                needs_aps = (
+                    "APS" in country_req or 
+                    "APS" in checklist_data.get("document_checklist", []) or
+                    requires_aps  # Based on user citizenship
+                )
+                
+                if needs_aps:
                     ideal_start = deadline_dt - datetime.timedelta(days=180)
                     timeline_events.append(create_event(
                         ideal_start, 
