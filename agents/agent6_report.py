@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from typing import Dict, Any
@@ -296,7 +298,7 @@ def draw_cost_section(c, y, program, user_profile, width):
     c.setFont("Helvetica", 9)
     
     # Determine if student is EU or non-EU
-    from Agent3 import EU_COUNTRIES
+    from agents.agent3_matcher import EU_COUNTRIES
     student_country = None
     if user_profile and user_profile.citizenship:
         student_country = user_profile.citizenship.country_of_citizenship
@@ -558,7 +560,7 @@ def draw_comparison_table(c, plans, user_profile, width, height):
                  [plan.get('university', 'Unknown')[:20] for plan in plans], y)
     
     # Tuition (show applicable fee)
-    from Agent3 import EU_COUNTRIES
+    from agents.agent3_matcher import EU_COUNTRIES
     student_country = user_profile.citizenship.country_of_citizenship if user_profile and user_profile.citizenship else None
     is_eu = student_country in EU_COUNTRIES if student_country else False
     

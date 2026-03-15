@@ -7,6 +7,8 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGener
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from sklearn.metrics.pairwise import cosine_similarity
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models import AgentState, UserProfile
 from pydantic import BaseModel, Field
 from sklearn.metrics.pairwise import cosine_similarity
@@ -396,7 +398,7 @@ def agent_3_filter_node(state: AgentState) -> Dict[str, Any]:
     catalog = state.get("program_database")
     if not catalog:
         try:
-            with open("structured_program_db_all_bw.json", 'r', encoding='utf-8') as f:
+            with open("data/structured_program_db_all_bw.json", 'r', encoding='utf-8') as f:
                 catalog = json.load(f)
         except FileNotFoundError:
             return {"eligible_programs": [], "_agent3_ran": True}

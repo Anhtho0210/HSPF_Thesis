@@ -4,11 +4,16 @@ This script provides automated testing and metrics calculation for thesis evalua
 """
 
 import json
+import sys
+import os
 import time
 import tracemalloc
 from typing import List, Set, Dict, Any
 import numpy as np
 from datetime import datetime
+
+# Ensure project root is on path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import your system
 from main import build_master_workflow
@@ -105,7 +110,7 @@ def run_single_test_case(test_case: Dict[str, Any]) -> Dict[str, Any]:
     # Prepare initial state
     initial_state = {
         "user_intent": test_case['profile']['input_text'],
-        "pdf_path": "Bachelor_Courses.pdf",
+        "pdf_path": "docs/Bachelor_Courses.pdf",
         "user_profile": None,
         "program_catalog": [],
         "eligible_programs": [],
@@ -360,8 +365,8 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description='Evaluate Multi-Agent University Application System')
-    parser.add_argument('--test-file', default='test_profiles.json', help='Path to test cases JSON file')
-    parser.add_argument('--output', default='evaluation_results.json', help='Path to save results')
+    parser.add_argument('--test-file', default='evaluation/test_profiles.json', help='Path to test cases JSON file')
+    parser.add_argument('--output', default='evaluation/evaluation_results.json', help='Path to save results')
     
     args = parser.parse_args()
     

@@ -3,6 +3,8 @@ import json
 import requests
 from typing import Dict, Any, List
 from dotenv import load_dotenv
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models import AgentState, UserProfile
 
 # --- Load Environment Variables ---

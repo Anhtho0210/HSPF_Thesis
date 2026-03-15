@@ -10,11 +10,15 @@ Tests:
 
 import json
 import sys
+import os
 from pathlib import Path
 from typing import List, Dict, Any
 
+# Ensure project root is on path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # Import Agent 3 functions
-from Agent3 import (
+from agents.agent3_matcher import (
     check_hard_constraints,
     batch_check_degrees_with_llm,
     calculate_semantic_match,
@@ -22,7 +26,7 @@ from Agent3 import (
     agent_3_filter_node
 )
 from models import UserProfile, AgentState
-from Agent1 import parse_profile_node
+from agents.agent1_intake import parse_profile_node
 
 # Color codes for output
 GREEN = '\033[92m'
@@ -51,10 +55,10 @@ def print_result(test_name, passed, expected=None, actual=None, details=None):
 
 def load_test_data():
     """Load test profiles and program database"""
-    with open('test_profiles.json', 'r') as f:
+    with open('evaluation/test_profiles.json', 'r') as f:
         profiles_data = json.load(f)
     
-    with open('structured_program_db_BW.json', 'r') as f:
+    with open('data/structured_program_db_BW.json', 'r') as f:
         programs_data = json.load(f)
     
     return profiles_data, programs_data
