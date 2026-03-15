@@ -1,0 +1,1411 @@
+{
+  "description": "Sample of 20 programs for testing 5 profiles. Includes variety of fields, tuition fees, and application modes.",
+  "total_programs": 20,
+  "programs": [
+    {
+      "program_id": "3865",
+      "university_name": "Nürtingen-Geislingen University",
+      "program_name": "International Master of Landscape Architecture (IMLA)",
+      "degree_type": "Master",
+      "application_mode": "VPD",
+      "city": "Nürtingen",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 750.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 188.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "landscape architecture",
+        "landscape planning",
+        "landscape construction",
+        "landscape management",
+        "architecture",
+        "town planning",
+        "physical planning"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": true,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [],
+        "notes": "The university plans to update the English entry requirement to C1 level soon."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": "No German language requirement at the time of entry. However, an A2 certificate must be submitted by the end of the second semester. German courses are part of the programme."
+      },
+      "deadlines": {
+        "winter_semester": null,
+        "summer_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "October 1"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "October 1"
+          }
+        }
+      },
+      "course_content_summary": "The IMLA programme focuses on practice-oriented landscape architecture with five main subject areas: planning and designing projects at various scales, international planning and design, planning and project management, information technology in planning and design, and planning and design methods. It emphasizes a strong practical focus, dealing with European countries and cross-border issues. Key topics include landscape as a system and projects conducted in various European locations.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/3865/"
+    },
+    {
+      "program_id": "4249",
+      "university_name": "University of Konstanz",
+      "program_name": "Computer and Information Science",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Konstanz",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 189.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [],
+        "notes": "The language of instruction is English. A level of at least high B2 is expected."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": "March 1",
+            "end_date": "June 15"
+          },
+          "non_eu_applicants": {
+            "start_date": "March 1",
+            "end_date": "April 15"
+          }
+        },
+        "summer_semester": {
+          "eu_applicants": {
+            "start_date": "November 1",
+            "end_date": "January 15"
+          },
+          "non_eu_applicants": null
+        }
+      },
+      "course_content_summary": "The Master's program in Computer and Information Science focuses on specialization in areas related to the exploration of large data volumes. Key topics include Data Science, Visual Computing, and Human-Computer Interaction (HCI). The curriculum has a strong research orientation, emphasizing exploratory analysis and visualization of large information spaces. Students can specialize in Data Science, Interactive Systems, Software and Systems, Visual Computing, and Algorithmics. The program includes a mentoring component where students are guided by a professor in their chosen field of specialization.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4249/"
+    },
+    {
+      "program_id": "4193",
+      "university_name": "University of Mannheim",
+      "program_name": "Master of Science in Economics",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Mannheim",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 200.0,
+      "min_gpa_german_scale": 2.5,
+      "required_degree_domains": [
+        "Economics",
+        "Business Administration",
+        "Social Sciences",
+        "Political Science",
+        "Sociology",
+        "Mathematics",
+        "Engineering",
+        "Humanities"
+      ],
+      "specific_ects_requirements": [
+        {
+          "domain_name": "Economics, Finance, Mathematics, or Statistics",
+          "min_ects_total": 60.0,
+          "condition_comment": "For applicants with degrees from neighbouring fields, a total of 60 ECTS from the listed areas is required.",
+          "modules": [
+            {
+              "subject_area": "Economics",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Finance",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Mathematics",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Statistics",
+              "min_ects": 0.0,
+              "condition_comment": null
+            }
+          ]
+        },
+        {
+          "domain_name": "Introductory Economics Core",
+          "min_ects_total": 0.0,
+          "condition_comment": "For applicants with degrees from neighbouring fields, successful completion of introductory modules in these fields is required.",
+          "modules": [
+            {
+              "subject_area": "Macroeconomics",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Microeconomics",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Econometrics",
+              "min_ects": 0.0,
+              "condition_comment": null
+            }
+          ]
+        }
+      ],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "TOEFL iBT",
+            "min_score": "72"
+          },
+          {
+            "test_name": "First Certificate in English (FCE)",
+            "min_score": "C"
+          },
+          {
+            "test_name": "Certificate in Advanced English (CAE)",
+            "min_score": null
+          },
+          {
+            "test_name": "Certificate of Proficiency in English (CPE)",
+            "min_score": null
+          },
+          {
+            "test_name": "IELTS Academic",
+            "min_score": "6.0"
+          },
+          {
+            "test_name": "University of Mannheim Language Certificate",
+            "min_score": "B2"
+          }
+        ],
+        "notes": "Waivers: University entrance qualification from a school with English as language of instruction (min. 2 years); University programme with at least 25% of courses taught in English. Proof can be submitted after application, by 15 August at the latest."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": "April 1",
+            "end_date": "May 15"
+          },
+          "non_eu_applicants": {
+            "start_date": "April 1",
+            "end_date": "May 15"
+          }
+        },
+        "summer_semester": null
+      },
+      "course_content_summary": "The program provides advanced knowledge in macroeconomics, microeconomics, and econometrics, preparing students for careers in international organizations, academia, and leadership roles. It focuses on both theoretical and empirical economic research. Students can choose from three specializations: 'Economics' offers a flexible curriculum with a wide range of electives. 'Competition and Regulation Economics' is tailored for careers in competition authorities, regulated industries like energy and telecommunications, and consulting, featuring modules on competition policy and regulatory economics. 'Economic Research' serves as a direct pathway to a PhD, deepening knowledge in core economic fields and preparing students for doctoral dissertations at the Center for Doctoral Studies in Economics (CDSE).",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4193/"
+    },
+    {
+      "program_id": "9995",
+      "university_name": "Albstadt-Sigmaringen University",
+      "program_name": "Industrial Artificial Intelligence",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Albstadt",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 180.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [],
+        "notes": "Documented B2 level required."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": "No requirements"
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": "May 1",
+            "end_date": null
+          },
+          "non_eu_applicants": {
+            "start_date": "May 1",
+            "end_date": null
+          }
+        },
+        "summer_semester": {
+          "eu_applicants": {
+            "start_date": "November 1",
+            "end_date": null
+          },
+          "non_eu_applicants": {
+            "start_date": "November 1",
+            "end_date": null
+          }
+        }
+      },
+      "course_content_summary": "The program provides comprehensive knowledge in AI-orientated Python programming, machine learning, deep learning, and generative AI. It also covers big data, data science, and data engineering. Practical skills are developed using application software from manufacturers like Microsoft, SAP, Siemens, and AWS, with a focus on ERP systems, cloud computing, robotic process automation (RPA), business intelligence, and analytics. Specialisations are offered in 'Industrial Operation and Transformation' (focusing on AI application areas and tools) and 'Artificial Intelligence and Data Engineering' (focusing on the development and refinement of AI tools).",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/9995/"
+    },
+    {
+      "program_id": "4372",
+      "university_name": "University of Tübingen",
+      "program_name": "Economics and Finance (MSc)",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Tübingen",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 200.0,
+      "min_gpa_german_scale": 2.5,
+      "required_degree_domains": [
+        "Business Administration",
+        "Economics"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "TOEFL iBT",
+            "min_score": "80"
+          },
+          {
+            "test_name": "TOEFL PBT",
+            "min_score": "550"
+          },
+          {
+            "test_name": "IELTS",
+            "min_score": "6.0"
+          },
+          {
+            "test_name": "Cambridge CAE",
+            "min_score": null
+          },
+          {
+            "test_name": "Cambridge CPE",
+            "min_score": null
+          },
+          {
+            "test_name": "Cambridge BEC Higher",
+            "min_score": null
+          },
+          {
+            "test_name": "TOEIC",
+            "min_score": "700"
+          },
+          {
+            "test_name": "UNIcert III",
+            "min_score": null
+          }
+        ],
+        "notes": "German \"Abitur\" with at least six (G8) or seven (G9) years of English, a Bachelor's degree in English/American Studies, or a university degree from the UK, Ireland, USA, Canada, Australia, or New Zealand are also accepted."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": "Knowledge of German is not required to complete the programme."
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "May 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "May 15"
+          }
+        },
+        "summer_semester": null
+      },
+      "course_content_summary": "This program combines economics, finance, and econometrics to provide a deep understanding of economic theory, financial instruments for risk management, and modern econometric analysis. Students learn to analyze financial and economic data using statistical software like Matlab, GAUSS, SAS, and Stata. Core topics include the pricing of risky assets, the role of options and futures in social welfare, and managing financial stability. The curriculum develops methodological skills in theoretical modeling, econometrics, and programming, preparing graduates for careers in financial institutions, regulatory bodies, central banks, or academia.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4372/"
+    },
+    {
+      "program_id": "8479",
+      "university_name": "Zeppelin University",
+      "program_name": "Master of Science in Corporate Management & Economics | CME",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Friedrichshafen",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 7300.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 0.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "Economics"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "C1",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": "German language proficiency is desirable, but it is not a mandatory admission requirement."
+      },
+      "deadlines": {
+        "winter_semester": null,
+        "summer_semester": null
+      },
+      "course_content_summary": "The programme offers comprehensive training in economics, corporate management, and business administration, combining theoretical knowledge with practical applications. Key topics include economics, corporate law, management, business administration, political science, statistics, and digital management. It focuses on developing analytical and strategic skills for complex economic challenges through interdisciplinary education and participation in research projects. The curriculum also provides networking opportunities and practical experience via collaborations with companies and institutions.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/8479/"
+    },
+    {
+      "program_id": "6119",
+      "university_name": "University of Tübingen",
+      "program_name": "Bioinformatics",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Tübingen",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 200.0,
+      "min_gpa_german_scale": 2.5,
+      "required_degree_domains": [
+        "bioinformatics",
+        "computer science",
+        "life sciences"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "IELTS",
+            "min_score": "6.5"
+          }
+        ],
+        "notes": null
+      },
+      "german_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "TestDaF",
+            "min_score": "4"
+          }
+        ],
+        "notes": "Required for Variant B and C students."
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "September 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "July 15"
+          }
+        },
+        "summer_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "March 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "January 15"
+          }
+        }
+      },
+      "course_content_summary": "The Master's degree programme in bioinformatics integrates courses in bioinformatics, computer science, and life sciences. The curriculum is designed to equip graduates with the skills to solve biological problems using high throughput technologies and bioinformatics methods. Core competencies include algorithmic thinking, efficient analysis, data visualisation, and mass data storage. The program has a strong research and hands-on focus. Specialized subjects include genomics, transcriptomics, protein and drug design, microbiome analysis, and systems biology.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/6119/"
+    },
+    {
+      "program_id": "6938",
+      "university_name": "Ulm University",
+      "program_name": "Master of Science in Chemistry",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Ulm",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 182.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": "April 1",
+            "end_date": "May 15"
+          },
+          "non_eu_applicants": {
+            "start_date": "April 1",
+            "end_date": "May 15"
+          }
+        },
+        "summer_semester": {
+          "eu_applicants": {
+            "start_date": "October 15",
+            "end_date": "November 15"
+          },
+          "non_eu_applicants": {
+            "start_date": "October 15",
+            "end_date": "November 15"
+          }
+        }
+      },
+      "course_content_summary": "The Chemistry Master's programme at Ulm University provides in-depth knowledge of chemical research and scientific work methods. Students can specialize in core areas such as Inorganic Chemistry, Organic Chemistry, Physical Chemistry, Analytical Chemistry, Macromolecular Chemistry, Theoretical Chemistry, and Energy Technology. The curriculum also offers thematic profiles for further specialization, including Chemistry of Energy Storage and Conversion, Sustainable, Green and Environmental Chemistry, Chemistry of Molecular Materials Light Matter Interaction, and Chemistry of Healthcare and Biomaterials. The program emphasizes the development of new materials, understanding chemical reactions in biotic and abiotic systems, and addressing key challenges in energy production, conversion, and storage.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/6938/"
+    },
+    {
+      "program_id": "10532",
+      "university_name": "Aalen University",
+      "program_name": "Master of Engineering in Electrical Engineering",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Aalen",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 170.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "Electrical Engineering",
+        "related fields"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [],
+        "notes": "for applicants who are not native English speakers"
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "March 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "March 15"
+          }
+        },
+        "summer_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "September 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "September 15"
+          }
+        }
+      },
+      "course_content_summary": "The program offers in-depth knowledge in key areas of electrical engineering, focusing on technologies for the digital future, the interface between electrical engineering and computer science for system and process optimization, and the integration of artificial intelligence to develop next-generation intelligent systems. Graduates are prepared for careers in research, development, industry, and public institutions, with potential roles in technical support, production, and service, as well as opportunities for doctoral studies.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/10532/"
+    },
+    {
+      "program_id": "10372",
+      "university_name": "Heilbronn University of Applied Sciences",
+      "program_name": "Intelligent Mechatronic Systems",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Heilbronn",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 159.0,
+      "min_gpa_german_scale": 2.5,
+      "required_degree_domains": [],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "TOEFL paper-based",
+            "min_score": "550"
+          },
+          {
+            "test_name": "TOEFL computer-based",
+            "min_score": "213"
+          },
+          {
+            "test_name": "TOEFL iBT",
+            "min_score": "79"
+          },
+          {
+            "test_name": "IELTS",
+            "min_score": "6.0"
+          },
+          {
+            "test_name": "CAE",
+            "min_score": "C"
+          },
+          {
+            "test_name": "TOEIC",
+            "min_score": "730"
+          }
+        ],
+        "notes": "Native English speakers are exempt (from Australia, Canada, Ireland, New Zealand, UK, or USA). Also exempt with a continuous stay of at least one year in an English-speaking country (proven by studies, employment, etc.)."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": "Not necessary"
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "June 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "June 15"
+          }
+        },
+        "summer_semester": null
+      },
+      "course_content_summary": "The program specializes in the development and application of mechatronic systems using intelligent methods like AI. It covers the interface of mechanics, electronics, and computer science. Key topics include artificial intelligence, machine learning, and intelligent control systems. The curriculum, featuring a wide range of elective courses, aims to develop autonomous, adaptive, and efficient systems for industries such as automotive and robotics. Graduates are prepared for roles in research, development, and industry, focusing on the next generation of intelligent systems.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/10372/"
+    },
+    {
+      "program_id": "4692",
+      "university_name": "Ulm University",
+      "program_name": "Master of Science in Chemical Engineering",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Ulm",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 172.0,
+      "min_gpa_german_scale": 3.0,
+      "required_degree_domains": [
+        "Chemical Engineering"
+      ],
+      "specific_ects_requirements": [
+        {
+          "domain_name": "Process Engineering Competences",
+          "min_ects_total": 0.0,
+          "condition_comment": "Basic competences must be demonstrated by corresponding study and examination achievements.",
+          "modules": [
+            {
+              "subject_area": "Chemical process engineering",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Thermal process engineering",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Mechanical process engineering",
+              "min_ects": 0.0,
+              "condition_comment": null
+            }
+          ]
+        },
+        {
+          "domain_name": "Independent Scientific Work",
+          "min_ects_total": 6.0,
+          "condition_comment": null,
+          "modules": [
+            {
+              "subject_area": "Thesis or comparable achievement",
+              "min_ects": 6.0,
+              "condition_comment": null
+            }
+          ]
+        }
+      ],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "TOEFL",
+            "min_score": "95"
+          },
+          {
+            "test_name": "IELTS",
+            "min_score": "5.5"
+          }
+        ],
+        "notes": "No test is needed from native speakers."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": "Feb 1",
+            "end_date": "Mar 15"
+          },
+          "non_eu_applicants": {
+            "start_date": "Feb 1",
+            "end_date": "Mar 15"
+          }
+        },
+        "summer_semester": {
+          "eu_applicants": {
+            "start_date": "Oct 15",
+            "end_date": "Nov 15"
+          },
+          "non_eu_applicants": {
+            "start_date": "Oct 15",
+            "end_date": "Nov 15"
+          }
+        }
+      },
+      "course_content_summary": "The program focuses on the chemical conversion of materials, related technical processes, and equipment. Core topics include mathematical modelling of chemical processes, chemical reaction engineering for energy storage and conversion, sustainable chemical processes, photochemical reactors, and energy-efficient separation methods. The curriculum is designed to deepen scientific and methodological qualifications, enabling students to independently solve complex problems in chemical and process engineering. Graduates are prepared for careers in research, science, and development within industry, higher education, and research institutes.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4692/"
+    },
+    {
+      "program_id": "8972",
+      "university_name": "University of Hohenheim",
+      "program_name": "Advisory and Innovation Services in Agri-Food Systems",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Stuttgart",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 175.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "agricultural sciences",
+        "horticulture",
+        "speciality crops",
+        "agricultural and forest ecology",
+        "related subjects"
+      ],
+      "specific_ects_requirements": [
+        {
+          "domain_name": "Economics",
+          "min_ects_total": 6.0,
+          "condition_comment": null,
+          "modules": [
+            {
+              "subject_area": "Economics",
+              "min_ects": 6.0,
+              "condition_comment": null
+            }
+          ]
+        }
+      ],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "IELTS",
+            "min_score": "6.5"
+          },
+          {
+            "test_name": "TOEFL iBT",
+            "min_score": "90"
+          },
+          {
+            "test_name": "Duolingo",
+            "min_score": "125"
+          }
+        ],
+        "notes": null
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "September 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "March 15"
+          }
+        },
+        "summer_semester": null
+      },
+      "course_content_summary": "This program focuses on establishing and promoting sustainable practices in agri-food systems through professional advice and innovation. It combines practical expertise in agricultural production, economics, and engineering with social science skills for consulting. Key topics include farm management, technical specialization, supporting problem-solving and innovation processes, understanding economic factors in decision-making, and analyzing agricultural knowledge and innovation systems (AKIS). Students learn tools for planning, implementing, and evaluating policies, as well as coordinating innovation networks. The curriculum prepares graduates for careers in consulting, agricultural administration, organizational development in the agri-food sector, and international cooperation.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/8972/"
+    },
+    {
+      "program_id": "9165",
+      "university_name": "Albstadt-Sigmaringen University",
+      "program_name": "Life Science Innovation",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Sigmaringen",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 150.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "life sciences",
+        "industrial engineering"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "May 31"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "May 31"
+          }
+        },
+        "summer_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "November 30"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "November 30"
+          }
+        }
+      },
+      "course_content_summary": "This research-oriented program focuses on product and process design within the life science industry. Students acquire research qualifications and learn to develop or improve products and processes. Key topics include environmentally-friendly packaging materials, research on food and pharmaceutical products, understanding high-tech research programs, formulating targeted research proposals, and publishing research results.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/9165/"
+    },
+    {
+      "program_id": "5240",
+      "university_name": "Offenburg University of Applied Sciences",
+      "program_name": "Master of Science in Biotechnology (MBT)",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Offenburg",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 320.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "bioengineering",
+        "bioprocess engineering",
+        "biochemical engineering",
+        "chemical engineering",
+        "industrial biotechnology",
+        "environmental biotechnology",
+        "food engineering"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "TOEFL PBT",
+            "min_score": "550"
+          },
+          {
+            "test_name": "TOEFL CBT",
+            "min_score": "213"
+          },
+          {
+            "test_name": "TOEFL iBT",
+            "min_score": "79"
+          },
+          {
+            "test_name": "IELTS",
+            "min_score": "6.0"
+          }
+        ],
+        "notes": "IELTS score of 6.0 or higher required in each band."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "July 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "March 31"
+          }
+        },
+        "summer_semester": null
+      },
+      "course_content_summary": "The program focuses on bioeconomy, industrial and environmental biotechnology, aiming to develop solutions for a bio-based industry, sustainable energy, medicine, and food security. Students engage in case studies on bioproduction, including security measures and authority management. Key topics include future trends in the biotechnology industry and ethical considerations. The program is internationally oriented, offering a double degree with the University of Warmia and Mazury (UWM) in Poland, and emphasizes intercultural skills.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/5240/"
+    },
+    {
+      "program_id": "4456",
+      "university_name": "University of Hohenheim",
+      "program_name": "Food Science and Technology",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Stuttgart",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 175.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "Natural Sciences",
+        "Engineering"
+      ],
+      "specific_ects_requirements": [
+        {
+          "domain_name": "Subject-specific knowledge",
+          "min_ects_total": 70.0,
+          "condition_comment": "A point-based system is used, at least 70 points required.",
+          "modules": [
+            {
+              "subject_area": "Physics",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Mathematics",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Organic Chemistry",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Food Chemistry",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Microbiology",
+              "min_ects": 0.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Process Engineering",
+              "min_ects": 0.0,
+              "condition_comment": null
+            }
+          ]
+        }
+      ],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "TOEFL iBT",
+            "min_score": "90"
+          },
+          {
+            "test_name": "IELTS",
+            "min_score": "6.5"
+          },
+          {
+            "test_name": "UNIcert II",
+            "min_score": "good"
+          }
+        ],
+        "notes": "Exemptions apply for native speakers from specific countries (UK, Ireland, Australia, Canada, New Zealand, USA, etc.) or for applicants who have completed a Bachelor's or Master's programme with English as the language of instruction in an EU member state or one of the aforementioned countries."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "June 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "June 15"
+          }
+        },
+        "summer_semester": null
+      },
+      "course_content_summary": "This research-oriented program focuses on the transformation of plant and animal-based raw materials into value-added, safe, and stable food or nutrient formulas. It covers the interface between complex food matrices and technical processes in food development and production. Key areas include food processing equipment, biogenesis of raw materials, microbiological ecology, development of food formulas and processing techniques, automated production processes, and in-line sensor technology. The curriculum aims to transfer basic research concepts into new technological approaches that meet consumer expectations and individual nutritional requirements.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4456/"
+    },
+    {
+      "program_id": "3981",
+      "university_name": "SRH University",
+      "program_name": "Applied Computer Science",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Heidelberg",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 5040.0,
+      "non_eu_tuition_fee_eur": 6950.0,
+      "semester_contribution_eur": 0.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "Computer Science",
+        "Virtual Realities",
+        "Applied Computer Science",
+        "Information Management",
+        "IT",
+        "Software Development"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "IELTS",
+            "min_score": "6.5"
+          },
+          {
+            "test_name": "TOEFL",
+            "min_score": "80"
+          },
+          {
+            "test_name": "Duolingo Certificate",
+            "min_score": "120"
+          },
+          {
+            "test_name": "PTE Academics",
+            "min_score": "58"
+          }
+        ],
+        "notes": "If applicants have studied completely in English in their previous studies, the test may be waived. Applicants may also be interviewed to test their English skills."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": null,
+        "summer_semester": null
+      },
+      "course_content_summary": "The curriculum includes modules such as International Project Management, Software Architecture, IT Security, Advanced Database, Software Development Practice, and Advanced Computer Science. The program focuses on full stack development, covering front end, middleware, back end, databases, and infrastructure. Students can choose individual specializations in Business Computing, Mobile Computing, and Usability Engineering and UX Design. The degree prepares graduates for jobs in the software and IT industry, public sector, research, and for doctoral studies.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/3981/"
+    },
+    {
+      "program_id": "4787",
+      "university_name": "SRH University",
+      "program_name": "Dance Movement Therapy (MA)",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Heidelberg",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 4500.0,
+      "non_eu_tuition_fee_eur": 5450.0,
+      "semester_contribution_eur": 0.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "dance/artistic studies",
+        "psychology",
+        "medicine",
+        "social work"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "IELTS",
+            "min_score": "6.5"
+          },
+          {
+            "test_name": "TOEFL",
+            "min_score": "80"
+          },
+          {
+            "test_name": "Duolingo Certificate",
+            "min_score": "120"
+          },
+          {
+            "test_name": "PTE Academics",
+            "min_score": "58"
+          }
+        ],
+        "notes": "If applicants have studied completely in English in their previous studies, we may waive the required test. We may also personally interview applicants in order to test their English skills."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": null,
+        "summer_semester": null
+      },
+      "course_content_summary": "Dance Movement Therapy is an evidence-based arts therapy approach utilizing dance and movement to foster physical, emotional, cognitive, social, and spiritual integration. The curriculum focuses on creative methods to enhance client expression, social connection, and emotional well-being. Professional applications are explored across various fields, including psychiatry, psychosomatic medicine, special education, neurology, oncology, cardiovascular medicine, geriatrics, forensic contexts, and paediatrics. The program also covers its use in preventive care and educational settings like schools and psychosocial institutions for children and families.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/4787/"
+    },
+    {
+      "program_id": "3763",
+      "university_name": "Heilbronn University of Applied Sciences",
+      "program_name": "International Business and Intercultural Management (MSc)",
+      "degree_type": "Master",
+      "application_mode": "VPD",
+      "city": "Heilbronn",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 159.0,
+      "min_gpa_german_scale": 2.5,
+      "required_degree_domains": [
+        "business studies",
+        "business-related discipline"
+      ],
+      "specific_ects_requirements": [],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "TOEFL paper-based",
+            "min_score": "550"
+          },
+          {
+            "test_name": "TOEFL computer-based",
+            "min_score": "213"
+          },
+          {
+            "test_name": "TOEFL iBT",
+            "min_score": "79"
+          },
+          {
+            "test_name": "Cambridge Certificate of Advanced English (CAE)",
+            "min_score": "C"
+          },
+          {
+            "test_name": "IELTS",
+            "min_score": "6.0"
+          },
+          {
+            "test_name": "Oxford Test of English (OTE)",
+            "min_score": "120"
+          }
+        ],
+        "notes": "An English-language school-leaving certificate, equivalent university entrance qualification, or a degree program of at least three years with English coursework and exams (at least 180 ECTS) are also accepted."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "July 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "July 15"
+          }
+        },
+        "summer_semester": null
+      },
+      "course_content_summary": "The program covers internal and external business environments, focusing on human resource management, leadership, global marketing, and international finance and economics. A significant emphasis is placed on intercultural communication. Advanced studies in intercultural management adopt a cross-disciplinary approach. The final stage involves an in-depth empirical research thesis, ideally on real-world business situations with a focus on sustainability or corporate responsibility. The curriculum includes training in quantitative and qualitative research methods. Students have the option to integrate an internship or a study abroad semester.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/3763/"
+    },
+    {
+      "program_id": "10374",
+      "university_name": "Heilbronn University of Applied Sciences",
+      "program_name": "Applied Artificial Intelligence (MAAI)",
+      "degree_type": "Master",
+      "application_mode": "VPD",
+      "city": "Heilbronn",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 159.0,
+      "min_gpa_german_scale": null,
+      "required_degree_domains": [
+        "computer science",
+        "engineering",
+        "economics",
+        "related field of study"
+      ],
+      "specific_ects_requirements": [
+        {
+          "domain_name": "Mathematics, Computer Science, and Artificial Intelligence",
+          "min_ects_total": 50.0,
+          "condition_comment": "A minimum of 10 ECTS credits is required in each of the three subject areas.",
+          "modules": [
+            {
+              "subject_area": "Mathematics",
+              "min_ects": 10.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Computer Science",
+              "min_ects": 10.0,
+              "condition_comment": null
+            },
+            {
+              "subject_area": "Artificial Intelligence",
+              "min_ects": 10.0,
+              "condition_comment": null
+            }
+          ]
+        }
+      ],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [
+          {
+            "test_name": "TOEFL PBT",
+            "min_score": "543"
+          },
+          {
+            "test_name": "TOEFL iBT",
+            "min_score": "85"
+          },
+          {
+            "test_name": "IELTS",
+            "min_score": "6.5"
+          },
+          {
+            "test_name": "Cambridge Certificate",
+            "min_score": "173"
+          },
+          {
+            "test_name": "ICC (Certificate in English for Business Purposes)",
+            "min_score": "60"
+          },
+          {
+            "test_name": "SEC (Business English Certificate)",
+            "min_score": "BEC Vantage"
+          },
+          {
+            "test_name": "TOEIC",
+            "min_score": "785"
+          },
+          {
+            "test_name": "Unicert",
+            "min_score": "2"
+          },
+          {
+            "test_name": "KMK Certificate",
+            "min_score": "3"
+          },
+          {
+            "test_name": "AACSB English B2 Ability Test",
+            "min_score": "approved"
+          }
+        ],
+        "notes": "Native speakers are exempt. Applicants with a degree from an English-language study programme are exempt. The certificate must not be older than three years."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "July 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "July 15"
+          }
+        },
+        "summer_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "January 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "January 15"
+          }
+        }
+      },
+      "course_content_summary": "The Master's programme in Applied Artificial Intelligence (MAAI) provides in-depth training in AI technologies with two main tracks: Application and Research. Key topics include machine learning, data analysis, and artificial neural networks. The curriculum focuses on the practical application of AI in various sectors such as healthcare, engineering, logistics, business informatics, and software engineering, aiming to educate highly qualified professionals capable of applying and advancing these technologies across industries.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/10374/"
+    },
+    {
+      "program_id": "9180",
+      "university_name": "Pforzheim University",
+      "program_name": "Digital Business Management (MSc)",
+      "degree_type": "Master",
+      "application_mode": "Direct",
+      "city": "Pforzheim",
+      "state": "Baden-Württemberg",
+      "tuition_fee_per_semester_eur": 0.0,
+      "non_eu_tuition_fee_eur": 1500.0,
+      "semester_contribution_eur": 200.0,
+      "min_gpa_german_scale": 2.5,
+      "required_degree_domains": [
+        "business administration",
+        "economics"
+      ],
+      "specific_ects_requirements": [
+        {
+          "domain_name": "Quantitative Methods",
+          "min_ects_total": 10.0,
+          "condition_comment": null,
+          "modules": [
+            {
+              "subject_area": "Statistics",
+              "min_ects": 5.0,
+              "condition_comment": "If you do not have the 5 ECTS in Statistics, we offer an additional course in advance to achieve them."
+            }
+          ]
+        },
+        {
+          "domain_name": "Business Information Systems",
+          "min_ects_total": 5.0,
+          "condition_comment": null,
+          "modules": []
+        },
+        {
+          "domain_name": "Business Administration and/or Economics",
+          "min_ects_total": 30.0,
+          "condition_comment": null,
+          "modules": []
+        }
+      ],
+      "required_standardized_tests": [],
+      "min_work_experience_months": 0,
+      "requires_internship": false,
+      "english_requirements": {
+        "min_cefr_level": "B2",
+        "accepted_tests": [],
+        "notes": "Proof of having completed an academic degree programme entirely in English is accepted."
+      },
+      "german_requirements": {
+        "min_cefr_level": "None",
+        "accepted_tests": [],
+        "notes": null
+      },
+      "deadlines": {
+        "winter_semester": {
+          "eu_applicants": {
+            "start_date": null,
+            "end_date": "June 15"
+          },
+          "non_eu_applicants": {
+            "start_date": null,
+            "end_date": "June 15"
+          }
+        },
+        "summer_semester": null
+      },
+      "course_content_summary": "This program provides a comprehensive focus on digital project management and the digitalization of companies. Core topics include digital transformation projects, digital management, digital business models and products, project and process management, and algorithms and data analytics. Students will gain in-depth knowledge of process analytics, process design, data analytics, and responsible management methods. The curriculum emphasizes applied skills in project management techniques, tools, and leadership. Elective courses in the third semester allow for individual profile shaping in areas like strategic management.",
+      "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/detail/9180/"
+    }
+  ]
+}

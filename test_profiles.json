@@ -1,0 +1,492 @@
+{
+    "test_profiles": [
+        {
+            "id": "PROFILE-001-VN-CS",
+            "description": "Vietnamese Computer Science student interested in AI/ML",
+            "input_text": "Hi, I'm Linh Nguyen from Vietnam. I have a Bachelor's degree in Computer Science from Hanoi University of Science and Technology. My GPA is 3.5 out of 4.0 (minimum passing grade is 2.0). I studied for 8 semesters and earned 130 credits total. My interests are Artificial Intelligence, Machine Learning, Deep Learning, Data Science, and Natural Language Processing. I want to study a Master's program in Data Science or Artificial Intelligence. I have IELTS 7.0 (overall) with no section below 6.5. I don't have German language skills yet. My maximum tuition budget is 3000 EUR per semester. I prefer to study in Baden-Württemberg state, particularly in cities like Munich, Stuttgart, or Karlsruhe. I want to start in the Winter semester. I don't have any work experience yet.",
+            "pdf_file": "PROFILE_001_VN_CS_Transcript.pdf",
+            "gold_standard": {
+                "expected_profile": {
+                    "full_name": "Linh Nguyen",
+                    "citizenship": "Vietnam",
+                    "bachelor_field": "Computer Science",
+                    "total_credits": 130,
+                    "semesters": 8,
+                    "expected_ects": 240.0,
+                    "expected_ects_factor": 1.85,
+                    "gpa_score": 3.5,
+                    "gpa_max_scale": 4.0,
+                    "gpa_min_score": 2.0,
+                    "gpa_german": 1.75,
+                    "english_test": "IELTS",
+                    "english_score": 7.0,
+                    "german_test": null,
+                    "max_tuition": 3000,
+                    "preferred_cities": [
+                        "Munich",
+                        "Stuttgart",
+                        "Karlsruhe"
+                    ],
+                    "preferred_state": "Baden-Württemberg",
+                    "preferred_semester": "Winter",
+                    "work_experience_months": 0,
+                    "interests": [
+                        "Artificial Intelligence",
+                        "Machine Learning",
+                        "Deep Learning",
+                        "Data Science",
+                        "Natural Language Processing"
+                    ],
+                    "desired_programs": [
+                        "Data Science",
+                        "Artificial Intelligence"
+                    ],
+                    "transcript_courses": [
+                        {
+                            "name": "Calculus I",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Calculus II",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Linear Algebra",
+                            "credits": 3
+                        },
+                        {
+                            "name": "Data Structures",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Algorithms",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Database Systems",
+                            "credits": 3
+                        },
+                        {
+                            "name": "Machine Learning",
+                            "credits": 3
+                        },
+                        {
+                            "name": "Artificial Intelligence",
+                            "credits": 3
+                        },
+                        {
+                            "name": "Web Development",
+                            "credits": 3
+                        }
+                    ]
+                },
+                "expected_top_programs": [
+                    "Food Science and Technology",
+                    "Computer and Information Science"
+                ],
+                "should_trigger_aps": true
+            }
+        },
+        {
+            "id": "PROFILE-002-IN-BUS",
+            "description": "Indian Business Administration student interested in MBA/Management",
+            "input_text": "Hello, my name is Raj Patel from India. I completed my Bachelor of Business Administration from Delhi University. My marks are 75 out of 100 (minimum passing is 40). I studied for 6 semesters and earned 180 credits. I'm interested in Business Analytics, Digital Marketing, Innovation Management, Supply Chain Management, and Entrepreneurship. I want to pursue an MBA or Master's in Business Management. I have TOEFL iBT score of 95 (Reading 24, Listening 23, Speaking 24, Writing 24). I don't speak German. My budget is up to 5000 EUR per semester. I prefer to study in Baden-Württemberg state but I have no preferred city. I prefer to start in the Winter semester. I have 18 months of work experience in marketing at a tech startup.",
+            "pdf_file": "PROFILE_002_IN_BUS_Transcript.pdf",
+            "gold_standard": {
+                "expected_profile": {
+                    "full_name": "Raj Patel",
+                    "citizenship": "India",
+                    "bachelor_field": "Business Administration",
+                    "total_credits": 180,
+                    "semesters": 6,
+                    "expected_ects": 180.0,
+                    "expected_ects_factor": 1.0,
+                    "gpa_score": 75,
+                    "gpa_max_scale": 100,
+                    "gpa_min_score": 40,
+                    "gpa_german": 2.25,
+                    "english_test": "TOEFL iBT",
+                    "english_score": 95,
+                    "german_test": null,
+                    "max_tuition": 5000,
+                    "preferred_cities": [],
+                    "preferred_state": "Baden-Württemberg",
+                    "preferred_semester": "Winter",
+                    "work_experience_months": 18,
+                    "interests": [
+                        "Business Analytics",
+                        "Digital Marketing",
+                        "Innovation Management",
+                        "Supply Chain Management",
+                        "Entrepreneurship"
+                    ],
+                    "desired_programs": [
+                        "MBA",
+                        "Business Management"
+                    ],
+                    "transcript_courses": [
+                        {
+                            "name": "Financial Accounting",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Managerial Economics",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Marketing Management",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Human Resource Management",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Business Statistics",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Operations Management",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Strategic Management",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Business Analytics",
+                            "credits": 6
+                        }
+                    ]
+                },
+                "expected_top_programs": [
+                    "Master of Science in Economics",
+                    "Industrial Artificial Intelligence",
+                    "Economics and Finance (MSc)",
+                    "International Business and Intercultural Management (MSc)",
+                    "Applied Artificial Intelligence (MAAI)",
+                    "Digital Business Management (MSc)"
+                ],
+                "should_trigger_aps": true
+            }
+        },
+        {
+            "id": "PROFILE-003-ES-ECON",
+            "description": "Spanish Economics student with lower GPA (EU citizen)",
+            "input_text": "I'm Maria Garcia from Spain. I have a Bachelor in Economics from Universidad Complutense de Madrid. My grade is 6.5 out of 10 (minimum passing is 5.0). I studied for 8 semesters and earned 240 ECTS credits. I'm interested in Economics, Finance, International Trade, Economic Policy, and Sustainable Development. I want to study Economics or Finance Master's programs. I'm a native Spanish speaker and have English C1 level (Cambridge CAE certificate). I also speak German at B2 level (Goethe-Zertifikat B2). My budget is flexible, up to 10000 EUR per semester. I prefer to study in Baden-Württemberg state. I want to start in Winter semester. I don't have any work experience yet.",
+            "pdf_file": "PROFILE_003_ES_ECON_Transcript.pdf",
+            "gold_standard": {
+                "expected_profile": {
+                    "full_name": "Maria Garcia",
+                    "citizenship": "Spain",
+                    "bachelor_field": "Economics",
+                    "total_credits": 240,
+                    "semesters": 8,
+                    "expected_ects": 240.0,
+                    "expected_ects_factor": 1.0,
+                    "gpa_score": 6.5,
+                    "gpa_max_scale": 10.0,
+                    "gpa_min_score": 5.0,
+                    "gpa_german": 3.1,
+                    "english_test": "Cambridge CAE",
+                    "english_level": "C1",
+                    "german_test": "Goethe-Zertifikat",
+                    "german_level": "B2",
+                    "max_tuition": 10000,
+                    "preferred_cities": null,
+                    "preferred_state": "Baden-Württemberg",
+                    "preferred_semester": "Winter",
+                    "work_experience_months": 0,
+                    "interests": [
+                        "Economics",
+                        "Finance",
+                        "International Trade",
+                        "Economic Policy",
+                        "Sustainable Development"
+                    ],
+                    "desired_programs": [
+                        "Economics",
+                        "Finance"
+                    ],
+                    "transcript_courses": [
+                        {
+                            "name": "Microeconomics",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Macroeconomics",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Econometrics",
+                            "credits": 6
+                        },
+                        {
+                            "name": "International Economics",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Public Finance",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Financial Markets",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Economic History",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Development Economics",
+                            "credits": 6
+                        }
+                    ]
+                },
+                "expected_top_programs": [
+                    "Economics and Finance (MSc)",
+                    "Master of Science in Corporate Management & Economics | CME",
+                    "International Business and Intercultural Management (MSc)"
+                ],
+                "should_trigger_aps": false
+            }
+        },
+        {
+            "id": "PROFILE-004-DE-BINF",
+            "description": "German Business Informatics student interested in Digital Transformation (EU citizen)",
+            "input_text": "Hallo, I'm Lukas Müller from Germany. I completed my Bachelor in Business Informatics (Wirtschaftsinformatik) at Hochschule München. My final grade is 2.3 (German grading system). I studied for 7 semesters and earned 210 ECTS credits. I'm interested in Digital Transformation, Enterprise Architecture, Business Process Management, IT Consulting, and Cloud Computing. I want to pursue a Master's in Business Informatics or Digital Business. I'm a native German speaker and have English B2 level (TOEIC 850). My budget is up to 2000 EUR per semester. I prefer to study in Baden-Württemberg state, particularly in Stuttgart or Mannheim. I want to start in the Winter semester. I have 12 months of work experience as a working student in IT consulting.",
+            "pdf_file": "PROFILE_004_DE_BINF_Transcript.pdf",
+            "gold_standard": {
+                "expected_profile": {
+                    "full_name": "Lukas Müller",
+                    "citizenship": "Germany",
+                    "bachelor_field": "Business Informatics",
+                    "total_credits": 210,
+                    "semesters": 7,
+                    "expected_ects": 210.0,
+                    "expected_ects_factor": 1.0,
+                    "gpa_score": 2.3,
+                    "gpa_max_scale": 1.0,
+                    "gpa_min_score": 5.0,
+                    "gpa_german": 2.3,
+                    "english_test": "TOEIC",
+                    "english_score": 850,
+                    "german_test": "Native",
+                    "german_level": "Native",
+                    "max_tuition": 2000,
+                    "preferred_cities": [
+                        "Stuttgart",
+                        "Mannheim"
+                    ],
+                    "preferred_state": "Baden-Württemberg",
+                    "preferred_semester": "Winter",
+                    "work_experience_months": 12,
+                    "interests": [
+                        "Digital Transformation",
+                        "Enterprise Architecture",
+                        "Business Process Management",
+                        "IT Consulting",
+                        "Cloud Computing"
+                    ],
+                    "desired_programs": [
+                        "Business Informatics",
+                        "Digital Business"
+                    ],
+                    "transcript_courses": [
+                        {
+                            "name": "Business Administration",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Software Engineering",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Database Systems",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Business Process Management",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Enterprise Resource Planning",
+                            "credits": 6
+                        },
+                        {
+                            "name": "IT Project Management",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Data Analytics",
+                            "credits": 6
+                        },
+                        {
+                            "name": "Digital Business Models",
+                            "credits": 6
+                        }
+                    ]
+                },
+                "expected_top_programs": [
+                    "Master of Science in Economics",
+                    "Computer and Information Science",
+                    "Applied Computer Science"
+                ],
+                "should_trigger_aps": false
+            }
+        },
+        {
+            "id": "PROFILE-005-PK-MKT",
+            "description": "Pakistani Marketing student interested in Digital Marketing",
+            "input_text": "Hello, I'm Ayesha Khan from Pakistan. I have a Bachelor's degree in Marketing from Lahore University of Management Sciences (LUMS). My CGPA is 3.2 out of 4.0 (minimum passing is 2.0). I studied for 8 semesters and earned 128 credits. I'm interested in Digital Marketing, Brand Management, Consumer Behavior, Social Media Marketing, and Marketing Analytics. I want to study a Master's in Marketing or Digital Marketing. I have IELTS 6.5 (overall) with Reading 7.0, Listening 6.5, Speaking 6.0, Writing 6.5. I don't speak German yet. My maximum tuition budget is 4000 EUR per semester. I prefer to study in Baden-Württemberg state. I don't have prefered semester. I have 24 months of work experience as a Marketing Executive at a digital agency.",
+            "pdf_file": "PROFILE_005_PK_MKT_Transcript.pdf",
+            "gold_standard": {
+                "expected_profile": {
+                    "full_name": "Ayesha Khan",
+                    "citizenship": "Pakistan",
+                    "bachelor_field": "Marketing",
+                    "total_credits": 128,
+                    "semesters": 8,
+                    "expected_ects": 240,
+                    "expected_ects_factor": 1.85,
+                    "gpa_score": 3.2,
+                    "gpa_max_scale": 4.0,
+                    "gpa_min_score": 2.0,
+                    "gpa_german": 2.0,
+                    "english_test": "IELTS",
+                    "english_score": 6.5,
+                    "german_test": null,
+                    "max_tuition": 4000,
+                    "preferred_cities": null,
+                    "preferred_state": "Baden-Württemberg",
+                    "preferred_semester": null,
+                    "work_experience_months": 24,
+                    "interests": [
+                        "Digital Marketing",
+                        "Brand Management",
+                        "Consumer Behavior",
+                        "Social Media Marketing",
+                        "Marketing Analytics"
+                    ],
+                    "desired_programs": [
+                        "Marketing",
+                        "Digital Marketing"
+                    ],
+                    "transcript_courses": [
+                        {
+                            "name": "Principles of Marketing",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Consumer Behavior",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Marketing Research",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Brand Management",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Digital Marketing",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Marketing Analytics",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Strategic Marketing",
+                            "credits": 4
+                        },
+                        {
+                            "name": "Integrated Marketing Communications",
+                            "credits": 4
+                        }
+                    ]
+                },
+                "expected_top_programs": [
+                    "Digital Business Management (MSc)",
+                    "International Business and Intercultural Management (MSc)"
+                ],
+                "should_trigger_aps": true
+            }
+        }
+    ],
+    "component_tests": {
+        "ects_conversion": [
+            {
+                "profile_id": "PROFILE-001-VN-CS",
+                "original_credits": 130,
+                "semesters": 8,
+                "expected_ects": 195.0,
+                "tolerance": 0.5
+            },
+            {
+                "profile_id": "PROFILE-002-IN-BUS",
+                "original_credits": 180,
+                "semesters": 6,
+                "expected_ects": 180.0,
+                "tolerance": 0.5
+            },
+            {
+                "profile_id": "PROFILE-003-ES-ECON",
+                "original_credits": 240,
+                "semesters": 8,
+                "expected_ects": 240.0,
+                "tolerance": 0.5
+            }
+        ],
+        "hard_filters": [
+            {
+                "profile_id": "PROFILE-001-VN-CS",
+                "gpa_german": 2.0,
+                "max_tuition": 3000,
+                "citizenship": "Vietnam",
+                "expected_behavior": "Filter programs with min_gpa > 2.0 or tuition > 3000"
+            },
+            {
+                "profile_id": "PROFILE-003-ES-ECON",
+                "gpa_german": 3.1,
+                "max_tuition": 10000,
+                "citizenship": "Spain",
+                "expected_behavior": "Filter programs with min_gpa > 3.1, apply EU tuition fees"
+            }
+        ],
+        "timeline_generation": [
+            {
+                "profile_id": "PROFILE-001-VN-CS",
+                "citizenship": "Vietnam",
+                "expected_aps": true,
+                "expected_aps_lead_time_days": 180
+            },
+            {
+                "profile_id": "PROFILE-003-ES-ECON",
+                "citizenship": "Spain",
+                "expected_aps": false
+            }
+        ]
+    },
+    "edge_cases": [
+        {
+            "id": "EDGE-001",
+            "description": "Missing GPA",
+            "input_text": "I'm from Vietnam, studied Computer Science. I want to study AI.",
+            "expected_behavior": "System should ask for missing GPA"
+        },
+        {
+            "id": "EDGE-002",
+            "description": "Missing language proficiency",
+            "input_text": "I'm Raj from India, studied Business, GPA 3.0. I want to study MBA.",
+            "expected_behavior": "System should ask for English language test"
+        },
+        {
+            "id": "EDGE-003",
+            "description": "Zero matching programs",
+            "input_text": "I have a Bachelor in Art History, GPA 2.0, and I want to study Quantum Physics with maximum tuition of 0 EUR.",
+            "expected_behavior": "Graceful failure with explanation"
+        }
+    ]
+}
