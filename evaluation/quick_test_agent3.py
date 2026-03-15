@@ -5,9 +5,14 @@ Run this BEFORE manual labeling to verify Agent3 works with test data
 
 import json
 import sys
+import os
 from pathlib import Path
-from Agent3 import agent_3_filter_node, EU_COUNTRIES
-from Agent1 import parse_profile_node
+
+# Ensure project root is on path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from agents.agent3_matcher import agent_3_filter_node, EU_COUNTRIES
+from agents.agent1_intake import parse_profile_node
 from models import AgentState
 
 # Color codes
@@ -153,11 +158,11 @@ def quick_test_agent3():
     
     # Load data
     print(f"\n{YELLOW}Loading test data...{RESET}")
-    with open('test_profiles.json') as f:
+    with open('evaluation/test_profiles.json') as f:
         profiles_data = json.load(f)
         profiles = profiles_data['test_profiles']
     
-    with open('test_sample_programs.json') as f:
+    with open('evaluation/test_sample_programs.json') as f:
         programs_data = json.load(f)
         programs = programs_data['programs']
     

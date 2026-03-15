@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 import math
 
 # --- Import Your Models ---
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models import AgentState, UserProfile, Citizenship, AcademicBackground, BachelorGPA, Preferences, ProfessionalAndTests
 
 # --- Handling PDF ---

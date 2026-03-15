@@ -11,10 +11,14 @@ Tests:
 
 import json
 import sys
+import os
 from pathlib import Path
 
+# Ensure project root is on path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # Import your Agent 1 functions
-from Agent1 import parse_profile_node, apply_ects_conversion
+from agents.agent1_intake import parse_profile_node, apply_ects_conversion
 from models import AgentState
 
 # Color codes for output
@@ -129,7 +133,7 @@ def test_ects_conversion():
     print_test_header("ECTS Conversion Accuracy")
     
     # Load test profiles
-    with open('test_profiles.json', 'r') as f:
+    with open('evaluation/test_profiles.json', 'r') as f:
         data = json.load(f)
     
     # Build test cases from all 5 profiles using gold_standard
@@ -233,7 +237,7 @@ def test_gpa_conversion():
     print_test_header("GPA Conversion to German Scale")
     
     # Load test profiles
-    with open('test_profiles.json', 'r') as f:
+    with open('evaluation/test_profiles.json', 'r') as f:
         data = json.load(f)
     
     # Build test cases from all 5 profiles using gold_standard
@@ -312,7 +316,7 @@ def test_field_extraction():
     print_test_header("Field Extraction from Natural Language")
     
     # Load test profiles
-    with open('test_profiles.json', 'r') as f:
+    with open('evaluation/test_profiles.json', 'r') as f:
         data = json.load(f)
     
     total_profiles_passed = 0
@@ -502,7 +506,7 @@ def test_pdf_parsing():
     print_test_header("PDF Transcript Parsing")
     
     # Load test profiles
-    with open('test_profiles.json', 'r') as f:
+    with open('evaluation/test_profiles.json', 'r') as f:
         data = json.load(f)
     
     test_cases = [
